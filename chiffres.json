@@ -116,5 +116,20 @@
     "coutGrandModele": 800,
     "facteur": 4.4,
     "champsGratuits": 3
+  },
+  "remediation": {
+    "constats": 8,
+    "manquesReflexe": 3,
+    "coutReflexe": 695000,
+    "manquesTrie": 0,
+    "coutReflexeHaut": 1825000,
+    "coutTrieHaut": 450000
+  },
+  "derive": {
+    "seuilDeLaNote": 0.2,
+    "deplacement": 0.3,
+    "signal": 0.09,
+    "fenetreSeparante": 350,
+    "seuilSeparant": 0.057
   }
 }

@@ -87,6 +87,20 @@ const OUTILS: Outil[] = [
     lecture: (c) => [`${c.facteur}<em>×</em>`, "cheaper, and more accurate"],
   },
   {
+    cle: "remediation", nom: "The order is the plan",
+    depot: "remediation-backlog",
+    demo: `${BASE_DEMO}/remediation-backlog/`, source: `${BASE_SRC}/remediation-backlog`,
+    trouvaille: (c) => `Taking the worst finding first misses <b>${c.manquesReflexe} of ${c.constats}</b> deadlines and costs <b>${dollars(c.coutReflexe)}</b>. The identical work sorted by deadline misses none. Same team, same effort, only the order changes.`,
+    lecture: (c) => [`${dollars(c.coutReflexe)}`, "the reflex costs"],
+  },
+  {
+    cle: "derive", nom: "The drift threshold sits above the signal",
+    depot: "drift-monitor",
+    demo: `${BASE_DEMO}/drift-monitor/`, source: `${BASE_SRC}/drift-monitor`,
+    trouvaille: (c) => `Every note says to alarm at <b>${c.seuilDeLaNote}</b>. A ${c.deplacement}σ shift moves the index to <b>${c.signal}</b> — the alarm is above the signal it exists to see. Below <b>${c.fenetreSeparante}</b> observations a check, no threshold separates noise from that shift at all.`,
+    lecture: (c) => [`${c.signal}`, `signal, against a ${c.seuilDeLaNote} alarm`],
+  },
+  {
     cle: "cycle", nom: "Eleven days, and nobody worked on it for nine",
     depot: "process-cycle-time",
     demo: `${BASE_DEMO}/process-cycle-time/`, source: `${BASE_SRC}/process-cycle-time`,

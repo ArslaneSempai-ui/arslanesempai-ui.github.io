@@ -24,7 +24,7 @@ import { isMain } from "./cli.ts";
 const VOISINS = new URL("../../", import.meta.url).pathname;
 const CHIFFRES = new URL("../chiffres.json", import.meta.url).pathname;
 
-export const DEPOTS = ["economics", "triage", "funnel", "cycle", "banc", "rag", "arbitrage", "cascade", "vitrine"];
+export const DEPOTS = ["economics", "triage", "funnel", "cycle", "banc", "rag", "arbitrage", "cascade", "remediation", "derive", "vitrine"];
 
 /** Le dernier commit qui a touché un fichier de test, par dépôt. */
 export function dernierTest(depot: string): string | null {

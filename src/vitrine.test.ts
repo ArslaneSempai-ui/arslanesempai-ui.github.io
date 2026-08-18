@@ -29,7 +29,7 @@ const voisins = new URL("../../", import.meta.url).pathname;
 const page = () => readFileSync(racine + "docs/index.html", "utf8");
 const chiffres = () => JSON.parse(readFileSync(racine + "chiffres.json", "utf8"));
 
-const OUTILS = ["economics", "triage", "funnel", "cycle", "banc", "rag", "arbitrage", "cascade"];
+const OUTILS = ["economics", "triage", "funnel", "cycle", "banc", "rag", "arbitrage", "cascade", "remediation", "derive"];
 
 test("chaque outil a ses chiffres", () => {
   const c = chiffres();
@@ -45,6 +45,7 @@ test("chaque outil a sa tuile, avec ses deux liens", () => {
     ["alert-triage-economics", 2], ["kyc-triage-agent", 2], ["funnel-economics", 2],
     ["process-cycle-time", 2], ["regression-bench", 2], ["compliance-document-search", 2],
     ["growth-versus-controls", 2], ["cascade-routing", 2],
+    ["remediation-backlog", 2], ["drift-monitor", 2],
   ] as const;
   for (const [depot, combien] of liens) {
     const vus = h.split(depot).length - 1;

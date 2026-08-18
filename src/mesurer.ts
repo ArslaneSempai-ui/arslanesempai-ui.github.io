@@ -200,6 +200,40 @@ const MESURES: Mesure[] = [
     },
   },
   {
+    cle: "remediation", dossier: "remediation",
+    async prendre() {
+      const { CARNET, EQUIPE, POLITIQUES, planifier } = await import(`${VOISINS}remediation/src/carnet.ts`);
+      const chiffrer = (nom: "graviteDabord" | "echeanceDabord") => {
+        const o = POLITIQUES[nom](CARNET);
+        return { centre: planifier(o, CARNET, EQUIPE, "centre"), haut: planifier(o, CARNET, EQUIPE, "haut") };
+      };
+      const reflexe = chiffrer("graviteDabord"), trie = chiffrer("echeanceDabord");
+      return {
+        constats: CARNET.length,
+        manquesReflexe: reflexe.centre.manques,
+        coutReflexe: Math.round(reflexe.centre.cout),
+        manquesTrie: trie.centre.manques,
+        coutReflexeHaut: Math.round(reflexe.haut.cout),
+        coutTrieHaut: Math.round(trie.haut.cout),
+      };
+    },
+  },
+  {
+    cle: "derive", dossier: "derive",
+    async prendre() {
+      const { REGLAGE, rubans, fenetreSeparante } = await import(`${VOISINS}derive/src/derive.ts`);
+      const r = rubans(REGLAGE, 80);
+      const s = fenetreSeparante(r);
+      return {
+        seuilDeLaNote: REGLAGE.seuil,
+        deplacement: REGLAGE.deplacement,
+        signal: oui(r.signal, 3),
+        fenetreSeparante: s.fenetre,
+        seuilSeparant: oui(s.seuil ?? 0, 3),
+      };
+    },
+  },
+  {
     cle: "cycle", dossier: "cycle",
     async prendre() {
       const { generate } = await import(`${VOISINS}cycle/src/events.ts`);

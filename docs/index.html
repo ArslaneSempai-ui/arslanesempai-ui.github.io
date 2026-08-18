@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Eight numbers nobody computes</title>
+<title>Ten numbers nobody computes</title>
 <meta name="description" content="Six décisions qu'une équipe opérationnelle tranche chaque trimestre, et le chiffre dont chacune dépend. Mettez vos volumes : le calcul tourne dans votre navigateur, rien n'est envoyé nulle part." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23fbfaf7'/%3E%3Crect x='2' y='4' width='12' height='1' fill='%23141618'/%3E%3Crect x='2' y='7' width='12' height='1' fill='%23141618'/%3E%3Crect x='2' y='11' width='12' height='2' fill='%23141618'/%3E%3C/svg%3E" />
 <link rel="stylesheet" href="registre.css" />
@@ -124,9 +124,9 @@
 <main>
   <div class="haut">
     <div>
-      <h1>Eight numbers nobody computes</h1>
+      <h1>Ten numbers nobody computes</h1>
       <p class="lede">
-        Eight decisions an operations team settles every quarter — and the
+        Ten decisions an operations team settles every quarter — and the
           number each one actually turns on. <b>Put your own volumes in below</b>: the
           arithmetic runs in your browser, and nothing is sent anywhere.
         </p>
@@ -228,7 +228,7 @@
   <h2>The verdict</h2>
   <div class="feuillet" id="verdict"></div>
 
-  <h2>The eight tools</h2>
+  <h2>The ten tools</h2>
   <div class="feuillet" id="outils">
 <div class="outil">
       <span class="marque">01</span>
@@ -267,20 +267,34 @@
     </div>
 <div class="outil">
       <span class="marque">06</span>
+      <span><a class="nom" href="https://arslanesempai-ui.github.io/remediation-backlog/">The order is the plan</a>
+        <p class="constate">Taking the worst finding first misses <b>3 of 8</b> deadlines and costs <b>$695,000</b>. The identical work sorted by deadline misses none. Same team, same effort, only the order changes.</p>
+        <a class="code" href="https://github.com/ArslaneSempai-ui/remediation-backlog">source</a></span>
+      <span class="lecture"><span class="n">$695,000</span><span class="u">the reflex costs</span></span>
+    </div>
+<div class="outil">
+      <span class="marque">07</span>
+      <span><a class="nom" href="https://arslanesempai-ui.github.io/drift-monitor/">The drift threshold sits above the signal</a>
+        <p class="constate">Every note says to alarm at <b>0.2</b>. A 0.3σ shift moves the index to <b>0.09</b> — the alarm is above the signal it exists to see. Below <b>350</b> observations a check, no threshold separates noise from that shift at all.</p>
+        <a class="code" href="https://github.com/ArslaneSempai-ui/drift-monitor">source</a></span>
+      <span class="lecture"><span class="n">0.09</span><span class="u">signal, against a 0.2 alarm</span></span>
+    </div>
+<div class="outil">
+      <span class="marque">08</span>
       <span><a class="nom" href="https://arslanesempai-ui.github.io/process-cycle-time/">Eleven days, and nobody worked on it for nine</a>
         <p class="constate">6.4 days end to end, of which <b>2.3 hours</b> of actual work. <b>95 %</b> of the time nobody is touching the file.</p>
         <a class="code" href="https://github.com/ArslaneSempai-ui/process-cycle-time">source</a></span>
       <span class="lecture"><span class="n">95<em> %</em></span><span class="u">of the delay is waiting</span></span>
     </div>
 <div class="outil">
-      <span class="marque">07</span>
+      <span class="marque">09</span>
       <span><a class="nom" href="https://arslanesempai-ui.github.io/regression-bench/">Regression bench</a>
         <p class="constate">Across 3 deterministic versions, <b>13 → 19</b> of 22 cases. A rising pass rate can still hide a case that just broke.</p>
         <a class="code" href="https://github.com/ArslaneSempai-ui/regression-bench">source</a></span>
       <span class="lecture"><span class="n">13<em>→</em>19</span><span class="u">cases out of 22</span></span>
     </div>
 <div class="outil">
-      <span class="marque">08</span>
+      <span class="marque">10</span>
       <span><a class="nom" href="https://arslanesempai-ui.github.io/compliance-document-search/">Document search</a>
         <p class="constate">On 25 questions: <b>10 right</b>, 9 wrong, and <b>6 times it said nothing</b> — every time no answer existed in the corpus.</p>
         <a class="code" href="https://github.com/ArslaneSempai-ui/compliance-document-search">source</a></span>
