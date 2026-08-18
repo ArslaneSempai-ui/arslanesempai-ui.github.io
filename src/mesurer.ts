@@ -176,6 +176,30 @@ const MESURES: Mesure[] = [
     },
   },
   {
+    cle: "cascade", dossier: "cascade",
+    async prendre() {
+      const { readProfiles } = await import(`${VOISINS}cascade/src/measure.ts`);
+      const { evaluer, optimiseExtraction } = await import(`${VOISINS}cascade/src/optimise.ts`);
+      const { ASSUMPTIONS } = await import(`${VOISINS}cascade/src/assumptions.ts`);
+      const { FIELDS } = await import(`${VOISINS}cascade/src/corpus.ts`);
+      const p = readProfiles();
+      if (!p) throw new Error("cascade : aucun profil mesuré — lancer `npm run measure` là-bas");
+      const o = optimiseExtraction(p, ASSUMPTIONS)!;
+      const tout = (palier: string) =>
+        evaluer(p, ASSUMPTIONS, Object.fromEntries(FIELDS.map((c: string) => [c, palier])) as never);
+      const grand = tout("large");
+      return {
+        champs: FIELDS.length,
+        justesseOptimale: oui(o.accuracy * 100, 1),
+        coutOptimal: Math.round(o.cost),
+        justesseGrandModele: oui(grand.accuracy * 100, 1),
+        coutGrandModele: Math.round(grand.cost),
+        facteur: oui(grand.cost / Math.max(1, o.cost), 1),
+        champsGratuits: FIELDS.filter((c: string) => o.routing[c] === "rules").length,
+      };
+    },
+  },
+  {
     cle: "cycle", dossier: "cycle",
     async prendre() {
       const { generate } = await import(`${VOISINS}cycle/src/events.ts`);

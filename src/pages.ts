@@ -80,6 +80,13 @@ const OUTILS: Outil[] = [
     lecture: (c) => [`${c.bascule}<em> %</em>`, "where the verdict flips"],
   },
   {
+    cle: "cascade", nom: "Where should the next dollar go?",
+    depot: "cascade-routing",
+    demo: `${BASE_DEMO}/cascade-routing/`, source: `${BASE_SRC}/cascade-routing`,
+    trouvaille: (c) => `Sending every field to the large model reaches ${c.justesseGrandModele} % for ${dollars(c.coutGrandModele)}. Routing field by field reaches <b>${c.justesseOptimale} %</b> for <b>${dollars(c.coutOptimal)}</b> — better and ${c.facteur}× cheaper, because ${c.champsGratuits} of the ${c.champs} fields are carried by regexes.`,
+    lecture: (c) => [`${c.facteur}<em>×</em>`, "cheaper, and more accurate"],
+  },
+  {
     cle: "cycle", nom: "Eleven days, and nobody worked on it for nine",
     depot: "process-cycle-time",
     demo: `${BASE_DEMO}/process-cycle-time/`, source: `${BASE_SRC}/process-cycle-time`,

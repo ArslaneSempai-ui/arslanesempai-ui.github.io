@@ -61,7 +61,7 @@
     "barre": 0.84
   },
   "portfolio": {
-    "tests": 191,
+    "tests": 210,
     "parDepot": {
       "economics": 47,
       "triage": 29,
@@ -70,18 +70,20 @@
       "banc": 21,
       "rag": 12,
       "arbitrage": 17,
+      "cascade": 19,
       "vitrine": 31
     },
-    "mesureLe": "2026-08-18T17:34:32.072Z",
+    "mesureLe": "2026-08-18T18:47:17.247Z",
     "testsCommitesLe": {
-      "economics": "811d0f615e9076a97f35c57e1227dd1132b33eb8",
-      "triage": "941a8b309fc9786ed3c8a0339fc35fa92f3294a4",
-      "funnel": "801cdc77ec1c8bf40bb1ef5f2bc6ec3c54013a63",
-      "cycle": "c79a7898540c9c743a3dacf50b1bea32aa59f72f",
-      "banc": "50d1aa054b275aa7da91da879c43d9441d5aeb7a",
-      "rag": "569aaca6f56b4f41f8c3a0ff0eb93739c808fd85",
-      "arbitrage": "5013b5284fd5d6259dd8f680529188ca6a5c37b9",
-      "vitrine": "b193aa701209bbf0401845e4d6256f8ef6546169"
+      "economics": "0861545dcc7d16d339724e6c3d83b0a165cac7a0",
+      "triage": "f552c584053df8298d680c82317ba465d33a9620",
+      "funnel": "5653c88043408c7953dba2ce33cc1ba4094cb91a",
+      "cycle": "f5f646475fbf28569f77291a927c24d23045dea7",
+      "banc": "3c28b56cf369c846b73fbdf8c3fdf05307ce572a",
+      "rag": "23e933e125d2e6f674cecf6c97f5e96a53a999fc",
+      "arbitrage": "e7bb900206ca1e40f060e24266530e2da99cc92f",
+      "cascade": "a380f41a00e938876f0e5e59f8e07508ed517179",
+      "vitrine": "6303bd82447052b0ddef68c35db9cf13ad92991f"
     }
   },
   "ragReel": {
@@ -105,5 +107,14 @@
     "net": 1209600,
     "analystesBas": 0,
     "analystesHaut": 1
+  },
+  "cascade": {
+    "champs": 5,
+    "justesseOptimale": 84.5,
+    "coutOptimal": 180,
+    "justesseGrandModele": 80.5,
+    "coutGrandModele": 800,
+    "facteur": 4.4,
+    "champsGratuits": 3
   }
 }
