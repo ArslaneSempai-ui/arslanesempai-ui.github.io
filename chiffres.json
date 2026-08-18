@@ -50,7 +50,7 @@
     "sansReponsePossible": 6
   },
   "portfolio": {
-    "tests": 169,
+    "tests": 172,
     "parDepot": {
       "economics": 47,
       "triage": 29,
@@ -58,9 +58,9 @@
       "cycle": 18,
       "banc": 21,
       "rag": 12,
-      "vitrine": 26
+      "vitrine": 29
     },
-    "mesureLe": "2026-08-18T11:40:30.084Z",
+    "mesureLe": "2026-08-18T12:37:36.016Z",
     "testsCommitesLe": {
       "economics": "811d0f615e9076a97f35c57e1227dd1132b33eb8",
       "triage": "9e3ca44b815f18c21d9cb1f7152a162408fcbef7",
