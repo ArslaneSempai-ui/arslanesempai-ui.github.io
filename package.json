@@ -10,7 +10,8 @@
     "mesurer": "node src/mesurer.ts",
     "pages": "tsc -p tsconfig.web.json && node src/pages.ts",
     "start": "node src/serveur.ts",
-    "emprunter": "node src/emprunter.ts"
+    "emprunter": "node src/emprunter.ts",
+    "compter": "node src/compter.ts"
   },
   "engines": {
     "node": ">=24"

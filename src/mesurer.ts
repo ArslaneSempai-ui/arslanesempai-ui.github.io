@@ -60,6 +60,18 @@ const MESURES: Mesure[] = [
         coutAnnuel: ici.annualCost,
         seuilGratuitLePlusLarge: oui(Math.min(...gratuits.map((p: any) => p.threshold)), 2),
         casSuivantLePlusCher: Math.round(Math.max(...pts.map((p: any) => p.costPerMarginalTruePositive ?? 0))),
+        /*
+         * Le premier pas qui se paie, et non le plus cher.
+         *
+         * « Gratuit jusqu'à 0,45, après quoi ça coûte X » : le lecteur comprend le pas
+         * *suivant*. Le maximum du balayage, lui, est deux marches plus loin — la page
+         * d'accueil du profil citait un montant pris dans un troisième tableau encore, et
+         * rien ne le vérifiait puisque ce README-là est écrit à la main.
+         */
+        premierCasPayant: Math.round(
+          pts.filter((p: any) => (p.costPerMarginalTruePositive ?? 0) > 0)
+            .sort((a: any, b: any) => b.threshold - a.threshold)[0]?.costPerMarginalTruePositive ?? 0,
+        ),
       };
     },
   },
