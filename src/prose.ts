@@ -32,7 +32,16 @@ const VOISINS = new URL("../../", import.meta.url).pathname;
 const CHIFFRES = new URL("../chiffres.json", import.meta.url).pathname;
 
 /** Les README qui portent des marques, et où ils vivent. */
-export const PAGES = ["economics", "triage", "funnel", "cycle", "banc", "rag", "rag-vitrine", "profil"];
+/*
+ * Les pages marquées. Un README par outil, plus la page d'accueil du profil et la note
+ * écrite qui l'accompagne — celle-là n'est pas un README, d'où le chemin complet : la
+ * provenance ne dépend pas du nom du fichier.
+ */
+export const PAGES = [
+  "economics/README.md", "triage/README.md", "funnel/README.md", "cycle/README.md",
+  "banc/README.md", "rag/README.md", "rag-vitrine/README.md",
+  "profil/README.md", "profil/benchmarks-are-not-yours.md",
+];
 
 /*
  * Le séparateur de format est un tilde, et ce n'est pas un caprice.
@@ -76,7 +85,7 @@ export function relire(mode: "check" | "write"): { marques: number; ecarts: Ecar
   let marques = 0;
 
   for (const page of PAGES) {
-    const chemin = `${VOISINS}${page}/README.md`;
+    const chemin = `${VOISINS}${page}`;
     if (!existsSync(chemin)) continue;
     const avant = readFileSync(chemin, "utf8");
 
