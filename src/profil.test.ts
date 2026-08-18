@@ -19,7 +19,14 @@ import { DEPOTS, dernierTest } from "./compter.ts";
 
 const PROFIL = new URL("../../profil/README.md", import.meta.url).pathname;
 const chiffres = () => JSON.parse(readFileSync(new URL("../chiffres.json", import.meta.url).pathname, "utf8"));
-const lire = () => readFileSync(PROFIL, "utf8");
+/*
+ * On lit la page telle qu'elle sera rendue.
+ *
+ * Depuis que les affirmations portent leur marque de provenance — `<!--p:clé-->valeur<!--/p-->`,
+ * invisible sur GitHub — chercher une chaîne littérale dans le fichier ne trouve plus rien.
+ * Ces tests parlent de ce que le lecteur voit, donc ils enlèvent les commentaires d'abord.
+ */
+const lire = () => readFileSync(PROFIL, "utf8").replace(/<!--[\s\S]*?-->/g, "");
 
 /** Chaque affirmation chiffrée de la page, et la mesure dont elle doit sortir. */
 const AFFIRMATIONS: { quoi: string; valeur: (c: any) => string }[] = [

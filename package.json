@@ -5,13 +5,14 @@
   "type": "module",
   "description": "The entry point to six tools: one finding each, measured, with the demo and the source behind it.",
   "scripts": {
-    "test": "tsc --noEmit && node src/emprunter.ts --check && node src/mesurer.ts --check && node --test src/*.test.ts",
+    "test": "tsc --noEmit && node src/emprunter.ts --check && node src/mesurer.ts --check && node src/prose.ts --check && node --test src/*.test.ts",
     "typage": "tsc --noEmit",
     "mesurer": "node src/mesurer.ts",
     "pages": "tsc -p tsconfig.web.json && node src/pages.ts",
     "start": "node src/serveur.ts",
     "emprunter": "node src/emprunter.ts",
-    "compter": "node src/compter.ts"
+    "compter": "node src/compter.ts",
+    "prose": "node src/prose.ts"
   },
   "engines": {
     "node": ">=24"

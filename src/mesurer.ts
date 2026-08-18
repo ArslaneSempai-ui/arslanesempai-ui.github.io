@@ -55,6 +55,9 @@ const MESURES: Mesure[] = [
       return {
         analystesEnPoste: ASSUMPTIONS.analystsInPost,
         analystesUtilises: ici.fteWhole,
+        /* Ceux qui sont payés et n'ont rien à traiter : la soustraction est faite ici, une
+         * fois, plutôt que dans chaque phrase qui la cite. */
+        analystesInoccupes: ASSUMPTIONS.analystsInPost - ici.fteWhole,
         attrapes: ici.truePositivesCaught,
         aTrouver: pop.truePositivesTotal,
         coutAnnuel: ici.annualCost,
@@ -81,13 +84,26 @@ const MESURES: Mesure[] = [
       const { genererCas } = await import(`${VOISINS}triage/src/cas.ts`);
       const { mesurer } = await import(`${VOISINS}triage/src/mesurer.ts`);
       const { REFERENTIEL_SECTORIEL } = await import(`${VOISINS}triage/src/referentiel.ts`);
-      const b = mesurer(genererCas(), 0.7, REFERENTIEL_SECTORIEL);
+      const { trier } = await import(`${VOISINS}triage/src/agent.ts`);
+      const cas = genererCas();
+      const b = mesurer(cas, 0.7, REFERENTIEL_SECTORIEL);
+      /*
+       * Les escalades que le curseur ne déplacera jamais.
+       *
+       * C'est l'affirmation que la page d'accueil du profil porte en une ligne — « le seuil
+       * était inerte » — et elle sortait d'un relevé fait à la main. Un verdict escaladé
+       * sans que la confiance soit sous le seuil vient d'une règle qui ne dépend pas d'elle.
+       */
+      const verdicts = cas.map((c: any) => trier(c, 0.7, REFERENTIEL_SECTORIEL));
+      const escalades = verdicts.filter((v: any) => v.decision === "escalader");
       return {
         dossiers: b.total,
         partAutomatisee: oui(b.tauxAutomatisation),
         justesse: oui(b.precisionAutomatisee),
         manquements: b.manquements,
         escaladesEvitables: b.escaladesInutiles,
+        escaladesParLaRegle: escalades.filter((v: any) => !v.escalade).length,
+        escaladesParLeSeuil: escalades.filter((v: any) => v.escalade).length,
       };
     },
   },
@@ -147,8 +163,20 @@ const MESURES: Mesure[] = [
        */
       const stables = runs.filter((r: any) => DETERMINISTE ? DETERMINISTE[r.version] !== false : !r.version.includes("sous-budget"));
       const premier = stables[0], dernier = stables[stables.length - 1];
+      /*
+       * Les deux taux que la trouvaille compare, et l'intervalle qui les rend
+       * indépartageables. Le README les écrivait à la main dans cinq phrases différentes.
+       * L'intervalle est celui de Wilson à 95 %, en points de pourcentage, arrondi comme il
+       * est cité : « à peu près ±14 points ».
+       */
+      const { wilson } = await import(`${VOISINS}banc/src/interval.ts`);
+      const avant = stables[stables.length - 2] ?? premier;
+      const [bas, haut] = wilson(dernier.passed, dernier.total);
       return {
         cas: premier.total,
+        tauxAvant: oui(avant.passed / avant.total),
+        tauxApres: oui(dernier.passed / dernier.total),
+        demiIntervalle: Math.round(((haut - bas) / 2) * 100),
         versionsPubliees: stables.length,
         versionsEnTout: runs.length,
         passesAuDebut: premier.passed,
@@ -172,6 +200,10 @@ const MESURES: Mesure[] = [
         ratees: m.repondables - justes,
         silencesJustifies: Math.round(m.abstention * indisponibles),
         sansReponsePossible: indisponibles,
+        /* La barre elle-même. Le README l'écrit dans une dizaine de phrases — « 0,84 est la
+         * plus basse à laquelle cet outil n'invente rien » — et c'est un réglage, pas une
+         * loi : il change si le corpus change. */
+        barre: M.getSeuil(),
       };
     },
   },

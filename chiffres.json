@@ -2,6 +2,7 @@
   "economics": {
     "analystesEnPoste": 8,
     "analystesUtilises": 1,
+    "analystesInoccupes": 7,
     "attrapes": 208,
     "aTrouver": 454,
     "coutAnnuel": 496000,
@@ -14,7 +15,9 @@
     "partAutomatisee": 0.583,
     "justesse": 0.983,
     "manquements": 0,
-    "escaladesEvitables": 69
+    "escaladesEvitables": 69,
+    "escaladesParLaRegle": 111,
+    "escaladesParLeSeuil": 56
   },
   "funnel": {
     "etapes": 4,
@@ -36,6 +39,9 @@
   },
   "banc": {
     "cas": 22,
+    "tauxAvant": 0.818,
+    "tauxApres": 0.864,
+    "demiIntervalle": 14,
     "versionsPubliees": 3,
     "versionsEnTout": 4,
     "passesAuDebut": 13,
@@ -47,7 +53,8 @@
     "justes": 10,
     "ratees": 9,
     "silencesJustifies": 6,
-    "sansReponsePossible": 6
+    "sansReponsePossible": 6,
+    "barre": 0.84
   },
   "portfolio": {
     "tests": 174,
