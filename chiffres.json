@@ -61,33 +61,33 @@
     "barre": 0.84
   },
   "portfolio": {
-    "tests": 236,
+    "tests": 269,
     "parDepot": {
-      "economics": 47,
-      "triage": 29,
-      "funnel": 16,
-      "cycle": 18,
-      "banc": 21,
-      "rag": 12,
-      "arbitrage": 17,
-      "cascade": 19,
-      "remediation": 13,
-      "derive": 13,
-      "vitrine": 31
+      "economics": 50,
+      "triage": 32,
+      "funnel": 19,
+      "cycle": 21,
+      "banc": 24,
+      "rag": 15,
+      "arbitrage": 20,
+      "cascade": 22,
+      "remediation": 16,
+      "derive": 16,
+      "vitrine": 34
     },
-    "mesureLe": "2026-08-18T19:29:52.796Z",
+    "mesureLe": "2026-08-18T20:09:29.732Z",
     "testsCommitesLe": {
-      "economics": "0861545dcc7d16d339724e6c3d83b0a165cac7a0",
-      "triage": "f552c584053df8298d680c82317ba465d33a9620",
-      "funnel": "5653c88043408c7953dba2ce33cc1ba4094cb91a",
-      "cycle": "f5f646475fbf28569f77291a927c24d23045dea7",
-      "banc": "3c28b56cf369c846b73fbdf8c3fdf05307ce572a",
-      "rag": "23e933e125d2e6f674cecf6c97f5e96a53a999fc",
-      "arbitrage": "e7bb900206ca1e40f060e24266530e2da99cc92f",
-      "cascade": "a380f41a00e938876f0e5e59f8e07508ed517179",
-      "remediation": "d6f77b38798957c5e34f46c19c5367e6bd1e85fb",
-      "derive": "2345b329ad1b9e677eca6047e87c673f8a596aec",
-      "vitrine": "951f2f9037776d17fb401d2519b6cfdebfa089f0"
+      "economics": "6d1544b48e9f84055edb6f484d9e231369967b6b",
+      "triage": "e593c252ae4cb01e47dd87874aefe8db1a9dfa74",
+      "funnel": "067f10593149609853f1a9565b0452075337f726",
+      "cycle": "bf20f15b2a2ef80d80caa51f95971269599d9d5e",
+      "banc": "ceeb8fe633a3c47b9c2df2058306dfbb775f35e8",
+      "rag": "4c70b4f2a6435e73638810ef2e2da93ff93801c7",
+      "arbitrage": "220a882505d30b72768adf95b8103cc9e9744f18",
+      "cascade": "8dd47794fdefac2e4d7d481ed1edd957fa857ba0",
+      "remediation": "2bb0b59894fcecad2ebcb94f148d97c6115fb9ba",
+      "derive": "7c602eb65355b611e4547d5a73f164cf8b38253c",
+      "vitrine": "8563ad77063a4dc67ab4ad894202de83e0a7c1e2"
     }
   },
   "ragReel": {
