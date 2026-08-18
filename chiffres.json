@@ -1,0 +1,51 @@
+{
+  "economics": {
+    "analystesEnPoste": 8,
+    "analystesUtilises": 1,
+    "attrapes": 208,
+    "aTrouver": 454,
+    "coutAnnuel": 496000,
+    "seuilGratuitLePlusLarge": 0.45,
+    "casSuivantLePlusCher": 81077
+  },
+  "triage": {
+    "dossiers": 400,
+    "partAutomatisee": 0.583,
+    "justesse": 0.983,
+    "manquements": 0,
+    "escaladesEvitables": 69
+  },
+  "funnel": {
+    "etapes": 4,
+    "etapeLaPlusFaible": "signup",
+    "meilleurLevier": "signup",
+    "meilleurRendement": 31.14,
+    "pireLevier": "retain",
+    "pireRendement": 2.1,
+    "facteur": 15
+  },
+  "cycle": {
+    "dossiers": 1200,
+    "joursDeBoutEnBout": 6.4,
+    "heuresDeBoutEnBout": 51,
+    "heuresTravaillees": 2.3,
+    "partAttente": 0.954,
+    "routesDistinctes": 74,
+    "conformite": 0.403
+  },
+  "banc": {
+    "cas": 22,
+    "versionsPubliees": 3,
+    "versionsEnTout": 4,
+    "passesAuDebut": 13,
+    "passesALaFin": 19,
+    "versionNonDeterministe": "v4-sous-budget"
+  },
+  "rag": {
+    "questions": 25,
+    "justes": 10,
+    "ratees": 9,
+    "silencesJustifies": 6,
+    "sansReponsePossible": 6
+  }
+}

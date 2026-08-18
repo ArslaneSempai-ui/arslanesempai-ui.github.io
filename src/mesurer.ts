@@ -1,0 +1,225 @@
+/*
+ * LES CHIFFRES DE LA VITRINE, PRIS À LA SOURCE.
+ *
+ * Cette page annonce une trouvaille par outil. Chacune est un nombre, et un nombre recopié
+ * à la main se périme au premier changement de modèle sans que rien ne le signale — c'est
+ * déjà arrivé trois fois sur les README de ces dépôts. Alors on ne recopie pas : on fait
+ * tourner les modèles et on écrit `chiffres.json`.
+ *
+ * ─── Ce qui rend ce fichier particulier ───
+ *
+ * Les six outils sont six dépôts séparés. Ce script les importe depuis les dossiers
+ * voisins, ce qui marche sur la machine où ils sont tous présents et nulle part ailleurs.
+ * D'où trois règles :
+ *
+ *  1. **Chaque import est optionnel.** Un dossier absent donne un message clair, pas une
+ *     pile d'exceptions. Quelqu'un qui clone seulement cette vitrine doit pouvoir la
+ *     construire à partir du `chiffres.json` livré.
+ *  2. **`--check` ne juge que ce qu'il a pu mesurer.** Un outil manquant est signalé comme
+ *     non vérifié, jamais comme concordant. Dire « à jour » de ce qu'on n'a pas lu est le
+ *     mensonge que ce fichier existe pour empêcher.
+ *  3. **Le moteur de recherche documentaire est privé.** Il est absent de la plupart des
+ *     machines, y compris des runners publics, et c'est voulu. Ses chiffres restent dans
+ *     `chiffres.json` et sont gardés par un test qui les confronte au README public.
+ *
+ * Ce que ce fichier ne mesure pas : `v4-sous-budget`, du banc de régression. Cette
+ * version-là court après une horloge et est non déterministe *par construction* — c'est
+ * son rôle dans la démonstration. Publier un score figé pour elle serait afficher un
+ * tirage au sort avec deux décimales.
+ */
+
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { isMain } from "./cli.ts";
+
+/** Les dépôts voisins. Une seule ligne à changer si l'arborescence bouge. */
+const VOISINS = new URL("../../", import.meta.url).pathname;
+const FICHIER = new URL("../chiffres.json", import.meta.url).pathname;
+
+export type Chiffres = Record<string, Record<string, number | string | boolean>>;
+
+type Mesure = { cle: string; dossier: string; prendre: () => Promise<Record<string, number | string | boolean>> };
+
+const oui = (n: number, d = 3) => Number(n.toFixed(d));
+
+const MESURES: Mesure[] = [
+  {
+    cle: "economics", dossier: "economics",
+    async prendre() {
+      const { generatePopulation } = await import(`${VOISINS}economics/src/alerts.ts`);
+      const { sweep, ASSUMPTIONS, THRESHOLDS } = await import(`${VOISINS}economics/src/model.ts`);
+      const pop = generatePopulation();
+      const pts = sweep(pop, THRESHOLDS, ASSUMPTIONS).sort((a: any, b: any) => a.threshold - b.threshold);
+      const ici = pts.find((p: any) => Math.abs(p.threshold - 0.65) < 1e-9);
+      /* Le dernier seuil dont le cas suivant est encore gratuit : la marche s'achète après. */
+      const gratuits = pts.filter((p: any) => p.costPerMarginalTruePositive === 0);
+      return {
+        analystesEnPoste: ASSUMPTIONS.analystsInPost,
+        analystesUtilises: ici.fteWhole,
+        attrapes: ici.truePositivesCaught,
+        aTrouver: pop.truePositivesTotal,
+        coutAnnuel: ici.annualCost,
+        seuilGratuitLePlusLarge: oui(Math.min(...gratuits.map((p: any) => p.threshold)), 2),
+        casSuivantLePlusCher: Math.round(Math.max(...pts.map((p: any) => p.costPerMarginalTruePositive ?? 0))),
+      };
+    },
+  },
+  {
+    cle: "triage", dossier: "triage",
+    async prendre() {
+      const { genererCas } = await import(`${VOISINS}triage/src/cas.ts`);
+      const { mesurer } = await import(`${VOISINS}triage/src/mesurer.ts`);
+      const { REFERENTIEL_SECTORIEL } = await import(`${VOISINS}triage/src/referentiel.ts`);
+      const b = mesurer(genererCas(), 0.7, REFERENTIEL_SECTORIEL);
+      return {
+        dossiers: b.total,
+        partAutomatisee: oui(b.tauxAutomatisation),
+        justesse: oui(b.precisionAutomatisee),
+        manquements: b.manquements,
+        escaladesEvitables: b.escaladesInutiles,
+      };
+    },
+  },
+  {
+    cle: "funnel", dossier: "funnel",
+    async prendre() {
+      const { generate, SCENARIO } = await import(`${VOISINS}funnel/src/population.ts`);
+      const { measure, worstStep } = await import(`${VOISINS}funnel/src/funnel.ts`);
+      const { priceAll } = await import(`${VOISINS}funnel/src/value.ts`);
+      const pop = generate(SCENARIO);
+      const taux = measure(pop);
+      const prix = priceAll();
+      const meilleur = prix[0], pire = prix[prix.length - 1];
+      return {
+        etapes: taux.length,
+        etapeLaPlusFaible: worstStep(taux).worst.step,
+        meilleurLevier: meilleur.step,
+        meilleurRendement: oui(meilleur.perDollar, 2),
+        pireLevier: pire.step,
+        pireRendement: oui(pire.perDollar, 2),
+        facteur: Math.round(meilleur.perDollar / pire.perDollar),
+      };
+    },
+  },
+  {
+    cle: "cycle", dossier: "cycle",
+    async prendre() {
+      const { generate } = await import(`${VOISINS}cycle/src/events.ts`);
+      const { perCase, overall } = await import(`${VOISINS}cycle/src/time.ts`);
+      const { conformance } = await import(`${VOISINS}cycle/src/paths.ts`);
+      const ev = generate();
+      const o = overall(perCase(ev));
+      const c = conformance(ev);
+      return {
+        dossiers: o.cases,
+        joursDeBoutEnBout: oui(o.meanLeadDays, 1),
+        /* Les heures sont mesurées, pas déduites des jours arrondis : 6,4 × 8 donne 51,2
+         * alors que la valeur réelle est 51,0, et la barre de la figure s'en ressent. */
+        heuresDeBoutEnBout: oui(o.meanLeadDays * 8, 1),
+        heuresTravaillees: oui(o.meanTouchHours, 1),
+        partAttente: oui(o.waitingShare),
+        routesDistinctes: c.distinctPaths,
+        conformite: oui(c.share),
+      };
+    },
+  },
+  {
+    cle: "banc", dossier: "banc",
+    async prendre() {
+      const { runAll } = await import(`${VOISINS}banc/src/run.ts`);
+      const { DETERMINISTE } = await import(`${VOISINS}banc/src/screening.ts`).catch(() => ({ DETERMINISTE: null }));
+      const runs = await runAll();
+      /*
+       * On ne publie que les versions déclarées déterministes. `v4-sous-budget` en est
+       * exclue parce qu'elle race un chronomètre : elle a donné 18 puis 19 sur cette même
+       * machine à quelques minutes d'intervalle, ce qui est son propos, pas un défaut.
+       */
+      const stables = runs.filter((r: any) => DETERMINISTE ? DETERMINISTE[r.version] !== false : !r.version.includes("sous-budget"));
+      const premier = stables[0], dernier = stables[stables.length - 1];
+      return {
+        cas: premier.total,
+        versionsPubliees: stables.length,
+        versionsEnTout: runs.length,
+        passesAuDebut: premier.passed,
+        passesALaFin: dernier.passed,
+        versionNonDeterministe: runs.find((r: any) => !stables.includes(r))?.version ?? "",
+      };
+    },
+  },
+  {
+    cle: "rag", dossier: "rag",
+    async prendre() {
+      const M = await import(`${VOISINS}rag/src/index.ts`);
+      await M.etape1_lire(`${VOISINS}rag/corpus`);
+      await M.etape2_indexer();
+      const m = await M.mesurer();
+      const indisponibles = m.total - m.repondables;
+      const justes = Math.round(m.top1 * m.repondables);
+      return {
+        questions: m.total,
+        justes,
+        ratees: m.repondables - justes,
+        silencesJustifies: Math.round(m.abstention * indisponibles),
+        sansReponsePossible: indisponibles,
+      };
+    },
+  },
+];
+
+export async function mesurer(): Promise<{ chiffres: Chiffres; absents: string[] }> {
+  const chiffres: Chiffres = {};
+  const absents: string[] = [];
+  for (const m of MESURES) {
+    if (!existsSync(`${VOISINS}${m.dossier}/src`)) { absents.push(m.cle); continue; }
+    try {
+      chiffres[m.cle] = await m.prendre();
+    } catch (e) {
+      absents.push(m.cle);
+      console.error(`  ${m.cle} : mesure impossible — ${(e as Error).message}`);
+    }
+  }
+  return { chiffres, absents };
+}
+
+export function lire(): Chiffres {
+  return JSON.parse(readFileSync(FICHIER, "utf8")) as Chiffres;
+}
+
+async function principal(): Promise<void> {
+  /* Le drapeau est cherché, pas lu à une position : `arg(0)` renvoyait le chemin de Node,
+   * et la vérification s'est silencieusement transformée en écriture. */
+  const controle = process.argv.includes("--check");
+  const { chiffres, absents } = await mesurer();
+
+  if (!controle) {
+    const garde = existsSync(FICHIER) ? lire() : {};
+    /* Un outil absent conserve ses chiffres livrés plutôt que de disparaître du fichier. */
+    const fusion = { ...garde, ...chiffres };
+    writeFileSync(FICHIER, JSON.stringify(fusion, null, 2) + "\n");
+    console.log(`chiffres.json écrit — ${Object.keys(chiffres).length} outil(s) mesuré(s)` +
+      (absents.length ? `, ${absents.length} conservé(s) tels quels : ${absents.join(", ")}` : ""));
+    return;
+  }
+
+  if (!existsSync(FICHIER)) {
+    console.error("chiffres.json manquant — lancer `npm run mesurer`");
+    process.exit(1);
+  }
+  const livre = lire();
+  const perimes: string[] = [];
+  for (const [cle, valeurs] of Object.entries(chiffres)) {
+    if (JSON.stringify(livre[cle]) !== JSON.stringify(valeurs)) perimes.push(cle);
+  }
+  if (perimes.length) {
+    console.error(`chiffres.json périmé pour : ${perimes.join(", ")} — lancer \`npm run mesurer\``);
+    for (const cle of perimes) {
+      console.error(`  livré  ${cle} ${JSON.stringify(livre[cle])}`);
+      console.error(`  mesuré ${cle} ${JSON.stringify(chiffres[cle])}`);
+    }
+    process.exit(1);
+  }
+  /* On dit ce qu'on a vérifié, et surtout ce qu'on n'a pas pu vérifier. */
+  console.log(`chiffres.json à jour — ${Object.keys(chiffres).length} outil(s) vérifié(s)` +
+    (absents.length ? `, ${absents.length} non vérifié(s) faute de dépôt voisin : ${absents.join(", ")}` : ""));
+}
+
+if (isMain(import.meta)) await principal();

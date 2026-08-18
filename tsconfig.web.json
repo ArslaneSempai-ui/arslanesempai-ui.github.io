@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": [
+      "ES2023",
+      "DOM"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "rootDir": "src",
+    "outDir": "docs/js",
+    "noEmit": false,
+    "strict": true,
+    "skipLibCheck": true,
+    "types": []
+  },
+  "files": [
+    "src/diagnostic.ts",
+    "src/interval.ts",
+    "src/emprunts/economics/alerts.ts",
+    "src/emprunts/economics/model.ts",
+    "src/emprunts/economics/calibrate.ts",
+    "src/emprunts/economics/regulations.ts",
+    "src/emprunts/economics/cli.ts",
+    "src/emprunts/cycle/events.ts",
+    "src/emprunts/cycle/time.ts",
+    "src/emprunts/cycle/rework.ts",
+    "src/emprunts/cycle/paths.ts",
+    "src/emprunts/cycle/assumptions.ts",
+    "src/emprunts/cycle/cli.ts",
+    "src/emprunts/cycle/interval.ts"
+  ]
+}

@@ -1,0 +1,461 @@
+/*
+ * LE DIAGNOSTIC.
+ *
+ * On saisit ses chiffres une fois, ça traverse les modèles, et il en sort des montants
+ * récupérables classés par argent. C'est le livrable d'un travail d'opérations : pas
+ * « voici six outils », mais « voici ce que votre maison laisse sur la table, et dans quel
+ * ordre le ramasser ».
+ *
+ * ─── La règle qui gouverne ce fichier ───
+ *
+ * **Chaque constat porte l'étiquette de ce qui l'a produit.** Un montant calculé sur les
+ * volumes du visiteur ne vaut pas un montant calculé sur une population inventée, et les
+ * confondre serait exactement le chiffre non vérifiable que ces six outils existent pour
+ * dénoncer. Trois étiquettes, jamais mélangées :
+ *
+ *   `vôtre`    — calculé entièrement sur ce qu'ils ont fourni.
+ *   `ajusté`   — la forme du modèle, recalée sur un point qu'ils ont observé.
+ *   `supposé`  — la forme et l'échelle du dépôt, mises à leur volume. Une démonstration.
+ *
+ * Un diagnostic qui afficherait « supposé » en petit et le montant en gros serait une
+ * publicité. Ici l'étiquette voyage avec le montant, dans la même structure, et l'écran
+ * n'a pas le droit d'afficher l'un sans l'autre — un test le vérifie.
+ *
+ * ─── Ce qui n'est pas noté ───
+ *
+ * Le banc de régression et la recherche documentaire démontrent une méthode, pas une
+ * économie. On ne peut pas les paramétrer par les chiffres d'un client sans inventer, donc
+ * ils ne produisent pas de montant. Ils sont liés, pas notés. Refuser de chiffrer ce qu'on
+ * ne sait pas chiffrer est le seul geste qui rend crédibles les quatre autres montants.
+ */
+
+import { generatePopulation } from "./emprunts/economics/alerts.ts";
+import { sweep, ASSUMPTIONS as ECO, THRESHOLDS } from "./emprunts/economics/model.ts";
+import { fitToObservation, ASSUMED, type Separation } from "./emprunts/economics/calibrate.ts";
+import type { ScoredCase } from "./emprunts/economics/calibrate.ts";
+import { wilson } from "./interval.ts";
+import { generate as journalDemo, type Event, type Activity } from "./emprunts/cycle/events.ts";
+import { perCase } from "./emprunts/cycle/time.ts";
+import { costOfRework } from "./emprunts/cycle/rework.ts";
+import { ASSUMPTIONS as CYCLE } from "./emprunts/cycle/assumptions.ts";
+
+export type Bilingue = { en: string; fr: string };
+
+export type Provenance = "vôtre" | "ajusté" | "supposé";
+
+export type Entrees = {
+  /* — la détection — */
+  operations?: number;
+  seuilActuel?: number;
+  alertesParAn?: number;
+  /** Part des alertes revues qui se révèlent réelles. */
+  tauxReel?: number;
+  partDeclarable?: number;
+  analystesEnPoste?: number;
+  coutChargeAnalyste?: number;
+  /** Niveau 3 : leurs propres dossiers scorés, lus dans leur navigateur. */
+  dossiersScores?: ScoredCase[];
+
+  /* — le temps de cycle — */
+  dossiersParAn?: number;
+  coutHoraireCharge?: number;
+  /** Niveau 3 du temps de cycle : leur propre journal, lu dans leur navigateur. */
+  journal?: { evenements: Event[]; retour?: string };
+
+  /* — le triage — */
+  entreesEnRelationParAn?: number;
+  minutesRevueParDossier?: number;
+
+  /*
+   * Ce que les six modèles ont mesuré une fois, sur leurs propres jeux.
+   *
+   * Deux constats s'appuient sur une part mesurée ailleurs — la part de dossiers qu'un
+   * agent peut décider seul, par exemple. Elle est passée ici plutôt que recopiée, pour
+   * qu'un seul fichier en soit la source et qu'un contrôle de péremption la garde.
+   */
+  mesures?: { triagePartAutomatisee?: number; triageDossiers?: number };
+
+  /* — l'entonnoir — */
+  entonnoir?: { etape: string; entres: number; convertis: number }[];
+  revenuParClient?: number;
+};
+
+export type Constat = {
+  outil: "economics" | "funnel" | "cycle" | "triage";
+  cle: string;
+  /** Le montant annuel, en dollars. */
+  montant: number;
+  /**
+   * De quelle sorte est ce montant — et pourquoi deux sortes ne se classent pas ensemble.
+   *
+   * « déjà payé » est une dépense qui sort du compte chaque année sans rien produire : la
+   * récupérer ne demande pas de projet, seulement une décision. « à gagner » est un revenu
+   * conditionnel à un travail qui reste à faire. Les mettre dans une même colonne triée par
+   * montant donnerait à lire une somme qui n'existe pas — c'est le raccourci que ces outils
+   * passent leur temps à dénoncer, et il n'a pas sa place dans leur propre vitrine.
+   */
+  nature: "déjà payé" | "à gagner";
+  /** L'unité du montant, écrite. Sans elle, « $520 000 » se lit comme un chèque annuel. */
+  unite: Bilingue;
+  provenance: Provenance;
+  /*
+   * Les deux langues, portées par le constat lui-même.
+   *
+   * Le portfolio vise des postes aux États-Unis : l'anglais est la langue par défaut, et le
+   * français doit exister à côté, pas à la place. Les faire cohabiter ici plutôt que dans
+   * l'écran garde la phrase collée aux nombres qui la justifient — une traduction qui vit
+   * loin de son chiffre finit par ne plus le décrire.
+   */
+  phrase: Bilingue;
+  /** Ce qui reste supposé dans ce constat précis, ou `null` si rien. */
+  reserve: Bilingue | null;
+  lien: string;
+};
+
+export type Diagnostic = {
+  /** Ce qui sort déjà du compte sans rien produire, du plus gros au plus petit. */
+  dejaPaye: Constat[];
+  /** Ce qu'un projet irait chercher. Jamais additionné au précédent. */
+  aGagner: Constat[];
+  /** Le niveau atteint pour la détection : 1 supposé, 2 ajusté, 3 mesuré. */
+  niveau: 1 | 2 | 3;
+  /** Ce que le visiteur a fourni d'incohérent, dans ses termes. */
+  refus: string[];
+  separation: Separation;
+};
+
+const BASE = "https://arslanesempai-ui.github.io";
+
+/**
+ * La séparation à utiliser, et à quel titre.
+ *
+ * Trois chemins, et le plus fort l'emporte : des dossiers scorés valent mieux qu'un point
+ * observé, qui vaut mieux que la forme du dépôt.
+ */
+export function separationPour(e: Entrees): { separation: Separation; niveau: 1 | 2 | 3; refus: string[] } {
+  if (e.dossiersScores && e.dossiersScores.length >= 30) {
+    /*
+     * Niveau 3. On ne « fitte » pas : on ajuste la forme aux deux histogrammes fournis par
+     * moments. Trente lignes est le plancher — en dessous, une moyenne empirique est plus
+     * bruitée que la forme du dépôt, et prétendre l'inverse serait ajuster du bruit.
+     */
+    const vrais = e.dossiersScores.filter((d) => d.truePositive).map((d) => d.score);
+    const faux = e.dossiersScores.filter((d) => !d.truePositive).map((d) => d.score);
+    const refus: string[] = [];
+    const sep: Separation = { ...ASSUMED };
+    const moyenne = (x: number[]) => x.reduce((s, v) => s + v, 0) / x.length;
+    /* L'écart-type du générateur vaut `spread · √½` : on inverse pour rester dans ses unités. */
+    const etendue = (x: number[], m: number) =>
+      Math.sqrt(x.reduce((s, v) => s + (v - m) ** 2, 0) / Math.max(1, x.length - 1)) / Math.SQRT1_2;
+
+    if (vrais.length >= 10) {
+      sep.truePositiveMean = moyenne(vrais);
+      sep.truePositiveSpread = Math.max(0.02, etendue(vrais, sep.truePositiveMean));
+    } else refus.push("moins de dix cas réels dans le fichier : la forme du signal reste celle du dépôt");
+    if (faux.length >= 10) {
+      sep.falsePositiveMean = moyenne(faux);
+      sep.falsePositiveSpread = Math.max(0.02, etendue(faux, sep.falsePositiveMean));
+    } else refus.push("moins de dix cas écartés dans le fichier : la forme du bruit reste celle du dépôt");
+    return { separation: sep, niveau: 3, refus };
+  }
+
+  const complet = e.operations && e.alertesParAn && e.tauxReel !== undefined && e.seuilActuel;
+  if (complet) {
+    const fit = fitToObservation({
+      operations: e.operations!,
+      threshold: e.seuilActuel!,
+      alerts: e.alertesParAn!,
+      precision: e.tauxReel!,
+      truePositiveShare: e.partDeclarable ?? 0.0012,
+    });
+    /* Ajusté seulement si l'observation a réellement déterminé quelque chose. */
+    const niveau = fit.fitted.falsePositive || fit.fitted.truePositive ? 2 : 1;
+    return { separation: fit.separation, niveau: niveau as 1 | 2, refus: fit.refused };
+  }
+
+  return { separation: ASSUMED, niveau: 1, refus: [] };
+}
+
+const dollars = (n: number) => "$" + Math.round(n).toLocaleString("en-GB");
+
+/** La capacité déjà payée que le seuil actuel n'emploie pas. */
+function capaciteInutilisee(e: Entrees, separation: Separation): Constat | null {
+  const operations = e.operations ?? 400_000;
+  const enPoste = e.analystesEnPoste ?? ECO.analystsInPost;
+  const cout = e.coutChargeAnalyste ?? ECO.loadedCostPerAnalyst;
+  const seuil = e.seuilActuel ?? 0.65;
+
+  const hypotheses = { ...ECO, analystsInPost: enPoste, loadedCostPerAnalyst: cout };
+  const pop = generatePopulation(operations, e.partDeclarable ?? 0.0012, 20260817, separation);
+  const points = sweep(pop, THRESHOLDS, hypotheses);
+  const ici = points.reduce((a, b) =>
+    Math.abs(b.threshold - seuil) < Math.abs(a.threshold - seuil) ? b : a);
+
+  const inoccupes = Math.max(0, enPoste - ici.fteWhole);
+  if (inoccupes <= 0) return null;
+
+  /*
+   * Ce qu'on peut acheter sans dépenser : le seuil le plus large dont la file tient, dont
+   * le délai est respecté, et qui n'ajoute pas un analyste. Tout ce qu'il attrape en plus
+   * est gratuit — c'est exactement la trouvaille de l'outil, appliquée à leur maison.
+   */
+  const gratuit = points
+    .filter((p) => p.queueHolds && p.deadlineMet && p.fteWhole <= enPoste)
+    .reduce((a, b) => (b.threshold < a.threshold ? b : a), ici);
+  const gagnes = Math.max(0, gratuit.truePositivesCaught - ici.truePositivesCaught);
+
+  return {
+    outil: "economics",
+    cle: "capacite",
+    montant: inoccupes * cout,
+    nature: "déjà payé",
+    unite: { en: "a year, already spent", fr: "par an, déjà dépensé" },
+    provenance: "supposé",
+    phrase: {
+      en: gagnes > 0
+        ? `${inoccupes} of ${enPoste} analysts are paid without being employed by threshold ${ici.threshold.toFixed(2)}. Lowering it to ${gratuit.threshold.toFixed(2)} would catch ${gagnes} more cases for no extra money.`
+        : `${inoccupes} of ${enPoste} analysts are paid without being employed by threshold ${ici.threshold.toFixed(2)}.`,
+      fr: gagnes > 0
+        ? `${inoccupes} analystes sur ${enPoste} sont payés sans être employés par le seuil ${ici.threshold.toFixed(2)}. Le descendre à ${gratuit.threshold.toFixed(2)} attraperait ${gagnes} cas de plus sans un dollar de plus.`
+        : `${inoccupes} analystes sur ${enPoste} sont payés sans être employés par le seuil ${ici.threshold.toFixed(2)}.`,
+    },
+    reserve: null,
+    lien: `${BASE}/alert-triage-economics/`,
+  };
+}
+
+/**
+ * L'entonnoir, calculé sur leurs propres comptes.
+ *
+ * Rien n'est supposé ici : leurs volumes déterminent chaque taux, et l'intervalle de
+ * Wilson dit lesquels se classent. Deux étapes dont les intervalles se recouvrent ne se
+ * classent pas — et c'est ce refus qui vaut le détour, pas le classement.
+ */
+function entonnoir(e: Entrees): Constat | null {
+  const etapes = e.entonnoir;
+  if (!etapes || etapes.length < 2) return null;
+  const revenu = e.revenuParClient ?? 1200;
+
+  const taux = etapes.map((s) => {
+    const [bas, haut] = wilson(s.convertis, s.entres);
+    return { ...s, taux: s.entres > 0 ? s.convertis / s.entres : 0, bas, haut };
+  });
+
+  const pire = taux.reduce((a, b) => (b.taux < a.taux ? b : a));
+  const recouvre = taux.some((s) => s !== pire && s.bas <= pire.haut);
+
+  /*
+   * Ce que vaut un point de conversion sur l'étape la plus faible : les clients gagnés en
+   * bout de chaîne, multipliés par le revenu annuel par client. Les taux en aval sont
+   * les leurs, donc le report l'est aussi.
+   */
+  const apres = taux.slice(taux.indexOf(pire) + 1).reduce((p, s) => p * s.taux, 1);
+  const parPoint = pire.entres * 0.01 * apres * revenu;
+
+  return {
+    outil: "funnel",
+    cle: "entonnoir",
+    montant: parPoint,
+    nature: "à gagner",
+    unite: { en: "per point of conversion gained", fr: "par point de conversion gagné" },
+    provenance: "vôtre",
+    phrase: {
+      en: `Your weakest step is “${pire.etape}”, at ${(pire.taux * 100).toFixed(1)} %. One point of conversion gained there is worth ${dollars(parPoint)} a year downstream.`,
+      fr: `Votre étape la plus faible est « ${pire.etape} », à ${(pire.taux * 100).toFixed(1)} %. Un point de conversion gagné là vaut ${dollars(parPoint)} par an en bout de chaîne.`,
+    },
+    reserve: recouvre ? {
+      en: "this step's confidence interval overlaps another's: on your volumes it cannot be named the weakest",
+      fr: "l'intervalle de confiance de cette étape recouvre celui d'une autre : sur vos volumes, elle n'est pas désignable comme la plus faible",
+    } : null,
+    lien: `${BASE}/funnel-economics/`,
+  };
+}
+
+/**
+ * La reprise : ce que coûte le travail refait.
+ *
+ * Avec leur journal, tout est à eux. Sans lui, la *forme* du processus reste celle du
+ * dépôt — la part de dossiers qui repassent, les minutes qu'ils coûtent — et seule
+ * l'échelle est la leur. Les deux cas donnent un montant ; un seul donne une mesure, et
+ * l'étiquette le dit.
+ */
+function repriseCoutee(e: Entrees): Constat | null {
+  const dossiers = e.dossiersParAn;
+  const coutHoraire = e.coutHoraireCharge;
+  if (!dossiers || !coutHoraire) return null;
+
+  const propre = !!e.journal?.evenements.length;
+  const evenements = propre ? e.journal!.evenements : journalDemo();
+  const temps = perCase(evenements);
+  if (!temps.length) return null;
+
+  /*
+   * `null` quand aucun dossier n'est passé sans reprise : il n'existe alors pas de dossier
+   * de référence, et le surcoût n'est pas calculable. Se taire est la bonne réponse — c'est
+   * ce cas-là, rencontré sur un journal étranger, qui a fait corriger le modèle d'origine.
+   */
+  const r = costOfRework(temps, { ...CYCLE, casesPerYear: dossiers, loadedHourlyCost: coutHoraire });
+  if (!r || !(r.extraCostPerYear > 0)) return null;
+
+  const heures = Math.round(r.extraHoursPerYear);
+  /*
+   * La phrase sur le délai n'est dite que si elle apprend quelque chose.
+   *
+   * Sur des dossiers courts, l'avant et l'après se confondent une fois arrondis au dixième
+   * de jour, et la page annonçait « de 0,3 à 0,3 jours » — une phrase qui use la confiance
+   * du lecteur sans rien lui donner.
+   */
+  const avant = r.meanDaysBefore.toFixed(1), apres = r.meanDaysIfNoRework.toFixed(1);
+  const delai = avant !== apres;
+  return {
+    outil: "cycle",
+    cle: "reprise",
+    montant: r.extraCostPerYear,
+    nature: "déjà payé",
+    unite: { en: "a year, in work done twice", fr: "par an, en travail refait" },
+    provenance: propre ? "vôtre" : "supposé",
+    phrase: {
+      en: `${(r.share * 100).toFixed(0)} % of cases come back at least once, and redoing them costs ${heures.toLocaleString("en-GB")} analyst hours a year.`
+        + (delai ? ` Removing the loop would take the average case from ${avant} to ${apres} days.` : ""),
+      fr: `${(r.share * 100).toFixed(0)} % des dossiers repassent au moins une fois, et les refaire coûte ${heures.toLocaleString("fr-FR")} heures d'analyste par an.`
+        + (delai ? ` Supprimer la boucle ramènerait le dossier moyen de ${avant} à ${apres} jours.` : ""),
+    },
+    reserve: propre ? null : {
+      en: "the share of cases that come back is measured on this repository's event log, not yours — only the volume and the hourly cost are yours",
+      fr: "la part de dossiers qui repassent est mesurée sur le journal du dépôt, pas sur le vôtre — seuls le volume et le coût horaire sont à vous",
+    },
+    lien: `${BASE}/process-cycle-time/`,
+  };
+}
+
+/**
+ * Le triage : le temps d'analyste passé sur ce qu'une règle déciderait.
+ *
+ * La part automatisable vient d'une mesure faite une fois, sur les quatre cents dossiers du
+ * dépôt. Elle n'est pas la leur et ne peut pas l'être sans leur jeu de cas — d'où
+ * l'étiquette, qui ne bougera pas tant qu'ils n'auront pas fourni de quoi la mériter.
+ */
+function revueEvitable(e: Entrees): Constat | null {
+  const dossiers = e.entreesEnRelationParAn;
+  const minutes = e.minutesRevueParDossier;
+  const coutHoraire = e.coutHoraireCharge;
+  const part = e.mesures?.triagePartAutomatisee;
+  if (!dossiers || !minutes || !coutHoraire || !part) return null;
+
+  const montant = dossiers * part * (minutes / 60) * coutHoraire;
+  if (!(montant > 0)) return null;
+
+  const sur = e.mesures?.triageDossiers ?? 400;
+  return {
+    outil: "triage",
+    cle: "revue",
+    montant,
+    nature: "déjà payé",
+    unite: { en: "a year, in reviews a rule could decide", fr: "par an, en revues qu'une règle déciderait" },
+    provenance: "supposé",
+    phrase: {
+      en: `On a comparable case set, ${(part * 100).toFixed(0)} % of files were decided without a human and without a single uncontrolled onboarding. At your volume, that is ${Math.round(dossiers * part).toLocaleString("en-GB")} files a year an analyst never has to open.`,
+      fr: `Sur un jeu de dossiers comparable, ${(part * 100).toFixed(0)} % ont été décidés sans humain et sans une seule entrée en relation non contrôlée. À votre volume, cela fait ${Math.round(dossiers * part).toLocaleString("fr-FR")} dossiers par an qu'un analyste n'ouvre jamais.`,
+    },
+    reserve: {
+      en: `the automatable share is measured on this repository's ${sur} synthetic cases, not on yours — your own mix of sectors and countries would move it`,
+      fr: `la part automatisable est mesurée sur les ${sur} dossiers synthétiques du dépôt, pas sur les vôtres — votre propre mélange de secteurs et de pays la déplacerait`,
+    },
+    lien: `${BASE}/kyc-triage-agent/`,
+  };
+}
+
+/**
+ * Lire un journal d'événements.
+ *
+ * Trois colonnes suffisent : le dossier, l'activité, l'horodatage. Une quatrième, les
+ * minutes réellement travaillées, affine le partage entre travail et attente — sans elle
+ * on ne peut pas distinguer les deux, et le calcul le dit plutôt que de supposer.
+ *
+ * Le vocabulaire est le leur. Le modèle, lui, repère une reprise à un libellé littéral —
+ * celui de son propre journal. On demande donc quelle activité marque un retour chez eux,
+ * et on la traduit vers ce libellé. Deviner à leur place produirait un taux de reprise
+ * faux et parfaitement crédible.
+ */
+export type Journal = {
+  evenements: Event[];
+  activites: string[];
+  ignorees: { ligne: number; raison: string }[];
+  minutesFournies: boolean;
+};
+
+export function lireJournal(texte: string, retour?: string): Journal {
+  const lignes = texte.split(/\r?\n/).filter((l) => l.trim() !== "");
+  const ignorees: Journal["ignorees"] = [];
+  if (!lignes.length) return { evenements: [], activites: [], ignorees, minutesFournies: false };
+
+  const decouper = (l: string) => l.split(/[,;\t]/).map((c) => c.trim().replace(/^"|"$/g, ""));
+  const tete = decouper(lignes[0]!).map((c) => c.toLowerCase());
+  const trouver = (motif: RegExp, defaut: number) => {
+    const i = tete.findIndex((c) => motif.test(c));
+    return i >= 0 ? i : defaut;
+  };
+  const entete = tete.some((c) => /case|dossier|activit|step|time|date/.test(c));
+  const cDossier = entete ? trouver(/case|dossier|id/, 0) : 0;
+  const cActivite = entete ? trouver(/activit|step|etape|event/, 1) : 1;
+  const cQuand = entete ? trouver(/time|date|horod|at$/, 2) : 2;
+  const cMinutes = entete ? tete.findIndex((c) => /minute|duration|touch|duree/.test(c)) : -1;
+
+  const brut: { dossier: string; activite: string; quand: number; minutes: number }[] = [];
+  for (let n = entete ? 1 : 0; n < lignes.length; n++) {
+    const cel = decouper(lignes[n]!);
+    const dossier = cel[cDossier] ?? "";
+    const activite = cel[cActivite] ?? "";
+    const t = cel[cQuand] ?? "";
+    const quand = /^-?\d+(\.\d+)?$/.test(t) ? Number(t) : Date.parse(t) / 60000;
+    if (!dossier) { ignorees.push({ ligne: n + 1, raison: "no case identifier" }); continue; }
+    if (!activite) { ignorees.push({ ligne: n + 1, raison: "no activity" }); continue; }
+    if (!Number.isFinite(quand)) { ignorees.push({ ligne: n + 1, raison: `timestamp “${t}” not understood` }); continue; }
+    const m = cMinutes >= 0 ? Number(cel[cMinutes]) : 0;
+    brut.push({ dossier, activite, quand, minutes: Number.isFinite(m) ? m : 0 });
+  }
+  if (!brut.length) return { evenements: [], activites: [], ignorees, minutesFournies: false };
+
+  /* Les horodatages deviennent des minutes depuis le début du journal. */
+  const debut = Math.min(...brut.map((b) => b.quand));
+  brut.sort((a, b) => a.quand - b.quand);
+
+  const activites = [...new Set(brut.map((b) => b.activite))];
+  const evenements: Event[] = brut.map((b) => ({
+    caseId: b.dossier,
+    activity: (retour && b.activite === retour ? "information requested" : b.activite) as Activity,
+    at: b.quand - debut,
+    touchMinutes: b.minutes,
+    actor: "—",
+  }));
+  return { evenements, activites, ignorees, minutesFournies: cMinutes >= 0 };
+}
+
+export function diagnostiquer(e: Entrees): Diagnostic {
+  const { separation, niveau, refus } = separationPour(e);
+  const constats = [capaciteInutilisee(e, separation), repriseCoutee(e), revueEvitable(e), entonnoir(e)]
+    .filter((c): c is Constat => c !== null);
+
+  /* Le niveau atteint requalifie ce que le volet détection a le droit d'affirmer. */
+  for (const c of constats) {
+    if (c.outil !== "economics") continue;
+    c.provenance = niveau === 3 ? "vôtre" : niveau === 2 ? "ajusté" : "supposé";
+    c.reserve = niveau === 3 ? null
+      : niveau === 2
+        ? {
+            en: "the noise distribution comes from your numbers; the signal side depends on the share of reportable operations, which nobody can observe",
+            fr: "la distribution du bruit vient de vos chiffres ; celle du signal dépend du taux de cas déclarables, que personne ne peut observer",
+          }
+        : {
+            en: "the shape of the population is this repository's, scaled to your volume — a demonstration of method, not a measurement of your institution",
+            fr: "la forme de la population est celle du dépôt, mise à votre volume — une démonstration de méthode, pas une mesure de votre maison",
+          };
+  }
+
+  const parMontant = (a: Constat, b: Constat) => b.montant - a.montant;
+  return {
+    dejaPaye: constats.filter((c) => c.nature === "déjà payé").sort(parMontant),
+    aGagner: constats.filter((c) => c.nature === "à gagner").sort(parMontant),
+    niveau, refus, separation,
+  };
+}
