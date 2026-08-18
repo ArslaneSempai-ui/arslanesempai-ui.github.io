@@ -76,7 +76,8 @@ test("la page n'a pas perdu ses parties en route", () => {
   assert.ok(!h.includes('class="fr"') && !h.includes('class="en"'),
     "des fragments de bascule de langue subsistent dans la page");
   for (const attendu of ["Your figures", "What already leaves the account",
-                         "What a project would go after", 'class="outil"']) {
+                         "What a project would go after", 'class="outil"',
+                         "Two apps, built end to end", "Atlas", "Hisho"]) {
     assert.ok(h.includes(attendu), `la page ne contient plus « ${attendu} »`);
   }
   /*
