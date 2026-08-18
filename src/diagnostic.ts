@@ -39,7 +39,6 @@ import { perCase } from "./emprunts/cycle/time.ts";
 import { costOfRework } from "./emprunts/cycle/rework.ts";
 import { ASSUMPTIONS as CYCLE } from "./emprunts/cycle/assumptions.ts";
 
-export type Bilingue = { en: string; fr: string };
 
 export type Provenance = "vôtre" | "ajusté" | "supposé";
 
@@ -96,7 +95,7 @@ export type Constat = {
    */
   nature: "déjà payé" | "à gagner";
   /** L'unité du montant, écrite. Sans elle, « $520 000 » se lit comme un chèque annuel. */
-  unite: Bilingue;
+  unite: string;
   provenance: Provenance;
   /*
    * Les deux langues, portées par le constat lui-même.
@@ -106,9 +105,9 @@ export type Constat = {
    * l'écran garde la phrase collée aux nombres qui la justifient — une traduction qui vit
    * loin de son chiffre finit par ne plus le décrire.
    */
-  phrase: Bilingue;
+  phrase: string;
   /** Ce qui reste supposé dans ce constat précis, ou `null` si rien. */
-  reserve: Bilingue | null;
+  reserve: string | null;
   lien: string;
 };
 
@@ -209,16 +208,11 @@ function capaciteInutilisee(e: Entrees, separation: Separation): Constat | null 
     cle: "capacite",
     montant: inoccupes * cout,
     nature: "déjà payé",
-    unite: { en: "a year, already spent", fr: "par an, déjà dépensé" },
+    unite: "a year, already spent",
     provenance: "supposé",
-    phrase: {
-      en: gagnes > 0
-        ? `${inoccupes} of ${enPoste} analysts are paid without being employed by threshold ${ici.threshold.toFixed(2)}. Lowering it to ${gratuit.threshold.toFixed(2)} would catch ${gagnes} more cases for no extra money.`
-        : `${inoccupes} of ${enPoste} analysts are paid without being employed by threshold ${ici.threshold.toFixed(2)}.`,
-      fr: gagnes > 0
-        ? `${inoccupes} analystes sur ${enPoste} sont payés sans être employés par le seuil ${ici.threshold.toFixed(2)}. Le descendre à ${gratuit.threshold.toFixed(2)} attraperait ${gagnes} cas de plus sans un dollar de plus.`
-        : `${inoccupes} analystes sur ${enPoste} sont payés sans être employés par le seuil ${ici.threshold.toFixed(2)}.`,
-    },
+    phrase: gagnes > 0
+        ? `${inoccupes} of ${enPoste} analysts are paid to handle nothing at threshold ${ici.threshold.toFixed(2)}. Lowering it to ${gratuit.threshold.toFixed(2)} would catch ${gagnes} more cases for no extra money.`
+        : `${inoccupes} of ${enPoste} analysts are paid to handle nothing at threshold ${ici.threshold.toFixed(2)}.`,
     reserve: null,
     lien: `${BASE}/alert-triage-economics/`,
   };
@@ -257,16 +251,12 @@ function entonnoir(e: Entrees): Constat | null {
     cle: "entonnoir",
     montant: parPoint,
     nature: "à gagner",
-    unite: { en: "per point of conversion gained", fr: "par point de conversion gagné" },
+    unite: "per point of conversion gained",
     provenance: "vôtre",
-    phrase: {
-      en: `Your weakest step is “${pire.etape}”, at ${(pire.taux * 100).toFixed(1)} %. One point of conversion gained there is worth ${dollars(parPoint)} a year downstream.`,
-      fr: `Votre étape la plus faible est « ${pire.etape} », à ${(pire.taux * 100).toFixed(1)} %. Un point de conversion gagné là vaut ${dollars(parPoint)} par an en bout de chaîne.`,
-    },
-    reserve: recouvre ? {
-      en: "this step's confidence interval overlaps another's: on your volumes it cannot be named the weakest",
-      fr: "l'intervalle de confiance de cette étape recouvre celui d'une autre : sur vos volumes, elle n'est pas désignable comme la plus faible",
-    } : null,
+    phrase: `Your weakest step is “${pire.etape}”, at ${(pire.taux * 100).toFixed(1)} %. One point of conversion gained there is worth ${dollars(parPoint)} a year downstream.`,
+    reserve: recouvre
+      ? "this step's confidence interval overlaps another's: on your volumes it cannot be named the weakest"
+      : null,
     lien: `${BASE}/funnel-economics/`,
   };
 }
@@ -312,18 +302,13 @@ function repriseCoutee(e: Entrees): Constat | null {
     cle: "reprise",
     montant: r.extraCostPerYear,
     nature: "déjà payé",
-    unite: { en: "a year, in work done twice", fr: "par an, en travail refait" },
+    unite: "a year, in work done twice",
     provenance: propre ? "vôtre" : "supposé",
-    phrase: {
-      en: `${(r.share * 100).toFixed(0)} % of cases come back at least once, and redoing them costs ${heures.toLocaleString("en-GB")} analyst hours a year.`
+    phrase: `${(r.share * 100).toFixed(0)} % of cases come back at least once, and redoing them costs ${heures.toLocaleString("en-GB")} analyst hours a year.`
         + (delai ? ` Removing the loop would take the average case from ${avant} to ${apres} days.` : ""),
-      fr: `${(r.share * 100).toFixed(0)} % des dossiers repassent au moins une fois, et les refaire coûte ${heures.toLocaleString("fr-FR")} heures d'analyste par an.`
-        + (delai ? ` Supprimer la boucle ramènerait le dossier moyen de ${avant} à ${apres} jours.` : ""),
-    },
-    reserve: propre ? null : {
-      en: "the share of cases that come back is measured on this repository's event log, not yours — only the volume and the hourly cost are yours",
-      fr: "la part de dossiers qui repassent est mesurée sur le journal du dépôt, pas sur le vôtre — seuls le volume et le coût horaire sont à vous",
-    },
+    reserve: propre
+      ? null
+      : "the share of cases that come back is measured on this repository's event log, not yours — only the volume and the hourly cost are yours",
     lien: `${BASE}/process-cycle-time/`,
   };
 }
@@ -351,16 +336,10 @@ function revueEvitable(e: Entrees): Constat | null {
     cle: "revue",
     montant,
     nature: "déjà payé",
-    unite: { en: "a year, in reviews a rule could decide", fr: "par an, en revues qu'une règle déciderait" },
+    unite: "a year, in reviews a rule could decide",
     provenance: "supposé",
-    phrase: {
-      en: `On a comparable case set, ${(part * 100).toFixed(0)} % of files were decided without a human and without a single uncontrolled onboarding. At your volume, that is ${Math.round(dossiers * part).toLocaleString("en-GB")} files a year an analyst never has to open.`,
-      fr: `Sur un jeu de dossiers comparable, ${(part * 100).toFixed(0)} % ont été décidés sans humain et sans une seule entrée en relation non contrôlée. À votre volume, cela fait ${Math.round(dossiers * part).toLocaleString("fr-FR")} dossiers par an qu'un analyste n'ouvre jamais.`,
-    },
-    reserve: {
-      en: `the automatable share is measured on this repository's ${sur} synthetic cases, not on yours — your own mix of sectors and countries would move it`,
-      fr: `la part automatisable est mesurée sur les ${sur} dossiers synthétiques du dépôt, pas sur les vôtres — votre propre mélange de secteurs et de pays la déplacerait`,
-    },
+    phrase: `On a comparable case set, ${(part * 100).toFixed(0)} % of files were decided without a human and without a single uncontrolled onboarding. At your volume, that is ${Math.round(dossiers * part).toLocaleString("en-GB")} files a year an analyst never has to open.`,
+    reserve: `the automatable share is measured on this repository's ${sur} synthetic cases, not on yours — your own mix of sectors and countries would move it`,
     lien: `${BASE}/kyc-triage-agent/`,
   };
 }
@@ -442,14 +421,8 @@ export function diagnostiquer(e: Entrees): Diagnostic {
     c.provenance = niveau === 3 ? "vôtre" : niveau === 2 ? "ajusté" : "supposé";
     c.reserve = niveau === 3 ? null
       : niveau === 2
-        ? {
-            en: "the noise distribution comes from your numbers; the signal side depends on the share of reportable operations, which nobody can observe",
-            fr: "la distribution du bruit vient de vos chiffres ; celle du signal dépend du taux de cas déclarables, que personne ne peut observer",
-          }
-        : {
-            en: "the shape of the population is this repository's, scaled to your volume — a demonstration of method, not a measurement of your institution",
-            fr: "la forme de la population est celle du dépôt, mise à votre volume — une démonstration de méthode, pas une mesure de votre maison",
-          };
+        ? "the noise distribution comes from your numbers; the signal side depends on the share of reportable operations, which nobody can observe"
+        : "the shape of the population is this repository's, scaled to your volume — a demonstration of method, not a measurement of your institution";
   }
 
   const parMontant = (a: Constat, b: Constat) => b.montant - a.montant;

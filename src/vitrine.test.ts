@@ -64,12 +64,40 @@ test("aucun lien vers le moteur gardé privé", () => {
     "la page pointe vers le moteur privé : le lien doit aller sur compliance-document-search");
 });
 
-test("les deux langues sont complètes", () => {
+test("la page n'a pas perdu ses parties en route", () => {
+  /*
+   * Ce test gardait l'appariement des deux langues. La page est passée à l'anglais seul,
+   * et l'appariement n'existe plus — mais ce qu'il attrapait vraiment reste vrai : une
+   * transformation de masse sur le gabarit peut emporter des sections entières sans que
+   * rien ne casse. On garde donc la garde, sur ce qui doit être là.
+   */
   const h = page();
-  const en = h.split('class="en"').length - 1;
-  const fr = h.split('class="fr"').length - 1;
-  assert.equal(en, fr, `${en} fragments anglais pour ${fr} français : une traduction manque`);
-  assert.ok(en > 20, `seulement ${en} fragments bilingues, la page a dû perdre du contenu`);
+  assert.ok(!h.includes('class="fr"') && !h.includes('class="en"'),
+    "des fragments de bascule de langue subsistent dans la page");
+  for (const attendu of ["Your figures", "What already leaves the account",
+                         "What a project would go after", 'class="outil"']) {
+    assert.ok(h.includes(attendu), `la page ne contient plus « ${attendu} »`);
+  }
+  /*
+   * Le titre et le grand titre comptent la même chose, et ce compte est celui des outils.
+   *
+   * Ils étaient écrits « six » à la main : le septième outil est arrivé et la page a
+   * annoncé six pendant que la liste en montrait sept. Pire, le garde-fou d'à côté est
+   * passé au vert parce qu'il trouvait la vieille phrase — dans la balise `<title>`, la
+   * seule qui n'avait pas encore été reprise. Un contrôle qui cherche une chaîne n'importe
+   * où dans la page trouve toujours la mauvaise occurrence un jour.
+   */
+  const h1 = h.match(/<h1>([^<]*)<\/h1>/)?.[1] ?? "";
+  const titre = h.match(/<title>([^<]*)<\/title>/)?.[1] ?? "";
+  const outils = h.split('class="outil"').length - 1;
+  const attenduTitre = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+                        "nine", "ten", "eleven", "twelve"][outils];
+  assert.match(h1.toLowerCase(), new RegExp(`^${attenduTitre} numbers`),
+    `le grand titre dit « ${h1} » pour ${outils} outils`);
+  assert.equal(titre.toLowerCase(), h1.toLowerCase(), "le titre de l'onglet et le grand titre divergent");
+  /* Mesuré, pas deviné : la page en fait 24 000 après le passage à l'anglais seul. Le
+   * plancher attrape la perte d'une section entière, pas une phrase réécrite. */
+  assert.ok(h.length > 20_000, `la page ne fait que ${h.length} octets : elle a maigri`);
 });
 
 test("la page n'annonce que des chiffres mesurés", () => {

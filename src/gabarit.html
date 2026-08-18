@@ -3,23 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Diagnostic — Arslane Chaouche Ramdane</title>
+<title><!--NOMBRE-TITRE--> numbers nobody computes</title>
 <meta name="description" content="Six décisions qu'une équipe opérationnelle tranche chaque trimestre, et le chiffre dont chacune dépend. Mettez vos volumes : le calcul tourne dans votre navigateur, rien n'est envoyé nulle part." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23fbfaf7'/%3E%3Crect x='2' y='4' width='12' height='1' fill='%23141618'/%3E%3Crect x='2' y='7' width='12' height='1' fill='%23141618'/%3E%3Crect x='2' y='11' width='12' height='2' fill='%23141618'/%3E%3C/svg%3E" />
 <link rel="stylesheet" href="registre.css" />
 <style>
-/*
- * Deux langues, l'anglais par défaut.
- *
- * Le portfolio vise des postes aux États-Unis : l'anglais est rendu dans le HTML, le
- * français attend à côté, et le sélecteur ne fait que poser une classe. Sans script, la
- * page reste entièrement lisible en anglais — le pire cas acceptable pour une page
- * d'entrée, contrairement à une page vide.
- */
-.fr { display: none; }
-html.en-fr .fr { display: inline; }
-html.en-fr .en { display: none; }
-
 /*
  * Le relevé, et le bordereau qui le remplit.
  *
@@ -27,7 +15,7 @@ html.en-fr .en { display: none; }
  * chiffrées en linéal, étiquettes en chasse fixe. Le formulaire s'y range comme un
  * bordereau — des champs posés sur un filet, pas des boîtes flottantes.
  *
- * Sans JavaScript, le relevé des six outils reste entièrement lisible : c'est le diagnostic
+ * Sans JavaScript, le relevé des outils reste entièrement lisible : c'est le diagnostic
  * qui disparaît, pas la page.
  */
 .bordereau { display: grid; gap: 24px; }
@@ -100,7 +88,7 @@ html.en-fr .en { display: none; }
 .rien { color: var(--encre-tres-pale); font-size: 14.5px; padding: 14px 0; margin: 0; }
 .refus { border-left: 3px solid var(--defavorable); padding: 4px 0 4px 14px; margin: 16px 0; font-size: 14.5px; }
 
-/* Le relevé des six outils. */
+/* Le relevé des outils. */
 .outil {
   display: grid; grid-template-columns: 26px minmax(240px, 1fr) 152px; gap: 24px;
   align-items: center; padding: 15px 0; border-bottom: 1px solid var(--filet);
@@ -136,77 +124,66 @@ html.en-fr .en { display: none; }
 <main>
   <div class="haut">
     <div>
-      <h1><span class="en">Six numbers nobody computes</span><span class="fr">Six chiffres que personne ne calcule</span></h1>
+      <h1><!--NOMBRE-TITRE--> numbers nobody computes</h1>
       <p class="lede">
-        <span class="en">Six decisions an operations team settles every quarter — and the
+        <!--NOMBRE-TITRE--> decisions an operations team settles every quarter — and the
           number each one actually turns on. <b>Put your own volumes in below</b>: the
-          arithmetic runs in your browser, and nothing is sent anywhere.</span>
-        <span class="fr">Six décisions qu'une équipe opérationnelle tranche chaque trimestre —
-          et le chiffre dont chacune dépend réellement. <b>Mettez vos volumes ci-dessous</b> :
-          le calcul tourne dans votre navigateur, et rien n'est envoyé nulle part.</span></p>
+          arithmetic runs in your browser, and nothing is sent anywhere.
+        </p>
     </div>
-    <div class="lang"><button id="fr" type="button">FR</button><button id="en" type="button" class="on">EN</button></div>
   </div>
 
-  <h2><span class="en">Your figures</span><span class="fr">Vos chiffres</span></h2>
+  <h2>Your figures</h2>
   <form class="feuillet bordereau" id="bordereau" autocomplete="off">
     <fieldset class="groupe">
-      <legend><span class="en">Detection</span><span class="fr">La détection</span></legend>
+      <legend>Detection</legend>
       <p class="aide">
-        <span class="en">The first two fields are enough for a demonstration. The next two —
+        The first two fields are enough for a demonstration. The next two —
           your alerts for the year, and the share that turned out to be founded — refit the
-          model to your system instead of this one's.</span>
-        <span class="fr">Les deux premiers champs suffisent pour une démonstration. Les deux
-          suivants — vos alertes de l'année et la part qui s'est révélée fondée — recalent le
-          modèle sur votre système au lieu du sien.</span></p>
+          model to your system instead of this one's.
+        </p>
       <div class="champs">
-        <div class="champ"><label for="operations"><span class="en">Operations screened / yr</span><span class="fr">Opérations filtrées / an</span></label>
-          <input id="operations" type="text" inputmode="numeric" placeholder="400 000" /></div>
-        <div class="champ"><label for="seuilActuel"><span class="en">Current threshold</span><span class="fr">Seuil actuel</span></label>
+        <div class="champ"><label for="operations">Operations screened / yr</label>
+          <input id="operations" type="text" inputmode="numeric" placeholder="400,000" /></div>
+        <div class="champ"><label for="seuilActuel">Current threshold</label>
           <input id="seuilActuel" type="text" inputmode="decimal" placeholder="0.65" /></div>
-        <div class="champ"><label for="alertesParAn"><span class="en">Alerts reviewed / yr</span><span class="fr">Alertes revues / an</span></label>
+        <div class="champ"><label for="alertesParAn">Alerts reviewed / yr</label>
           <input id="alertesParAn" type="text" inputmode="numeric" placeholder="—" /></div>
-        <div class="champ"><label for="tauxReel"><span class="en">Share founded (%)</span><span class="fr">Part fondée (%)</span></label>
+        <div class="champ"><label for="tauxReel">Share founded (%)</label>
           <input id="tauxReel" type="text" inputmode="decimal" placeholder="—" /></div>
-        <div class="champ"><label for="analystesEnPoste"><span class="en">Analysts in post</span><span class="fr">Analystes en poste</span></label>
+        <div class="champ"><label for="analystesEnPoste">Analysts in post</label>
           <input id="analystesEnPoste" type="text" inputmode="numeric" placeholder="8" /></div>
-        <div class="champ"><label for="coutChargeAnalyste"><span class="en">Loaded cost / analyst ($)</span><span class="fr">Coût chargé / analyste ($)</span></label>
-          <input id="coutChargeAnalyste" type="text" inputmode="numeric" placeholder="62 000" /></div>
+        <div class="champ"><label for="coutChargeAnalyste">Loaded cost / analyst ($)</label>
+          <input id="coutChargeAnalyste" type="text" inputmode="numeric" placeholder="62,000" /></div>
       </div>
       <div class="depot" id="depot">
         <span class="dit">
-          <span class="en"><b>Have an export of scored cases?</b> Two columns are enough: the
+          <b>Have an export of scored cases?</b> Two columns are enough: the
             score, and whether the case turned out to be founded. Nothing is uploaded — the
-            file is read here, in this page.</span>
-          <span class="fr"><b>Un export de dossiers scorés ?</b> Deux colonnes suffisent : le
-            score, et si le cas s'est révélé fondé. Rien n'est téléversé — le fichier est lu
-            ici, dans cette page.</span>
+            file is read here, in this page.
+          
           <span id="depotEtat"></span></span>
         <input type="file" id="fichier" accept=".csv,.tsv,.txt" style="font-size:13px" />
       </div>
     </fieldset>
 
     <fieldset class="groupe">
-      <legend><span class="en">Process time</span><span class="fr">Le temps de cycle</span></legend>
+      <legend>Process time</legend>
       <p class="aide">
-        <span class="en">Your volume and your hourly cost are enough. An event log — case,
-          activity, timestamp — replaces this repository's process with your own.</span>
-        <span class="fr">Votre volume et votre coût horaire suffisent. Un journal
-          d'événements — dossier, activité, horodatage — remplace le processus du dépôt par
-          le vôtre.</span></p>
+        Your volume and your hourly cost are enough. An event log — case,
+          activity, timestamp — replaces this repository's process with your own.
+        </p>
       <div class="champs">
-        <div class="champ"><label for="dossiersParAn"><span class="en">Cases handled / yr</span><span class="fr">Dossiers traités / an</span></label>
+        <div class="champ"><label for="dossiersParAn">Cases handled / yr</label>
           <input id="dossiersParAn" type="text" inputmode="numeric" placeholder="—" /></div>
-        <div class="champ"><label for="coutHoraireCharge"><span class="en">Loaded hourly cost ($)</span><span class="fr">Coût horaire chargé ($)</span></label>
+        <div class="champ"><label for="coutHoraireCharge">Loaded hourly cost ($)</label>
           <input id="coutHoraireCharge" type="text" inputmode="numeric" placeholder="48" /></div>
       </div>
       <div class="depot" id="depotJournal">
         <span class="dit">
-          <span class="en"><b>An event log?</b> Three columns: case, activity, timestamp. A
-            fourth — minutes actually worked — separates work from waiting.</span>
-          <span class="fr"><b>Un journal d'événements ?</b> Trois colonnes : dossier,
-            activité, horodatage. Une quatrième — les minutes réellement travaillées —
-            sépare le travail de l'attente.</span>
+          <b>An event log?</b> Three columns: case, activity, timestamp. A
+            fourth — minutes actually worked — separates work from waiting.
+          
           <span id="journalEtat"></span>
         </span>
         <span style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -217,58 +194,51 @@ html.en-fr .en { display: none; }
     </fieldset>
 
     <fieldset class="groupe">
-      <legend><span class="en">Onboarding triage</span><span class="fr">Le triage des entrées</span></legend>
+      <legend>Onboarding triage</legend>
       <p class="aide">
-        <span class="en">What a human currently spends opening files a rule could
-          settle.</span>
-        <span class="fr">Ce qu'un humain passe aujourd'hui à ouvrir des dossiers qu'une règle
-          trancherait.</span></p>
+        What a human currently spends opening files a rule could
+          settle.
+        </p>
       <div class="champs">
-        <div class="champ"><label for="entreesEnRelationParAn"><span class="en">Onboardings / yr</span><span class="fr">Entrées en relation / an</span></label>
+        <div class="champ"><label for="entreesEnRelationParAn">Onboardings / yr</label>
           <input id="entreesEnRelationParAn" type="text" inputmode="numeric" placeholder="—" /></div>
-        <div class="champ"><label for="minutesRevueParDossier"><span class="en">Minutes of review / file</span><span class="fr">Minutes de revue / dossier</span></label>
+        <div class="champ"><label for="minutesRevueParDossier">Minutes of review / file</label>
           <input id="minutesRevueParDossier" type="text" inputmode="numeric" placeholder="25" /></div>
       </div>
     </fieldset>
 
     <fieldset class="groupe">
-      <legend><span class="en">The funnel</span><span class="fr">L'entonnoir</span></legend>
+      <legend>The funnel</legend>
       <p class="aide">
-        <span class="en">Your raw volumes, step by step. Everything that comes out is computed
+        Your raw volumes, step by step. Everything that comes out is computed
           on those alone — including the confidence interval that says whether your weakest
-          step can really be named.</span>
-        <span class="fr">Vos volumes bruts, étape par étape. Tout ce qui en sort est calculé sur
-          eux seuls — y compris l'intervalle de confiance qui dit si votre étape la plus faible
-          est vraiment désignable.</span></p>
+          step can really be named.
+        </p>
       <div class="champs">
-        <div class="champ"><label for="f0"><span class="en">Visits</span><span class="fr">Visites</span></label><input id="f0" type="text" inputmode="numeric" placeholder="—" /></div>
-        <div class="champ"><label for="f1"><span class="en">Signups</span><span class="fr">Inscriptions</span></label><input id="f1" type="text" inputmode="numeric" placeholder="—" /></div>
-        <div class="champ"><label for="f2"><span class="en">Activations</span><span class="fr">Activations</span></label><input id="f2" type="text" inputmode="numeric" placeholder="—" /></div>
-        <div class="champ"><label for="f3"><span class="en">Subscriptions</span><span class="fr">Abonnements</span></label><input id="f3" type="text" inputmode="numeric" placeholder="—" /></div>
-        <div class="champ"><label for="f4"><span class="en">Retained at 12 months</span><span class="fr">Retenus à 12 mois</span></label><input id="f4" type="text" inputmode="numeric" placeholder="—" /></div>
-        <div class="champ"><label for="revenuParClient"><span class="en">Annual revenue / customer ($)</span><span class="fr">Revenu annuel / client ($)</span></label><input id="revenuParClient" type="text" inputmode="numeric" placeholder="1 200" /></div>
+        <div class="champ"><label for="f0">Visits</label><input id="f0" type="text" inputmode="numeric" placeholder="—" /></div>
+        <div class="champ"><label for="f1">Signups</label><input id="f1" type="text" inputmode="numeric" placeholder="—" /></div>
+        <div class="champ"><label for="f2">Activations</label><input id="f2" type="text" inputmode="numeric" placeholder="—" /></div>
+        <div class="champ"><label for="f3">Subscriptions</label><input id="f3" type="text" inputmode="numeric" placeholder="—" /></div>
+        <div class="champ"><label for="f4">Retained at 12 months</label><input id="f4" type="text" inputmode="numeric" placeholder="—" /></div>
+        <div class="champ"><label for="revenuParClient">Annual revenue / customer ($)</label><input id="revenuParClient" type="text" inputmode="numeric" placeholder="1,200" /></div>
       </div>
     </fieldset>
   </form>
 
-  <h2><span class="en">The verdict</span><span class="fr">Le verdict</span></h2>
+  <h2>The verdict</h2>
   <div class="feuillet" id="verdict"></div>
 
-  <h2><span class="en">The six tools</span><span class="fr">Les six outils</span></h2>
+  <h2><!--NOMBRE-OUTILS--> tools</h2>
   <div class="feuillet" id="outils">
 <!--TUILES-->
   </div>
 
   <p class="renvoi" id="signature">
-    <span class="en">Arslane Chaouche Ramdane — business operations and AI transformation,
+    Arslane Chaouche Ramdane — business operations and AI transformation,
       open to US-remote roles. Written in TypeScript with no runtime dependencies: clone any
       repository, run <code>npm test</code>, and every figure regenerates. The demonstration
-      data is synthetic and seeded; the regulation cited is real (31 CFR Chapter X).</span>
-    <span class="fr">Arslane Chaouche Ramdane — business operations et transformation par
-      l'IA, ouvert aux postes en remote aux États-Unis. Écrit en TypeScript sans aucune
-      dépendance d'exécution : clonez n'importe quel dépôt, lancez <code>npm test</code>, et
-      chaque chiffre se régénère. Les données de démonstration sont synthétiques à graine
-      fixée ; la réglementation citée est réelle (31 CFR chapitre X).</span>
+      data is synthetic and seeded; the regulation cited is real (31 CFR Chapter X).
+    
   </p>
 </main>
 
@@ -284,8 +254,6 @@ const $ = (s) => document.querySelector(s);
 const esc = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
 const dollars = (n) => "$" + Math.round(n).toLocaleString("en-GB");
 
-/* La langue courante, lue une fois par rendu : le verdict est réécrit à chaque bascule. */
-let langue = "en";
 
 /*
  * Un nombre saisi à la main.
@@ -334,55 +302,43 @@ function entrees() {
   };
 }
 
-/* La provenance est une valeur du modèle, en français ; l'étiquette se lit dans la langue
- * du lecteur. La classe, elle, reste stable — c'est elle qui porte la trame. */
+/* La provenance est une valeur du modèle, écrite en français ; l'écran, lui, est en
+ * anglais. La classe reste stable — c'est elle qui porte la trame, et la trame est ce qui
+ * fait lire l'étiquette sans la couleur. */
 const ETIQ = {
-  "vôtre":   { classe: "votre",   en: "yours",   fr: "vôtre" },
-  "ajusté":  { classe: "ajuste",  en: "fitted",  fr: "ajusté" },
-  "supposé": { classe: "suppose", en: "assumed", fr: "supposé" },
+  "vôtre":   { classe: "votre",   mot: "yours" },
+  "ajusté":  { classe: "ajuste",  mot: "fitted" },
+  "supposé": { classe: "suppose", mot: "assumed" },
 };
 
 const ligne = (c, i) => `<a class="constat" href="${esc(c.lien)}">
   <span class="marque">${String(i + 1).padStart(2, "0")}</span>
-  <span><p class="dit"><span class="etiq ${ETIQ[c.provenance].classe}">${esc(ETIQ[c.provenance][langue])}</span>${esc(c.phrase[langue])}</p>
-    ${c.reserve ? `<span class="apres">${MOT[langue].reste} ${esc(c.reserve[langue])}</span>` : ""}</span>
-  <span class="somme"><span class="n">${esc(dollars(c.montant))}</span><span class="u">${esc(c.unite[langue])}</span></span>
+  <span><p class="dit"><span class="etiq ${ETIQ[c.provenance].classe}">${esc(ETIQ[c.provenance].mot)}</span>${esc(c.phrase)}</p>
+    ${c.reserve ? `<span class="apres">${MOT.reste} ${esc(c.reserve)}</span>` : ""}</span>
+  <span class="somme"><span class="n">${esc(dollars(c.montant))}</span><span class="u">${esc(c.unite)}</span></span>
 </a>`;
 
 const DIT = {
-  en: {
-    1: "assumed — this repository's shape, scaled to your volume",
-    2: "fitted — refit on a point you observed",
-    3: "yours — computed on your own cases",
-  },
-  fr: {
-    1: "supposé — la forme du dépôt, mise à votre volume",
-    2: "ajusté — recalé sur un point que vous avez observé",
-    3: "vôtre — calculé sur vos propres dossiers",
-  },
+  1: "assumed — this repository's shape, scaled to your volume",
+  2: "fitted — refit on a point you observed",
+  3: "yours — computed on your own cases",
 };
 const MOT = {
-  en: { niveau: "Level", reste: "What remains assumed:", refus: "What your figures do not allow:",
-    deja: "What already leaves the account", gagner: "What a project would go after",
-    rienDeja: "Nothing to recover on what you already pay, given what is filled in.",
-    rienGagner: "Fill in your funnel volumes to price this part.",
-    pasSomme: "The two blocks do not add up: the first is money leaving every year without producing anything, the second a revenue conditional on work still to be done.",
-    lus: "case(s) read.", remis: "Scores brought back from a 0–100 scale.", ecartees: "line(s) skipped —" },
-  fr: { niveau: "Niveau", reste: "Ce qui reste supposé :", refus: "Ce que vos chiffres ne permettent pas :",
-    deja: "Ce qui sort déjà du compte", gagner: "Ce qu'un projet irait chercher",
-    rienDeja: "Rien à récupérer sur ce que vous payez déjà, au vu de ce qui est renseigné.",
-    rienGagner: "Renseignez vos volumes d'entonnoir pour chiffrer cette partie.",
-    pasSomme: "Les deux blocs ne s'additionnent pas : le premier est une dépense qui sort chaque année sans rien produire, le second un revenu conditionnel à un travail qui reste à faire.",
-    lus: "dossier(s) lus.", remis: "Scores ramenés depuis une échelle sur 100.", ecartees: "ligne(s) écartée(s) —" },
+  niveau: "Level", reste: "What remains assumed:", refus: "What your figures do not allow:",
+  deja: "What already leaves the account", gagner: "What a project would go after",
+  rienDeja: "Nothing to recover on what you already pay, given what is filled in.",
+  rienGagner: "Fill in your funnel volumes to price this part.",
+  pasSomme: "The two blocks do not add up: the first is money leaving every year without producing anything, the second a revenue conditional on work still to be done.",
+  lus: "case(s) read.", remis: "Scores brought back from a 0–100 scale.", ecartees: "line(s) skipped —",
 };
 
 function dessiner() {
   const r = diagnostiquer(entrees());
 
-  const M = MOT[langue];
+  const M = MOT;
   const crans = `<div class="crans">${[1, 2, 3].map((n) =>
     `<i class="${n <= r.niveau ? "on" : ""}"></i>`).join("")}</div>
-    <div class="niveau-dit">${M.niveau} ${r.niveau} · ${esc(DIT[langue][r.niveau])}</div>`;
+    <div class="niveau-dit">${M.niveau} ${r.niveau} · ${esc(DIT[r.niveau])}</div>`;
 
   const refus = r.refus.length
     ? `<div class="refus"><b>${M.refus}</b><br>${r.refus.map(esc).join("<br>")}</div>`
@@ -415,26 +371,13 @@ $("#fichier").addEventListener("change", async (ev) => {
   dossiersScores = lu.rows.length ? lu.rows : undefined;
   $("#depot").classList.toggle("pose", lu.rows.length > 0);
   /* Ce qui n'a pas été compris est dit, jamais écarté en silence. */
-  const M = MOT[langue];
+  const M = MOT;
   $("#depotEtat").innerHTML = `<b>${lu.rows.length} ${M.lus}</b>`
     + (lu.rescaled ? " " + M.remis : "")
     + (lu.ignored.length ? ` ${lu.ignored.length} ${M.ecartees} ${esc(lu.ignored[0].reason)}.` : "");
   dessiner();
 });
 
-/* Le sélecteur pose une classe et redessine le verdict, qui est le seul texte non statique. */
-function poser(l) {
-  langue = l;
-  document.documentElement.classList.toggle("en-fr", l === "fr");
-  document.documentElement.lang = l;
-  $("#fr").className = l === "fr" ? "on" : "";
-  $("#en").className = l === "fr" ? "" : "on";
-  try { localStorage.setItem("langue", l); } catch (e) {}
-  dessiner();
-}
-$("#fr").onclick = () => poser("fr");
-$("#en").onclick = () => poser("en");
-try { if (localStorage.getItem("langue") === "fr") poser("fr"); } catch (e) {}
 
 /*
  * Le journal, et l'activité qui marque un retour.
@@ -448,16 +391,14 @@ async function relireJournal(texte) {
   journalLu = lireJournal(texte, retourChoisi);
   const sel = $("#retour");
   if (journalLu.activites.length) {
-    sel.innerHTML = `<option value="">${langue === "fr" ? "quelle activité marque un retour ?" : "which activity marks a return?"}</option>`
+    sel.innerHTML = `<option value="">which activity marks a return?</option>`
       + journalLu.activites.map((a) => `<option${a === retourChoisi ? " selected" : ""}>${esc(a)}</option>`).join("");
     sel.style.display = "";
   }
-  const M = MOT[langue];
+  const M = MOT;
   $("#depotJournal").classList.toggle("pose", journalLu.evenements.length > 0);
-  $("#journalEtat").innerHTML = ` <b>${journalLu.evenements.length} ${langue === "fr" ? "événements lus" : "events read"}.</b>`
-    + (journalLu.minutesFournies ? "" : (langue === "fr"
-        ? " Aucune colonne de minutes travaillées : le partage travail/attente n'est pas calculable."
-        : " No worked-minutes column: work versus waiting cannot be split."))
+  $("#journalEtat").innerHTML = ` <b>${journalLu.evenements.length} events read.</b>`
+    + (journalLu.minutesFournies ? "" : " No worked-minutes column: work versus waiting cannot be split.")
     + (journalLu.ignorees.length ? ` ${journalLu.ignorees.length} ${M.ecartees} ${esc(journalLu.ignorees[0].raison)}.` : "");
   dessiner();
 }

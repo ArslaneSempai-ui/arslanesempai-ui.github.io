@@ -88,13 +88,11 @@ test("aucun montant ne sort sans son unité écrite", () => {
    * point de conversion. L'unité n'est pas un ornement : elle empêche une lecture fausse.
    */
   for (const c of [...diagnostiquer(MAISON).dejaPaye, ...diagnostiquer(MAISON).aGagner]) {
-    /* Les deux langues, pas seulement celle qu'on relit. Une traduction manquante ne se
-     * voit qu'au moment où quelqu'un bascule — c'est-à-dire jamais, chez soi. */
-    for (const langue of ["en", "fr"] as const) {
-      assert.ok(c.unite[langue].trim().length > 0, `${c.cle} n'a pas d'unité en ${langue}`);
-      assert.ok(c.phrase[langue].trim().length > 0, `${c.cle} n'a pas de phrase en ${langue}`);
-      if (c.reserve) assert.ok(c.reserve[langue].trim().length > 0, `${c.cle} : réserve absente en ${langue}`);
-    }
+    /* Un constat sans phrase est un montant sans justification : c'est précisément ce que
+     * cet écran refuse de produire. */
+    assert.ok(c.unite.trim().length > 0, `${c.cle} n'a pas d'unité`);
+    assert.ok(c.phrase.trim().length > 0, `${c.cle} n'a pas de phrase`);
+    if (c.reserve) assert.ok(c.reserve.trim().length > 0, `${c.cle} : réserve vide`);
     assert.ok(c.lien.startsWith("https://"), `${c.cle} n'a pas de lien vérifiable`);
   }
 });
@@ -103,7 +101,7 @@ test("un constat non « vôtre » porte toujours sa réserve", () => {
   const r = diagnostiquer(MAISON);
   for (const c of [...r.dejaPaye, ...r.aGagner]) {
     if (c.provenance === "vôtre") continue;
-    assert.ok(c.reserve && c.reserve.fr.length > 20 && c.reserve.en.length > 20,
+    assert.ok(c.reserve && c.reserve.length > 20,
       `${c.cle} se dit « ${c.provenance} » sans dire ce qui reste supposé`);
   }
 });
@@ -119,7 +117,7 @@ test("l'entonnoir refuse de désigner une étape que ses intervalles ne séparen
   });
   const f = serre.aGagner.find((c) => c.outil === "funnel");
   assert.ok(f, "aucun constat d'entonnoir");
-  assert.ok(f!.reserve && /recouvre/.test(f!.reserve.fr) && /overlaps/.test(f!.reserve.en),
+  assert.ok(f!.reserve && /overlaps/.test(f!.reserve),
     JSON.stringify(f!.reserve));
 });
 
