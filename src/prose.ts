@@ -15,8 +15,8 @@
  * La marque est un commentaire HTML, donc **invisible sur GitHub** :
  *
  *     un jeu de <!--p:banc.cas-->22<!--/p--> cas
- *     <!--p:cycle.partAttente|pc-->95.4 %<!--/p--> d'attente
- *     <!--p:economics.coutAnnuel|usd-->$496,000<!--/p--> par an
+ *     <!--p:cycle.partAttente~pc-->95.4 %<!--/p--> d'attente
+ *     <!--p:economics.coutAnnuel~usd-->$496,000<!--/p--> par an
  *
  * Ce que ce module ne fait pas : deviner. Il ne va pas chercher les nombres non marqués —
  * un README contient des numéros d'étape, un port, une version de Node, des articles de
@@ -34,7 +34,16 @@ const CHIFFRES = new URL("../chiffres.json", import.meta.url).pathname;
 /** Les README qui portent des marques, et où ils vivent. */
 export const PAGES = ["economics", "triage", "funnel", "cycle", "banc", "rag", "profil"];
 
-const MARQUE = /<!--p:([a-zA-Z0-9_.]+)(?:\|([a-zA-Z0-9]+))?-->([\s\S]*?)<!--\/p-->/g;
+/*
+ * Le séparateur de format est un tilde, et ce n'est pas un caprice.
+ *
+ * La première version écrivait `<!--p:cle|format-->`. Dans une phrase, parfait. Dans une
+ * **cellule de tableau markdown**, la barre verticale est le séparateur de colonnes : GitHub
+ * coupait la marque en deux et affichait « pc0--&gt;58 % of files decided… » en pleine page
+ * d'accueil. Invisible en local, visible pour tout le monde — exactement la classe de défaut
+ * que ce module existe pour fermer, commise par le module lui-même.
+ */
+const MARQUE = /<!--p:([a-zA-Z0-9_.]+)(?:~([a-zA-Z0-9]+))?-->([\s\S]*?)<!--\/p-->/g;
 
 /**
  * Comment une quantité s'écrit dans une phrase.
@@ -83,6 +92,19 @@ export function relire(mode: "check" | "write"): { marques: number; ecarts: Ecar
       if (bloc[0].includes("<!--p:")) inconnues.push(`${page} : une marque est dans un bloc généré, elle sera effacée`);
     }
 
+    /*
+     * Une marque mal formée s'affiche au lieu de disparaître.
+     *
+     * Compter les ouvertures et les marques reconnues : si l'un dépasse l'autre, un fragment
+     * finira dans le texte que le lecteur voit. C'est ce qui est arrivé avec la barre
+     * verticale du format dans une cellule de tableau.
+     */
+    const ouvertures = (avant.match(/<!--p:/g) ?? []).length;
+    const reconnues = (avant.match(MARQUE) ?? []).length;
+    if (ouvertures !== reconnues) {
+      inconnues.push(`${page} : ${ouvertures} marque(s) ouverte(s) pour ${reconnues} reconnue(s) — un fragment s'affichera`);
+    }
+
     const apres = avant.replace(MARQUE, (tout, cle, format, ecrit) => {
       marques++;
       const v = valeur(chiffres, cle);
@@ -92,7 +114,7 @@ export function relire(mode: "check" | "write"): { marques: number; ecarts: Ecar
       const attendu = rendre(v);
       if (attendu === ecrit) return tout;
       ecarts.push({ page, cle, ecrit, attendu });
-      return `<!--p:${cle}${format ? "|" + format : ""}-->${attendu}<!--/p-->`;
+      return `<!--p:${cle}${format ? "~" + format : ""}-->${attendu}<!--/p-->`;
     });
     if (mode === "write" && apres !== avant) writeFileSync(chemin, apres);
   }
