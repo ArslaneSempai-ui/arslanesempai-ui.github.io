@@ -109,6 +109,20 @@ const OUTILS: Outil[] = [
     ],
   },
   {
+    cle: "arbitrage", nom: "Growth versus controls, priced instead of argued",
+    depot: "growth-versus-controls",
+    demo: `${BASE_DEMO}/growth-versus-controls/`, source: `${BASE_SRC}/growth-versus-controls`,
+    trouvaille: (c) => [
+      `The A/B test settles the lift — <b>${c.ecartConversion} %</b> [${c.ecartBas} – ${c.ecartHaut}] — and not the decision. The sign flips at an undetected-risk share of <b>${c.bascule} %</b>, inside the range both sides defend.`,
+      `Le test A/B établit le gain — <b>${c.ecartConversion} %</b> [${c.ecartBas} – ${c.ecartHaut}] — et pas la décision. Le signe bascule à <b>${c.bascule} %</b> de risque non détecté, dans la fourchette que les deux camps défendent.`,
+    ],
+    lecture: (c) => [`${c.bascule}<em> %</em>`, "où le verdict bascule", "where the verdict flips"],
+    pied: (c) => [
+      `Sign decided by the ${c.signeDecidePar}, not the other one`,
+      `Signe décidé par les hypothèses, pas par le test`,
+    ],
+  },
+  {
     cle: "cycle", nom: "Eleven days, and nobody worked on it for nine",
     depot: "process-cycle-time",
     demo: `${BASE_DEMO}/process-cycle-time/`, source: `${BASE_SRC}/process-cycle-time`,

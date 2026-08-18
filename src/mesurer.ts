@@ -153,6 +153,29 @@ const MESURES: Mesure[] = [
     },
   },
   {
+    cle: "arbitrage", dossier: "arbitrage",
+    async prendre() {
+      const { CAS } = await import(`${VOISINS}arbitrage/src/situation.ts`);
+      const { arbitrer, bascule, desaccordReel, ecartConversion } = await import(`${VOISINS}arbitrage/src/arbitrage.ts`);
+      const v = arbitrer(CAS);
+      const e = ecartConversion(CAS);
+      const d = desaccordReel(CAS);
+      return {
+        ecartConversion: oui(e.centre * 100, 2),
+        ecartBas: oui(e.bas * 100, 2),
+        ecartHaut: oui(e.haut * 100, 2),
+        bascule: oui(bascule(CAS)! * 100, 2),
+        croyanceBas: oui(CAS.croyance.bas * 100, 2),
+        croyanceHaut: oui(CAS.croyance.haut * 100, 2),
+        desaccordReel: d.dedans,
+        signeDecidePar: v.signeDecidePar === "les hypothèses" ? "assumptions" : "the test",
+        net: Math.round(v.net.centre),
+        analystesBas: v.analystes.bas,
+        analystesHaut: v.analystes.haut,
+      };
+    },
+  },
+  {
     cle: "cycle", dossier: "cycle",
     async prendre() {
       const { generate } = await import(`${VOISINS}cycle/src/events.ts`);

@@ -90,5 +90,18 @@
     "secondesIndexation": 14,
     "secondesLecture": 1,
     "mesureLe": "2026-08-18T13:24:58.379Z"
+  },
+  "arbitrage": {
+    "ecartConversion": 2.1,
+    "ecartBas": 0.15,
+    "ecartHaut": 4.04,
+    "bascule": 1.33,
+    "croyanceBas": 0.5,
+    "croyanceHaut": 3,
+    "desaccordReel": true,
+    "signeDecidePar": "assumptions",
+    "net": 1209600,
+    "analystesBas": 0,
+    "analystesHaut": 1
   }
 }
