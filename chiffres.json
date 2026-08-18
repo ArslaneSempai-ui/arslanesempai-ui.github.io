@@ -8,6 +8,10 @@
     "coutAnnuel": 496000,
     "seuilGratuitLePlusLarge": 0.45,
     "casSuivantLePlusCher": 81077,
+    "chargeAuSeuilGratuit": 0.977,
+    "attenteAuSeuilGratuit": 5.5,
+    "facteurVolume": 29,
+    "facteurHeures": 35,
     "premierCasPayant": 32476
   },
   "triage": {
@@ -77,5 +81,14 @@
       "rag": "569aaca6f56b4f41f8c3a0ff0eb93739c808fd85",
       "vitrine": "32adc64463806d87eb8d319e53b5273954df6202"
     }
+  },
+  "ragReel": {
+    "documents": 5,
+    "pages": 312,
+    "passages": 618,
+    "illisibles": 0,
+    "secondesIndexation": 14,
+    "secondesLecture": 1,
+    "mesureLe": "2026-08-18T13:24:58.379Z"
   }
 }

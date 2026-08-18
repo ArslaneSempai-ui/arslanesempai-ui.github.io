@@ -12,7 +12,8 @@
     "start": "node src/serveur.ts",
     "emprunter": "node src/emprunter.ts",
     "compter": "node src/compter.ts",
-    "prose": "node src/prose.ts"
+    "prose": "node src/prose.ts",
+    "figer-reel": "node src/figer-reel.ts"
   },
   "engines": {
     "node": ">=24"

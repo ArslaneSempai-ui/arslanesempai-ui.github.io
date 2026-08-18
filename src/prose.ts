@@ -32,7 +32,7 @@ const VOISINS = new URL("../../", import.meta.url).pathname;
 const CHIFFRES = new URL("../chiffres.json", import.meta.url).pathname;
 
 /** Les README qui portent des marques, et où ils vivent. */
-export const PAGES = ["economics", "triage", "funnel", "cycle", "banc", "rag", "profil"];
+export const PAGES = ["economics", "triage", "funnel", "cycle", "banc", "rag", "rag-vitrine", "profil"];
 
 /*
  * Le séparateur de format est un tilde, et ce n'est pas un caprice.

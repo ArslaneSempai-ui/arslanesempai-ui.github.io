@@ -71,6 +71,30 @@ const MESURES: Mesure[] = [
          * d'accueil du profil citait un montant pris dans un troisième tableau encore, et
          * rien ne le vérifiait puisque ce README-là est écrit à la main.
          */
+        /*
+         * Ce que la prose affirme ailleurs sur la page, et qui n'avait pas de mesure.
+         *
+         * L'occupation et l'attente au seuil encore gratuit, et les deux facteurs de volume
+         * entre 0,70 et 0,50. Quatre phrases les citaient de mémoire.
+         *
+         * Deux autres nombres de la prose restent non marqués, faute d'une définition qui
+         * corresponde : « 306 cas de plus » se compte depuis le seuil affiché à l'écran, qui
+         * bouge, et « 33 % d'occupation » est un exemple de raisonnement, pas une sortie du
+         * modèle. Marquer avec une définition approchante serait pire que ne pas marquer :
+         * ça donnerait une garantie fausse.
+         */
+        ...(() => {
+          const gratuit = pts.filter((p: any) => p.costPerMarginalTruePositive === 0)
+            .sort((a: any, b: any) => a.threshold - b.threshold)[0];
+          const a70 = pts.find((p: any) => Math.abs(p.threshold - 0.70) < 1e-9);
+          const a50 = pts.find((p: any) => Math.abs(p.threshold - 0.50) < 1e-9);
+          return {
+            chargeAuSeuilGratuit: oui(gratuit?.load ?? 0),
+            attenteAuSeuilGratuit: oui(gratuit?.waitDays ?? 0, 1),
+            facteurVolume: Math.round((a50?.alerts ?? 0) / (a70?.alerts || 1)),
+            facteurHeures: Math.round((a50?.hours ?? 0) / (a70?.hours || 1)),
+          };
+        })(),
         premierCasPayant: Math.round(
           pts.filter((p: any) => (p.costPerMarginalTruePositive ?? 0) > 0)
             .sort((a: any, b: any) => b.threshold - a.threshold)[0]?.costPerMarginalTruePositive ?? 0,
