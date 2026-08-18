@@ -12,6 +12,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { diagnostiquer, separationPour, type Entrees } from "./diagnostic.ts";
 import { ASSUMED } from "./emprunts/economics/calibrate.ts";
+import { generatePopulation } from "./emprunts/economics/alerts.ts";
 
 /** Une maison plausible, pour ne pas réécrire les mêmes dix lignes à chaque test. */
 const MAISON: Entrees = {
@@ -149,4 +150,50 @@ test("un système qui ne sépare rien ne laisse aucune capacité libre à récup
     "un système sans pouvoir séparateur ne peut pas dégager de capacité libre");
   /* L'entonnoir, lui, ne dépend pas de la détection et doit rester là. */
   assert.ok(r.aGagner.some((c) => c.outil === "funnel"));
+});
+
+/*
+ * Le même dossier, deux fois, donne le même verdict.
+ *
+ * Ce test vient d'un contrôle fait à la main sur la page publiée : remplir le formulaire,
+ * recharger, remplir à nouveau, comparer. Il a été écrit parce que le contrôle a trouvé
+ * autre chose ailleurs — le banc de régression affichait un taux différent à chaque visite,
+ * parce qu'une des versions mesurées court après une horloge.
+ *
+ * Ici rien ne tire au sort : la population d'alertes est engendrée depuis une graine
+ * constante, et c'est ce qui rend le montant reproductible. Un `Math.random()` glissé dans
+ * un modèle emprunté suffirait à donner deux chiffres différents au même visiteur, sur la
+ * même page, à deux minutes d'intervalle — et c'est la sorte de défaut que personne ne
+ * signale, parce qu'on ne recharge pas deux fois pour vérifier un montant.
+ *
+ * L'ordre de saisie compte aussi : le formulaire recalcule à chaque frappe, donc un état
+ * qui s'accumulerait entre deux appels se verrait ici et nulle part ailleurs.
+ */
+test("le même dossier donne toujours le même verdict", () => {
+  const scores = Array.from({ length: 90 }, (_, i) => {
+    const reel = i % 3 === 0;
+    return { score: reel ? 0.66 + (i % 7) * 0.02 : 0.28 + (i % 9) * 0.02, truePositive: reel };
+  });
+  const cas: [string, Entrees][] = [
+    ["rien fourni", {}],
+    ["ses chiffres", MAISON],
+    ["fichier scoré", { ...MAISON, dossiersScores: scores }],
+  ];
+  for (const [nom, entrees] of cas) {
+    const vus = new Set(Array.from({ length: 12 }, () => JSON.stringify(diagnostiquer(entrees))));
+    assert.equal(vus.size, 1, `« ${nom} » produit ${vus.size} verdicts différents pour la même saisie`);
+  }
+});
+
+test("la population d'alertes est engendrée depuis une graine, pas au hasard", () => {
+  /*
+   * La propriété est chez le modèle emprunté, pas ici — mais c'est ici qu'elle est promise
+   * à un inconnu, sous forme d'un montant en dollars. Un test dans le dépôt d'origine ne
+   * protégerait pas la vitrine si l'emprunt cessait d'être à jour.
+   */
+  const a = generatePopulation(50_000, 0.0012, 20260817, ASSUMED);
+  const b = generatePopulation(50_000, 0.0012, 20260817, ASSUMED);
+  assert.equal(a.alerts.length, b.alerts.length);
+  assert.equal(a.truePositivesTotal, b.truePositivesTotal);
+  assert.deepEqual(a.alerts.slice(0, 50), b.alerts.slice(0, 50), "deux tirages de même graine diffèrent");
 });
