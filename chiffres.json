@@ -61,33 +61,33 @@
     "barre": 0.84
   },
   "portfolio": {
-    "tests": 302,
+    "tests": 465,
     "parDepot": {
-      "economics": 50,
-      "triage": 32,
-      "funnel": 19,
-      "cycle": 21,
-      "banc": 24,
-      "rag": 15,
-      "arbitrage": 20,
-      "cascade": 54,
-      "remediation": 16,
-      "derive": 16,
-      "vitrine": 35
+      "arbitrage": 32,
+      "banc": 36,
+      "cycle": 33,
+      "derive": 28,
+      "economics": 62,
+      "funnel": 31,
+      "identite": 70,
+      "rag": 27,
+      "remediation": 28,
+      "triage": 44,
+      "vitrine": 74
     },
-    "mesureLe": "2026-08-19T12:12:18.257Z",
+    "mesureLe": "2026-08-21T20:55:27.335Z",
     "testsCommitesLe": {
-      "economics": "6d1544b48e9f84055edb6f484d9e231369967b6b",
-      "triage": "e593c252ae4cb01e47dd87874aefe8db1a9dfa74",
-      "funnel": "067f10593149609853f1a9565b0452075337f726",
-      "cycle": "bf20f15b2a2ef80d80caa51f95971269599d9d5e",
-      "banc": "ceeb8fe633a3c47b9c2df2058306dfbb775f35e8",
-      "rag": "4c70b4f2a6435e73638810ef2e2da93ff93801c7",
-      "arbitrage": "220a882505d30b72768adf95b8103cc9e9744f18",
-      "cascade": "8dd47794fdefac2e4d7d481ed1edd957fa857ba0",
-      "remediation": "2bb0b59894fcecad2ebcb94f148d97c6115fb9ba",
-      "derive": "7c602eb65355b611e4547d5a73f164cf8b38253c",
-      "vitrine": "8563ad77063a4dc67ab4ad894202de83e0a7c1e2"
+      "arbitrage": "3e323ff5ceda795a716ac15bfe7aa4db97aed2a7",
+      "banc": "0253dc4220d9e6e8bd877a4b20d52e7fcf692b0b",
+      "cycle": "e667c3d835052ecce7863c8c16f59e0584ae99bb",
+      "derive": "1ea2955df559dd088ab2fff057d314fe5ea94372",
+      "economics": "105c70d20e002679b33ba34f57ab9465948b848c",
+      "funnel": "22d6bcd5e6db91c7f6c2e50cbfec38b95e919044",
+      "identite": null,
+      "rag": "1a0e14f959cadfbb0ba008dd7916b983080c7c8f",
+      "remediation": "1b245b43dc6530a0ed09f879dcbc64ecc00431fb",
+      "triage": "52b38b9d88e5cbeec2edd357d5b9a658930e5003",
+      "vitrine": "5c9ae2a9a184a3c057e7f02873bef617a88795b1"
     }
   },
   "ragReel": {
@@ -115,10 +115,10 @@
   "cascade": {
     "champs": 5,
     "justesseOptimale": 94.4,
-    "coutOptimal": 193,
+    "coutOptimal": 191,
     "justesseGrandModele": 78.8,
     "coutGrandModele": 800,
-    "facteur": 4.1,
+    "facteur": 4.2,
     "champsGratuits": 3
   },
   "remediation": {
