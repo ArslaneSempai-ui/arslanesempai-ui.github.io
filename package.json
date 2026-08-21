@@ -5,7 +5,7 @@
   "type": "module",
   "description": "The entry point to six tools: one finding each, measured, with the demo and the source behind it.",
   "scripts": {
-    "test": "tsc --noEmit && node src/emprunter.ts --check && node src/mesurer.ts --check && node src/prose.ts --check && node --test src/*.test.ts",
+    "test": "tsc --noEmit && node src/emprunter.ts --check && node src/mesurer.ts --check && node src/prose.ts --check && node --test src/*.test.*",
     "typage": "tsc --noEmit",
     "mesurer": "node src/mesurer.ts",
     "pages": "tsc -p tsconfig.web.json && node src/pages.ts && node src/verifier-ecran.mjs . 0",
