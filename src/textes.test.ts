@@ -118,7 +118,20 @@ test("aucun dépôt ne prétend être testé sans l'être", () => {
 
   const racine = new URL("../../", import.meta.url).pathname;
   const menteurs: string[] = [];
-  for (const e of readdirSync(racine, { withFileTypes: true })) {
+  /*
+   * Le témoin, avant le verdict.
+   *
+   * Ce cas balaie les voisins et rend « aucun menteur » quand il n'en trouve pas. Une racine
+   * fausse, un dépôt cloné seul, et il rendrait exactement la même chose sans avoir rien
+   * regardé. `gardiens.test.mjs` l'a signalé le 22 août : un balayage doit refuser de conclure
+   * sur une liste vide.
+   */
+  const candidats = readdirSync(racine, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && !e.name.startsWith(".") && e.name !== "node_modules");
+  assert.ok(candidats.length >= 5,
+    `seulement ${candidats.length} voisin(s) trouvé(s) sous ${racine} : ce n'est pas un `
+    + `portfolio en ordre, c'est un relevé qui ne lit rien`);
+  for (const e of candidats) {
     if (!e.isDirectory() || e.name.startsWith(".") || e.name === "node_modules") continue;
     const d = `${racine}${e.name}/`;
     if (!existsSync(d + "package.json")) continue;

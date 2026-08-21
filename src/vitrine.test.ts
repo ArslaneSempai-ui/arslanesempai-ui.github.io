@@ -23,13 +23,25 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
+import { OUTILS as PAGES_OUTILS } from "./pages.ts";
 
 const racine = new URL("..", import.meta.url).pathname;
 const voisins = new URL("../../", import.meta.url).pathname;
 const page = () => readFileSync(racine + "docs/index.html", "utf8");
 const chiffres = () => JSON.parse(readFileSync(racine + "chiffres.json", "utf8"));
 
-const OUTILS = ["economics", "triage", "funnel", "cycle", "banc", "rag", "arbitrage", "cascade", "remediation", "derive"];
+/*
+ * LA LISTE VIENT DE `pages.ts`, QUI EST CE QUI CONSTRUIT LA PAGE.
+ *
+ * Elle était recopiée ici, dix noms figés. Ils étaient exacts au 21 août 2026 — vérifié, les
+ * deux ensembles coïncidaient — mais rien ne les tenait ensemble : un onzième outil ajouté à
+ * la vitrine n'aurait pas fait tomber ce contrôle, qui aurait continué à vérifier les dix
+ * qu'il connaissait et à compter dix `<div class="outil">` dans une page qui en porte onze.
+ *
+ * Dériver d'ici ne rend pas le cas tautologique : `pages.ts` **déclare**, `docs/index.html`
+ * est **construit**, et c'est l'écart entre les deux que ces cas mesurent.
+ */
+const OUTILS = PAGES_OUTILS.map((o) => o.cle);
 
 test("chaque outil a ses chiffres", () => {
   const c = chiffres();

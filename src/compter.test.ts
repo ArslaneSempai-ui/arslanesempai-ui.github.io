@@ -47,6 +47,9 @@ function portfolio(noms: string[], declare: { diffusion: string[]; exclus?: Reco
 }
 
 test("un dossier inscrit est compté, un dossier exclu ne l'est pas", () => {
+  /* liste-figee: noms de montage, pas un périmètre. Ils coïncident volontairement avec de
+     vrais dépôts pour que le cas ressemble au portfolio réel — mais l'arbre est temporaire et
+     la liste passée en paramètre, donc rien ici ne fige ce que le code regarde en vrai. */
   const p = portfolio(["vitrine", "banc", "reserve"],
     { diffusion: ["vitrine", "banc"], exclus: { reserve: { pourquoi: "essai", depuis: "2026-08-21" } } });
   try {

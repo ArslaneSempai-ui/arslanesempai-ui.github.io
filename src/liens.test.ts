@@ -22,18 +22,25 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import { execFileSync } from "node:child_process";
+import { OUTILS as PAGES_OUTILS } from "./pages.ts";
 
 const VOISINS = new URL("../../", import.meta.url).pathname;
 
 /** Chaque outil, son dépôt public, et la démo que son README doit annoncer. */
-const OUTILS = [
-  { dossier: "economics", demo: "alert-triage-economics" },
-  { dossier: "triage", demo: "kyc-triage-agent" },
-  { dossier: "funnel", demo: "funnel-economics" },
-  { dossier: "cycle", demo: "process-cycle-time" },
-  { dossier: "banc", demo: "regression-bench" },
-  { dossier: "rag-vitrine", demo: "compliance-document-search" },
-];
+/*
+ * LA LISTE VIENT DE `pages.ts`, ET ELLE EN IGNORAIT QUATRE.
+ *
+ * Six outils étaient écrits ici à la main, contre dix publiés : `arbitrage`, `cascade`,
+ * `derive` et `remediation` n'étaient vérifiés par rien. Leurs README annoncent bien leur
+ * démo aujourd'hui — mesuré le 22 août 2026 — donc le contrôle était étroit sans être faux ;
+ * mais rien ne l'aurait vu si l'un cessait, et c'est exactement ce qu'un contrôle de liens
+ * existe pour voir.
+ *
+ * Le `dossier` vient de `pages.ts` et n'est pas déduit de la clé : `cle: "rag"` désigne la
+ * recherche documentaire publique, dont le dossier est `rag-vitrine`, tandis que le dossier
+ * local `rag` est le dépôt gardé privé. Déduire aurait fait lire le mauvais README.
+ */
+const OUTILS = PAGES_OUTILS.map((o) => ({ dossier: o.dossier, demo: o.depot }));
 
 const lire = (d: string) => readFileSync(`${VOISINS}${d}/README.md`, "utf8");
 const present = (d: string) => existsSync(`${VOISINS}${d}/README.md`);
