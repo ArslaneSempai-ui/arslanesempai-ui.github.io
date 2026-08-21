@@ -75,7 +75,7 @@
       "triage": 45,
       "vitrine": 74
     },
-    "mesureLe": "2026-08-21T22:34:30.811Z",
+    "mesureLe": "2026-08-21T22:38:12.367Z",
     "testsCommitesLe": {
       "arbitrage": "7739bf1bf4c7134b318386ffcecddd6f6a895ad2",
       "banc": "8366dd40b3bd062705df6d7785bcf36b6e241a81",
@@ -87,7 +87,7 @@
       "rag": "e05fddab1b5d9eeb741f7547f4070dc515d4dd85",
       "remediation": "d3e21e4084a9511c8deac445b876b99b6fdcba17",
       "triage": "f1c0a7470afa0ca66bcf844aab6ac1d76e49fb36",
-      "vitrine": "3caa61fa9b6d929090f345bc9cd4b4f9fb159854"
+      "vitrine": "aa4d00b7a3f255d5eeffa3eb27c2a183432b5cf3"
     }
   },
   "ragReel": {
