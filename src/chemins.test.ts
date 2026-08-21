@@ -31,6 +31,22 @@ import { readFileSync, existsSync, readdirSync } from "node:fs";
 
 const VOISINS = new URL("../../", import.meta.url).pathname;
 const lire = (f: string) => readFileSync(new URL(f, import.meta.url).pathname, "utf8");
+/*
+ * ─── LE DÉPÔT CLONÉ SEUL ───
+ *
+ * Ces cas comparent la vitrine à ses voisins. Sur un clone isolé — ce qu'un visiteur obtient
+ * en premier — les voisins n'existent pas, et jusqu'au 22 août 2026 la suite échouait à la
+ * première commande. Un dépôt de démonstration dont les tests cassent tout de suite annonce
+ * qu'on ne les a jamais essayés.
+ *
+ * On saute donc, **en le disant** : un saut nommé est un résultat, un saut muet est un vert
+ * vide. Le signal est la liste elle-même — si `identite/depots.json` est hors de portée, il
+ * n'y a pas de portfolio autour, et ces questions n'ont pas d'objet.
+ */
+const SEUL = !existsSync(new URL("../../identite/depots.json", import.meta.url).pathname);
+const siSeul = (t: { skip: (m: string) => void }) =>
+  SEUL && (t.skip("dépôt cloné seul — les voisins ne sont pas là, ces cas n'ont pas d'objet"), true);
+
 
 /**
  * Toute paire `cle: "x", dossier: "y"` déclarée dans un fichier.
@@ -67,7 +83,8 @@ test("le relevé porte sur des correspondances — sinon il ne prouve rien", () 
   assert.ok(n >= 15, `seulement ${n} correspondance(s) lue(s) : le motif de recherche est périmé`);
 });
 
-test("tout dossier déclaré existe vraiment", () => {
+test("tout dossier déclaré existe vraiment", (t) => {
+  if (siSeul(t)) return;
   const absents: string[] = [];
   for (const f of ["./pages.ts", "./mesurer.ts"]) {
     for (const [cle, dossier] of Object.entries(correspondances(f))) {
@@ -94,7 +111,8 @@ test("une clé qui n'est pas son dossier est déclarée trompeuse", () => {
     + `TROMPEUSES avec sa raison. Vérifier d'abord qu'elle ne vise pas un dépôt privé.`);
 });
 
-test("l'exception s'exerce : le dossier homonyme existe et diffère", () => {
+test("l'exception s'exerce : le dossier homonyme existe et diffère", (t) => {
+  if (siSeul(t)) return;
   /*
    * Une exception qui ne sert plus est pire qu'aucune : elle se lit comme une protection en
    * place. Si le dossier `rag` disparaissait, cette entrée n'aurait plus d'objet et devrait
@@ -109,7 +127,8 @@ test("l'exception s'exerce : le dossier homonyme existe et diffère", () => {
   }
 });
 
-test("le désaccord entre pages et mesurer est voulu, et le rester", () => {
+test("le désaccord entre pages et mesurer est voulu, et le rester", (t) => {
+  if (siSeul(t)) return;
   /*
    * `mesurer.ts` mesure le modèle, qui vit dans le dépôt privé ; `pages.ts` publie la démo,
    * qui vit dans le public. Les deux sont justes et ils ne peuvent pas être unifiés : mesurer

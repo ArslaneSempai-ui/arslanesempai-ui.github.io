@@ -20,12 +20,23 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { decouvrirDepots } from "./compter.ts";
 
 const VRAIE_LISTE = new URL("../../identite/depots.json", import.meta.url).pathname;
+
+/*
+ * ─── LE DÉPÔT CLONÉ SEUL ───
+ *
+ * Ce cas compare la déclaration réelle au disque. Sur un clone isolé — ce qu'un visiteur
+ * obtient en premier — la liste n'est pas là, et jusqu'au 22 août 2026 la suite échouait à la
+ * première commande. On saute en le disant : un saut nommé est un résultat, un saut muet est
+ * un vert vide.
+ */
+const SEUL = !existsSync(VRAIE_LISTE);
+
 
 /** Un faux portfolio : des dossiers qui ressemblent à des dépôts, et une liste à part. */
 function portfolio(noms: string[], declare: { diffusion: string[]; exclus?: Record<string, unknown> }) {
@@ -95,15 +106,44 @@ test("aucun dépôt inscrit trouvé : on refuse le zéro au lieu de le rendre", 
   } finally { p.nettoyer(); }
 });
 
-test("liste illisible : on tombe, on ne retombe pas sur un balayage", () => {
-  const p = portfolio(["vitrine"], { diffusion: ["vitrine"] });
+test("liste illisible AVEC des voisins : on tombe, on ne retombe pas sur un balayage", () => {
+  /*
+   * Sans liste, la seule autre conduite serait de balayer le disque — et un balayage écrit
+   * dans des dépôts que personne n'a inscrits. Tant qu'il y a des voisins, il y a quelque
+   * chose à protéger, donc on lève.
+   */
+  /* liste-figee: noms de montage. Ils coïncident volontairement avec de vrais dépôts pour que
+     le cas ressemble au portfolio réel — mais l'arbre est temporaire et la liste passée en
+     paramètre, donc rien ici ne fige ce que le code regarde en vrai. Ce qui compte est qu'il y
+     ait des voisins : c'est la condition qui distingue le danger du clone isolé. */
+  const p = portfolio(["vitrine", "banc", "economics"], { diffusion: ["vitrine"] });
   try {
     assert.throws(() => decouvrirDepots(p.racine, p.racine + "inexistant.json", "vitrine", p.racine + "vitrine/"),
       /liste des dépôts est illisible/);
   } finally { p.nettoyer(); }
 });
 
-test("la vraie liste écarte bien cascade, et compte identite", () => {
+test("liste illisible SANS voisin : c'est un clone isolé, et il se rend lui-même", () => {
+  /*
+   * L'autre moitié, et celle qui manquait. Cette fonction levait au chargement du module, donc
+   * quatre fichiers de contrôle ne se chargeaient même pas sur un clone isolé — mesuré le
+   * 22 août 2026 : un clone de la vitrine, seul dans un dossier vide, échouait 7 cas et 4
+   * fichiers entiers. C'est le dépôt qu'un visiteur clone en premier.
+   *
+   * Sans voisin il n'y a rien à balayer et rien à protéger : lever ne défend personne, ça
+   * casse seulement une suite que quelqu'un vient d'essayer pour la première fois.
+   */
+  const p = portfolio(["vitrine"], { diffusion: ["vitrine"] });
+  try {
+    assert.deepEqual(
+      decouvrirDepots(p.racine, p.racine + "inexistant.json", "vitrine", p.racine + "vitrine/"),
+      ["vitrine"],
+      "un dépôt seul doit se rendre lui-même, pas lever");
+  } finally { p.nettoyer(); }
+});
+
+test("la vraie liste écarte bien cascade, et compte identite", (t) => {
+  if (SEUL) return t.skip("dépôt cloné seul — la liste des dépôts n'est pas là");
   /*
    * Un zéro qui ne prouve rien : les cas ci-dessus tournent sur des listes d'essai. Si le
    * vrai fichier n'excluait plus rien, ils passeraient tout autant.

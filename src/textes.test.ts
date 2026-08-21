@@ -122,7 +122,11 @@ test("aucune page marquée n'échappe à la liste surveillée", () => {
     + `  → leurs chiffres ne sont jamais rafraîchis, et rien ne le dit.`);
 });
 
-test("aucun dépôt ne prétend être testé sans l'être", () => {
+test("aucun dépôt ne prétend être testé sans l'être", (t) => {
+  /* Sur un clone isolé il n'y a aucun voisin à juger — saut nommé, pas silence. */
+  if (!existsSync(new URL("../../identite/depots.json", import.meta.url).pathname)) {
+    return t.skip("dépôt cloné seul — aucun voisin à examiner");
+  }
   /*
    * `recon` portait un script `npm test` qui lance `node --test src/*.test.ts` — et pas un
    * seul fichier de test. La commande existait, la promesse aussi, la vérification non.

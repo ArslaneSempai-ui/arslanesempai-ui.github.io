@@ -98,6 +98,31 @@ export function decouvrirDepots(
   try {
     declare = JSON.parse(readFileSync(liste, "utf8"));
   } catch (e: any) {
+    /*
+     * ─── UN DÉPÔT CLONÉ SEUL N'EST PAS UNE PANNE ───
+     *
+     * Cette fonction levait dès que la liste était illisible, et c'était juste tant qu'on la
+     * pensait toujours entourée de ses voisins : sans liste, la seule autre conduite serait de
+     * balayer le disque, et un balayage écrit dans des dépôts que personne n'a inscrits.
+     *
+     * Mais elle levait **au chargement du module**, donc quatre fichiers de contrôle ne se
+     * chargeaient même pas sur un clone isolé. Mesuré le 22 août 2026 : un clone de la vitrine,
+     * seul dans un dossier vide, échouait 7 cas et 4 fichiers entiers. C'est le dépôt qu'un
+     * visiteur clone en premier, et une suite qui casse à la première commande annonce qu'on ne
+     * l'a jamais essayée.
+     *
+     * La distinction qui manquait : **liste absente ET des voisins autour** reste dangereux —
+     * on pourrait balayer, donc on lève. **Liste absente ET aucun voisin** est simplement un
+     * dépôt cloné seul : il n'y a rien à balayer, rien à protéger, et la seule réponse honnête
+     * est de se rendre soi-même.
+     */
+    const combienDeVoisins = (() => {
+      try {
+        return readdirSync(voisins, { withFileTypes: true })
+          .filter((x) => x.isDirectory() && !x.name.startsWith(".") && x.name !== ici).length;
+      } catch { return 0; }
+    })();
+    if (combienDeVoisins === 0) return [ici];
     throw new Error(
       `la liste des dépôts est illisible (${liste}) : ${e.message}\n`
       + `  → elle est tenue dans identite/depots.json et partagée avec diffuser.mjs.\n`
