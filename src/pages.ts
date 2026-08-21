@@ -10,10 +10,17 @@
  *
  *  1. **Aucun chiffre n'est écrit à la main.** Tout vient de `chiffres.json`, produit en
  *     faisant tourner les six modèles. Un test refuse de passer si le fichier a vieilli.
- *  2. **La page se lit sans JavaScript.** L'anglais est rendu dans le HTML ; le français
- *     est là aussi, et le sélecteur ne fait que basculer une classe. Une page d'entrée qui
- *     dépend d'un script pour afficher son texte est une page qui apparaît vide le jour où
- *     le script ne charge pas.
+ *  2. **La page se lit sans JavaScript.** Le texte est rendu dans le HTML. Une page d'entrée
+ *     qui dépend d'un script pour afficher son texte est une page qui apparaît vide le jour
+ *     où le script ne charge pas.
+ *
+ *     *Corrigé le 22 août 2026.* Ce point décrivait un mécanisme bilingue — « l'anglais est
+ *     rendu dans le HTML ; le français est là aussi, et le sélecteur ne fait que basculer une
+ *     classe ». Ce mécanisme n'existe plus : la page est en anglais seul, il n'y a pas une
+ *     occurrence de `class="fr"` ni de `class="en"`, et `vitrine.test.ts` **interdit** qu'il
+ *     en revienne. Le commentaire décrivait donc un état que le contrôle rend impossible.
+ *     C'est la forme la plus discrète du document qui ment : personne ne le relit, et il
+ *     survit à ce qu'il décrit.
  *  3. **Le moteur de recherche documentaire reste privé.** Le lien « source » de cet
  *     outil-là pointe vers le dépôt public — l'article et la démo — jamais vers le moteur.
  *     C'est une décision, pas un oubli, et elle est écrite ici pour qu'on ne la « corrige »
@@ -30,7 +37,7 @@ const racine = new URL("..", import.meta.url).pathname;
 const ech = (t: unknown) => String(t ?? "").replace(/[&<>"]/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
 
-/** Un fragment bilingue de *texte riche*, pour la prose de la tuile. */
+/** Mise en forme des nombres de la prose des tuiles. */
 const nb = (n: number) => Math.round(n).toLocaleString("en-GB");
 const pc = (x: number) => `${Math.round(x * 100)} %`;
 const dollars = (n: number) => "$" + Math.round(n).toLocaleString("en-GB");
