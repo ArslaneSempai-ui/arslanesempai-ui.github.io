@@ -103,7 +103,14 @@ test("la page n'a pas perdu ses parties en route", () => {
    */
   const h1 = h.match(/<h1>([^<]*)<\/h1>/)?.[1] ?? "";
   const titre = h.match(/<title>([^<]*)<\/title>/)?.[1] ?? "";
-  const outils = h.split('class="outil"').length - 1;
+  /*
+   * Sans les commentaires : un commentaire HTML citant `class="outil"` gonflait le compte des
+   * tuiles et faisait échouer ce cas sur une page correcte. Démontré le 22 août 2026 avec un
+   * symbole inventé. Ce fichier ne dépend d'aucun commentaire — vérifié, zéro occurrence de
+   * `<!--` dans ses assertions — donc les retirer ici ne lui enlève rien.
+   */
+  const sansNotes = h.replace(/<!--[\s\S]*?-->/g, " ");
+  const outils = sansNotes.split('class="outil"').length - 1;
   const attenduTitre = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
                         "nine", "ten", "eleven", "twelve"][outils];
   assert.match(h1.toLowerCase(), new RegExp(`^${attenduTitre} numbers`),
