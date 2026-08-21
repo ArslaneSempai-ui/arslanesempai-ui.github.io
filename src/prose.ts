@@ -79,15 +79,48 @@ export function valeur(chiffres: any, cle: string): unknown {
 
 export type Ecart = { page: string; cle: string; ecrit: string; attendu: string };
 
-export function relire(mode: "check" | "write"): { marques: number; ecarts: Ecart[]; inconnues: string[] } {
+/**
+ * UNE MARQUE QUI PEND N'EST PAS TOUJOURS UNE PANNE.
+ *
+ * Le 22 août 2026, `cascade` est sorti de la liste des dépôts comptés — une autre session y
+ * travaille et la diffusion y aurait écrasé ses fichiers partagés. Son README portait encore
+ * `<!--p:portfolio.parDepot.cascade-->`, dont la clé a cessé d'exister avec lui. `prose` a
+ * refusé d'écrire, ce qui était juste, mais il refusait **définitivement** : la chaîne
+ * mesure → prose → comptage restait bloquée sans qu'aucune correction locale la lève.
+ *
+ * Deux situations que l'ancien code confondait :
+ *
+ *   - la clé nomme un dépôt **déclaré hors liste** dans `identite/depots.json`, avec sa raison
+ *     et sa date. La marque pend légitimement — la valeur n'existe plus parce que le dépôt
+ *     n'est plus compté — et ça ne doit pas arrêter la chaîne.
+ *   - la clé nomme un dépôt **absent du disque**. Là c'est une panne : quelque chose a disparu
+ *     sans être déclaré.
+ *
+ * Dans les deux cas la marque est **comptée et nommée**. Remplacer un refus par un silence
+ * échangerait un mur contre un vert vide.
+ */
+const LISTE = new URL("../../identite/depots.json", import.meta.url).pathname;
+
+function horsListe(): Record<string, { pourquoi?: string; depuis?: string }> {
+  try { return JSON.parse(readFileSync(LISTE, "utf8")).exclus ?? {}; } catch { return {}; }
+}
+
+export type Relecture = { marques: number; ecarts: Ecart[]; inconnues: string[];
+                          pendantes: string[]; pagesAbsentes: string[] };
+
+export function relire(mode: "check" | "write"): Relecture {
   const chiffres = JSON.parse(readFileSync(CHIFFRES, "utf8"));
+  const exclus = horsListe();
   const ecarts: Ecart[] = [];
   const inconnues: string[] = [];
+  const pendantes: string[] = [];
+  const pagesAbsentes: string[] = [];
   let marques = 0;
 
   for (const page of PAGES) {
     const chemin = `${VOISINS}${page}`;
-    if (!existsSync(chemin)) continue;
+    /* Une page absente se dit. Sautée en silence, elle laisse croire qu'elle a été relue. */
+    if (!existsSync(chemin)) { pagesAbsentes.push(page); continue; }
     const avant = readFileSync(chemin, "utf8");
 
     /*
@@ -118,7 +151,22 @@ export function relire(mode: "check" | "write"): { marques: number; ecarts: Ecar
     const apres = avant.replace(MARQUE, (tout, cle, format, ecrit) => {
       marques++;
       const v = valeur(chiffres, cle);
-      if (v === undefined) { inconnues.push(`${page} : ${cle}`); return tout; }
+      if (v === undefined) {
+        /*
+         * La clé nomme-t-elle un dépôt sorti de la liste ? On regarde chaque segment :
+         * `portfolio.parDepot.cascade` pend parce que `cascade` est exclu, et la raison est
+         * écrite dans `depots.json`, pas devinée ici.
+         */
+        const nom = cle.split(".").find((seg: string) => seg in exclus);
+        if (nom && existsSync(`${VOISINS}${nom}`)) {
+          pendantes.push(`${page} : ${cle} — « ${nom} » hors liste depuis le ${exclus[nom]!.depuis ?? "?"}`);
+        } else if (nom) {
+          inconnues.push(`${page} : ${cle} — « ${nom} » est hors liste ET absent du disque`);
+        } else {
+          inconnues.push(`${page} : ${cle}`);
+        }
+        return tout;
+      }
       const rendre = FORMATS[format ?? "brut"];
       if (!rendre) { inconnues.push(`${page} : format « ${format} » inconnu`); return tout; }
       const attendu = rendre(v);
@@ -128,13 +176,23 @@ export function relire(mode: "check" | "write"): { marques: number; ecarts: Ecar
     });
     if (mode === "write" && apres !== avant) writeFileSync(chemin, apres);
   }
-  return { marques, ecarts, inconnues };
+  return { marques, ecarts, inconnues, pendantes, pagesAbsentes };
 }
 
 if (isMain(import.meta)) {
   const controle = process.argv.includes("--check");
-  const { marques, ecarts, inconnues } = relire(controle ? "check" : "write");
+  const { marques, ecarts, inconnues, pendantes, pagesAbsentes } = relire(controle ? "check" : "write");
 
+  /* Comptées et nommées, jamais tues — mais elles n'arrêtent pas la chaîne. */
+  if (pendantes.length) {
+    console.log(`${pendantes.length} marque(s) orpheline(s), dépôt hors liste :`);
+    for (const x of pendantes) console.log(`  ${x}`);
+    console.log(`  → la valeur n'existe plus parce que le dépôt n'est plus compté. Retirer la`);
+    console.log(`    marque de sa page, ou le réinscrire dans depots.json.`);
+  }
+  if (pagesAbsentes.length) {
+    console.log(`${pagesAbsentes.length} page(s) marquée(s) absente(s) du disque : ${pagesAbsentes.join(", ")}`);
+  }
   if (inconnues.length) {
     console.error("des marques ne pointent sur rien :");
     for (const i of inconnues) console.error(`  ${i}`);
