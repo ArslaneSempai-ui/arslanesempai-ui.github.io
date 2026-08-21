@@ -185,6 +185,16 @@ export function construire(): void {
   const html = readFileSync(racine + "src/gabarit.html", "utf8")
     .replaceAll("<!--NOMBRE-TITRE-->", (MOTS_NOMBRE[OUTILS.length] ?? String(OUTILS.length)).replace(/^./, (m) => m.toUpperCase()))
     .replace("<!--NOMBRE-OUTILS-->", "The " + (MOTS_NOMBRE[OUTILS.length] ?? String(OUTILS.length)))
+    /*
+     * La description que les moteurs affichent, remplie par le même compte que le titre.
+     *
+     * Elle disait « Six décisions » — en français, dans une page passée à l'anglais seul, et
+     * pour dix outils. C'est la ligne qu'un lecteur voit avant d'ouvrir la page, et rien ne la
+     * lisait : les contrôles regardaient le `<h1>` et le `<title>`, jamais le `<meta>`. Une
+     * phrase qu'aucun test ne lit vieillit à la vitesse de ce qu'elle décrit.
+     */
+    .replace("<!--NOMBRE-DESCRIPTION-->", (MOTS_NOMBRE[OUTILS.length] ?? String(OUTILS.length))
+      .replace(/^./, (m) => m.toUpperCase()))
     .replace("<!--TUILES-->", tuiles)
     .replace("</main>", `</main>
 <script type="application/json" id="mesures">${mesures}</script>`);

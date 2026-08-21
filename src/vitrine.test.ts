@@ -109,6 +109,17 @@ test("la page n'a pas perdu ses parties en route", () => {
   assert.match(h1.toLowerCase(), new RegExp(`^${attenduTitre} numbers`),
     `le grand titre dit « ${h1} » pour ${outils} outils`);
   assert.equal(titre.toLowerCase(), h1.toLowerCase(), "le titre de l'onglet et le grand titre divergent");
+  /*
+   * La description est ce qu'un moteur de recherche affiche, et personne ne la lisait. Elle
+   * annonçait « Six décisions » pour dix outils, en français, dans une page passée à l'anglais
+   * seul — trois erreurs dans la seule ligne qu'un lecteur voit avant d'ouvrir la page.
+   */
+  const desc = h.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? "";
+  assert.ok(desc.length > 40, `la page n'a pas de description lisible : « ${desc} »`);
+  assert.match(desc.toLowerCase(), new RegExp(`^${attenduTitre} decisions`),
+    `la description dit « ${desc.slice(0, 40)}… » pour ${outils} outils`);
+  assert.doesNotMatch(desc, /[àâçéèêëîïôùûü]/,
+    `la description porte encore du français : « ${desc.slice(0, 60)}… »`);
   /* Mesuré, pas deviné : la page en fait 24 000 après le passage à l'anglais seul. Le
    * plancher attrape la perte d'une section entière, pas une phrase réécrite. */
   assert.ok(h.length > 20_000, `la page ne fait que ${h.length} octets : elle a maigri`);
