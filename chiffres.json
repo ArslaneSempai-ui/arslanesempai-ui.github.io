@@ -61,7 +61,7 @@
     "barre": 0.84
   },
   "portfolio": {
-    "tests": 269,
+    "tests": 302,
     "parDepot": {
       "economics": 50,
       "triage": 32,
@@ -70,12 +70,12 @@
       "banc": 24,
       "rag": 15,
       "arbitrage": 20,
-      "cascade": 22,
+      "cascade": 54,
       "remediation": 16,
       "derive": 16,
-      "vitrine": 34
+      "vitrine": 35
     },
-    "mesureLe": "2026-08-18T20:09:29.732Z",
+    "mesureLe": "2026-08-19T12:12:18.257Z",
     "testsCommitesLe": {
       "economics": "6d1544b48e9f84055edb6f484d9e231369967b6b",
       "triage": "e593c252ae4cb01e47dd87874aefe8db1a9dfa74",
@@ -114,11 +114,11 @@
   },
   "cascade": {
     "champs": 5,
-    "justesseOptimale": 84.5,
-    "coutOptimal": 180,
-    "justesseGrandModele": 80.5,
+    "justesseOptimale": 94.4,
+    "coutOptimal": 193,
+    "justesseGrandModele": 78.8,
     "coutGrandModele": 800,
-    "facteur": 4.4,
+    "facteur": 4.1,
     "champsGratuits": 3
   },
   "remediation": {

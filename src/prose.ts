@@ -40,6 +40,7 @@ const CHIFFRES = new URL("../chiffres.json", import.meta.url).pathname;
 export const PAGES = [
   "economics/README.md", "triage/README.md", "funnel/README.md", "cycle/README.md",
   "banc/README.md", "rag/README.md", "rag-vitrine/README.md",
+  "arbitrage/README.md", "cascade/README.md", "derive/README.md", "remediation/README.md",
   "profil/README.md", "profil/benchmarks-are-not-yours.md",
 ];
 

@@ -13,7 +13,8 @@
     "emprunter": "node src/emprunter.ts",
     "compter": "node src/compter.ts",
     "prose": "node src/prose.ts",
-    "figer-reel": "node src/figer-reel.ts"
+    "figer-reel": "node src/figer-reel.ts",
+    "portefeuille": "node src/portefeuille.ts"
   },
   "engines": {
     "node": ">=24"
