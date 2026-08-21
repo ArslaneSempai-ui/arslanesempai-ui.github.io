@@ -81,12 +81,39 @@ test("aucune page marquée n'échappe à la liste surveillée", () => {
    * main : le contrôle manquait exactement là où l'outil regarde.
    */
   const racine = new URL("../../", import.meta.url).pathname;
+  /*
+   * ─── UNE PAGE QUI *PARLE* D'UNE MARQUE N'EN PORTE PAS ───
+   *
+   * Le motif cherchait `<!--p:` seul. Le 22 août 2026 il a accusé deux documents qui citent une
+   * marque dans leur prose — un journal qui raconte pourquoi une marque pendait, et le verdict
+   * d'un pilote. Ni l'un ni l'autre ne porte de chiffre à rafraîchir : ils en parlent.
+   *
+   * Troisième forme du même piège en une nuit, après une classe citée dans un commentaire et un
+   * import cité dans un commentaire. La règle qui les couvre : **un contrôle lit les commentaires
+   * si et seulement si son sujet y vit, et il doit savoir lequel des deux il fait.** Ici le sujet
+   * EST un commentaire HTML — on ne les retire donc pas, on exige la **paire complète**
+   * `<!--p:clé-->valeur<!--/p-->`, qui est ce qu'une marque réelle est et ce qu'une citation en
+   * prose n'est pas.
+   */
   const marquees = execFileSync("grep",
-    ["-rl", "--include=*.md", "<!--p:", "."],
+    ["-rlE", "--include=*.md", "<!--p:[^>]*-->[^<]*<!--/p-->", "."],
     { cwd: racine, encoding: "utf8" })
     .split("\n").filter(Boolean)
     .map((c) => c.replace(/^\.\//, ""))
     .filter((c) => !c.includes("node_modules"))
+    /*
+     * Et une marque MONTRÉE n'est pas une marque POSÉE.
+     *
+     * Le verdict du pilote illustre le mécanisme par `<!--p:clé~format-->valeur<!--/p-->` — une
+     * paire complète, entre accents graves, dont la clé est le mot « clé ». La forme seule ne
+     * suffit donc pas : dans ce projet un exemple est toujours cloisonné en code, et le sujet
+     * réel vit hors des accents graves. On les retire avant de conclure.
+     */
+    .filter((c) => {
+      const sansCode = readFileSync(racine + c, "utf8")
+        .replace(/```[\s\S]*?```/g, " ").replace(/`[^`\n]*`/g, " ");
+      return /<!--p:[^>]*-->[^<]*<!--\/p-->/.test(sansCode);
+    })
     .sort();
 
   const oubliees = marquees.filter((c) => !PAGES.includes(c));
