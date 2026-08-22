@@ -233,7 +233,21 @@ export function compter(): { nombre: number; parDepot: Record<string, number>; a
         `${depot} : \`npm test\` a échoué avant d'exécuter la suite — ce n'est pas un test cassé.\n`
         + `      ${cause}`);
     }
-    parDepot[depot] = Number(/^ℹ pass (\d+)$/m.exec(sortie)?.[1] ?? 0);
+    /*
+     * `pass` PLUS `skipped`, et non `pass` seul.
+     *
+     * Le comptage tourne avec `COMPTAGE=1`, drapeau qui met en pause le contrôle de
+     * fraîcheur du chiffre — sans lui, ce contrôle refuserait de passer pendant qu'on
+     * recompte, et le comptage ne pourrait jamais aboutir. L'instrument perdait donc
+     * exactement le test qu'il neutralise pour pouvoir mesurer : `npm test` annonce 76
+     * dans la vitrine, le comptage en retenait 75, et le nombre publié sur la page
+     * d'accueil était faux d'autant. Mesuré le 22 août 2026.
+     *
+     * Un test en pause reste un test écrit et exécutable — il est compté. Une suite en
+     * échec, elle, ne parvient jamais ici : le `catch` ci-dessus lève d'abord.
+     */
+    const lu = (mot: string) => Number(new RegExp(`^ℹ ${mot} (\\d+)$`, "m").exec(sortie)?.[1] ?? 0);
+    parDepot[depot] = lu("pass") + lu("skipped");
   }
   return { nombre: Object.values(parDepot).reduce((a, b) => a + b, 0), parDepot, absents };
 }
