@@ -16,6 +16,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import { DEPOTS, dernierTest } from "./compter.ts";
+import { OUTILS } from "./pages.ts";
 
 const PROFIL = new URL("../../profil/README.md", import.meta.url).pathname;
 const chiffres = () => JSON.parse(readFileSync(new URL("../chiffres.json", import.meta.url).pathname, "utf8"));
@@ -97,4 +98,95 @@ test("l'estampille de fraîcheur couvre tous les dépôts, sinon elle ne garde r
   assert.deepEqual(sans, [],
     `${sans.join(", ")} : aucun commit de test trouvé — le contrôle de fraîcheur les écarte `
     + `en silence, et un contrôle qui n'examine personne est vert par construction.`);
+});
+
+/*
+ * LES LIENS, ET CE QUE LA PAGE LAISSE VOIR.
+ *
+ * L'en-tête de ce fichier dit que ces tests tiennent les chiffres et ne relisent pas la
+ * prose. Ce bloc élargit ça d'un cran, et pour une raison mesurée : le 22 août 2026, une
+ * page publiée nommait le chemin local du dépôt privé. Un lien mort ou un chemin de
+ * machine sur la première page qu'un recruteur ouvre coûte plus cher qu'un chiffre faux,
+ * et rien ne les regardait — le profil n'a ni test ni build.
+ *
+ * Tout se vérifie hors ligne : on ne va pas demander à GitHub si un dépôt existe, on
+ * confronte les liens au registre que la vitrine tient déjà. Un contrôle qui dépend du
+ * réseau tombe en panne les jours où le réseau tombe, et on apprend à ignorer son rouge.
+ */
+const DEPOT_LIEN = /https:\/\/github\.com\/ArslaneSempai-ui\/([\w.-]+)/g;
+
+/** Les défauts d'un profil, sur un texte quelconque — pour pouvoir le prouver sur un faux. */
+function defauts(texte: string, fichiersVoisins: (f: string) => boolean): string[] {
+  const p: string[] = [];
+  const connus = new Set(OUTILS.map((o: any) => o.depot));
+  const lies = new Set([...texte.matchAll(DEPOT_LIEN)].map((m) => m[1]));
+  for (const d of lies) if (!connus.has(d)) p.push(`lien vers un dépôt inconnu du registre : ${d}`);
+  for (const d of connus) if (!lies.has(d)) p.push(`outil publié mais absent du profil : ${d}`);
+
+  /* Ce que la page ne doit pas laisser voir. Le dossier local du moteur privé s'appelle
+     `rag` ; son dépôt public s'appelle autrement. Nommer l'un depuis l'autre est la fuite
+     qui a déjà eu lieu une fois aujourd'hui, dans `rag/src/ui.html`. */
+  for (const [motif, quoi] of [
+    [/\/Users\/[\w.-]+/, "un chemin de la machine"],
+    [/~\/Documents\//, "un chemin du dossier personnel"],
+    [/127\.0\.0\.1|localhost:\d+/, "une adresse de boucle locale"],
+    [/\/(?:private\/)?tmp\//, "un dossier temporaire"],
+  ] as [RegExp, string][]) {
+    const m = motif.exec(texte);
+    if (m) p.push(`${quoi} est visible sur la page publiée : ${m[0]}`);
+  }
+
+  /* Un lien relatif qui ne résout pas est un 404 sur le profil lui-même. */
+  for (const m of texte.matchAll(/\]\((?!https?:|#|mailto:)([^)]+)\)/g)) {
+    if (!fichiersVoisins(m[1])) p.push(`lien relatif qui ne résout pas : ${m[1]}`);
+  }
+
+  /* Les marques de provenance vont par paires : une ouvrante orpheline laisse le lecteur
+     voir la valeur sans que la passe de prose sache la remettre à jour. */
+  /* `[^>]+` et non `[\w.]+` : les clés portent un suffixe de format après un tilde —
+     `cascade.coutOptimal~usd`, `derive.signal~n2`. Le motif étroit en reconnaissait 15 sur
+     35 et accusait la page d'être déparée alors qu'elle est intacte. Exiger une forme
+     plutôt que lire celle qui existe : la même erreur que la veille, en plus petit. */
+  const ouvre = (texte.match(/<!--p:[^>]+-->/g) ?? []).length;
+  const ferme = (texte.match(/<!--\/p-->/g) ?? []).length;
+  if (ouvre !== ferme) p.push(`marques de provenance dépariées : ${ouvre} ouvrante(s), ${ferme} fermante(s)`);
+  return p;
+}
+
+const VOISIN = (f: string) => existsSync(new URL("../../profil/" + f, import.meta.url).pathname);
+
+test("le profil publié ne porte ni lien mort ni chemin de la machine", () => {
+  const brut = readFileSync(PROFIL, "utf8");
+  /* Avant de croire un zéro : la page doit vraiment porter des liens de dépôt. */
+  const liens = [...brut.matchAll(DEPOT_LIEN)].length;
+  assert.ok(liens >= 10, `seulement ${liens} lien(s) de dépôt lus : le motif est périmé`);
+  assert.deepEqual(defauts(brut, VOISIN), []);
+});
+
+test("témoin : un profil fabriqué avec chacun de ces défauts est refusé", () => {
+  /*
+   * On casse une chose à la fois, mais sur une page fabriquée : la vraie ne bouge pas.
+   * Un contrôle prouvé sur un faux positif fabriqué vaut ce que vaut le faux — donc il
+   * reprend la vraie page et n'y change qu'un point.
+   */
+  const vrai = readFileSync(PROFIL, "utf8");
+  const cas: [string, string, RegExp][] = [
+    /* On vise l'URL et pas le nom : `[regression-bench](…/regression-bench)` porte le mot
+       deux fois sur la même ligne, et `replace` sur une chaîne ne change que la première —
+       donc le libellé. Le lien restait juste et le cas ne prouvait rien. */
+    ["dépôt inconnu",
+      vrai.replace(/(github\.com\/ArslaneSempai-ui\/)regression-bench/, "$1regression-banc"),
+      /dépôt inconnu du registre/],
+    ["outil manquant", vrai.replace(/https:\/\/github\.com\/ArslaneSempai-ui\/drift-monitor/, "https://example.com/x"), /absent du profil/],
+    ["chemin machine", vrai + "\n\nvoir /Users/quelquun/Documents/rag/corpus\n", /chemin de la machine/],
+    ["boucle locale", vrai + "\n\ndémo sur http://127.0.0.1:8000/\n", /boucle locale/],
+    ["lien relatif mort", vrai + "\n\n[note](inexistant.md)\n", /lien relatif qui ne résout pas/],
+    ["marque dépariée", vrai.replace("<!--/p-->", ""), /marques de provenance dépariées/],
+  ];
+  for (const [nom, texte, attendu] of cas) {
+    assert.notEqual(texte, vrai, `le cas « ${nom} » n'a rien modifié — il ne prouve rien`);
+    const p = defauts(texte, VOISIN);
+    assert.ok(p.some((x) => attendu.test(x)),
+      `le cas « ${nom} » n'a pas été attrapé.\n  relevé : ${p.join(" | ") || "aucun défaut"}`);
+  }
 });
