@@ -82,7 +82,7 @@ test("aucun dépôt n'a commité de test depuis ce comptage", (t) => {
     `des tests ont été commités depuis le comptage (${bouges.join(", ")}) — lancer \`npm run compter\``);
 });
 
-test("l'estampille de fraîcheur couvre tous les dépôts, sinon elle ne garde rien", () => {
+test("l'estampille de fraîcheur couvre tous les dépôts, sinon elle ne garde rien", (t) => {
   /*
    * Le contrôle voisin n'examine un dépôt que si `dernierTest` lui rend un commit : un
    * dépôt sans estampille est écarté en silence, et un contrôle qui écarte tout le monde
@@ -93,6 +93,12 @@ test("l'estampille de fraîcheur couvre tous les dépôts, sinon elle ne garde r
    * interroge doit rendre un commit. Si le motif se rétrécit à nouveau, c'est ici que ça
    * tombe, et pas six commits plus tard.
    */
+  /* `git archive` produit un arbre sans `.git` : aucun dépôt n'a d'historique, tout serait
+     nul, et le cas dirait « périmètre trop étroit » alors qu'il n'y a simplement pas d'objet.
+     Un saut nommé, donc — un saut muet serait le vert vide que ce cas existe pour empêcher. */
+  if (!existsSync(new URL("../.git", import.meta.url).pathname)) {
+    return t.skip("clone sans historique — l'estampille de fraîcheur n'a pas d'objet");
+  }
   const sans = DEPOTS.filter((d) => dernierTest(d) === null);
   assert.ok(DEPOTS.length >= 11, `seulement ${DEPOTS.length} dépôt(s) découvert(s) : la liste est vide ou tronquée`);
   assert.deepEqual(sans, [],
@@ -155,7 +161,8 @@ function defauts(texte: string, fichiersVoisins: (f: string) => boolean): string
 
 const VOISIN = (f: string) => existsSync(new URL("../../profil/" + f, import.meta.url).pathname);
 
-test("le profil publié ne porte ni lien mort ni chemin de la machine", () => {
+test("le profil publié ne porte ni lien mort ni chemin de la machine", (t) => {
+  if (!existsSync(PROFIL)) return t.skip("dépôt profil absent");
   const brut = readFileSync(PROFIL, "utf8");
   /* Avant de croire un zéro : la page doit vraiment porter des liens de dépôt. */
   const liens = [...brut.matchAll(DEPOT_LIEN)].length;
@@ -163,7 +170,8 @@ test("le profil publié ne porte ni lien mort ni chemin de la machine", () => {
   assert.deepEqual(defauts(brut, VOISIN), []);
 });
 
-test("témoin : un profil fabriqué avec chacun de ces défauts est refusé", () => {
+test("témoin : un profil fabriqué avec chacun de ces défauts est refusé", (t) => {
+  if (!existsSync(PROFIL)) return t.skip("dépôt profil absent");
   /*
    * On casse une chose à la fois, mais sur une page fabriquée : la vraie ne bouge pas.
    * Un contrôle prouvé sur un faux positif fabriqué vaut ce que vaut le faux — donc il
