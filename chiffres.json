@@ -61,7 +61,7 @@
     "barre": 0.84
   },
   "portfolio": {
-    "tests": 494,
+    "tests": 496,
     "parDepot": {
       "arbitrage": 34,
       "banc": 38,
@@ -69,13 +69,13 @@
       "derive": 30,
       "economics": 64,
       "funnel": 33,
-      "identite": 75,
+      "identite": 77,
       "rag": 29,
       "remediation": 30,
       "triage": 46,
       "vitrine": 80
     },
-    "mesureLe": "2026-08-22T01:31:44.750Z",
+    "mesureLe": "2026-08-22T02:49:14.755Z",
     "testsCommitesLe": {
       "arbitrage": "d236b3357fa10cac00f39ee438c132447858e507",
       "banc": "e9adba8bf53eaded4a3a717814f5414855af04aa",
@@ -83,7 +83,7 @@
       "derive": "49573818ee2153207a0d191284f95db562b08b30",
       "economics": "a39aed9b508b86e57a8f49cec485204622675076",
       "funnel": "523968a9161ff8dafe2c2369a779af455bbf50ec",
-      "identite": "746d9254dac4cd0b459d1abc5e9b05dfb1daea7a",
+      "identite": "be4697de723dae37dbddcde562d603c54efd800d",
       "rag": "f093525808dea221a19996792ffa8401376bbbc0",
       "remediation": "936a8360746370889629f9d346f636a2a1a0358f",
       "triage": "17829b74ec397a788ae63425a9694f20ecb34186",
