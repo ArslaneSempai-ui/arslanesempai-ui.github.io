@@ -80,3 +80,21 @@ test("aucun dépôt n'a commité de test depuis ce comptage", (t) => {
   assert.deepEqual(bouges, [],
     `des tests ont été commités depuis le comptage (${bouges.join(", ")}) — lancer \`npm run compter\``);
 });
+
+test("l'estampille de fraîcheur couvre tous les dépôts, sinon elle ne garde rien", () => {
+  /*
+   * Le contrôle voisin n'examine un dépôt que si `dernierTest` lui rend un commit : un
+   * dépôt sans estampille est écarté en silence, et un contrôle qui écarte tout le monde
+   * passe toujours. C'est ce qui est arrivé — le motif ne voyait que `src/*.test.ts`,
+   * `identite` range ses tests à la racine et ses fichiers sont des `.mjs`.
+   *
+   * Ce cas-ci mesure la couverture au lieu de la supposer : chaque dépôt que le compte
+   * interroge doit rendre un commit. Si le motif se rétrécit à nouveau, c'est ici que ça
+   * tombe, et pas six commits plus tard.
+   */
+  const sans = DEPOTS.filter((d) => dernierTest(d) === null);
+  assert.ok(DEPOTS.length >= 11, `seulement ${DEPOTS.length} dépôt(s) découvert(s) : la liste est vide ou tronquée`);
+  assert.deepEqual(sans, [],
+    `${sans.join(", ")} : aucun commit de test trouvé — le contrôle de fraîcheur les écarte `
+    + `en silence, et un contrôle qui n'examine personne est vert par construction.`);
+});

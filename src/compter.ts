@@ -179,9 +179,21 @@ export function dernierTest(depot: string): string | null {
   const dossier = depot === "vitrine" ? new URL("..", import.meta.url).pathname : `${VOISINS}${depot}/`;
   if (!existsSync(dossier + ".git")) return null;
   try {
-    /* Restreint aux fichiers de test : un commit qui touche un modèle ne périme pas un
-     * compte de tests, et une alerte qui se déclenche à chaque commit n'est plus lue. */
-    const sortie = execFileSync("git", ["log", "-1", "--format=%H", "--", "src/*.test.ts"], {
+    /*
+     * Restreint aux fichiers de test : un commit qui touche un modèle ne périme pas un
+     * compte de tests, et une alerte qui se déclenche à chaque commit n'est plus lue.
+     *
+     * Mais le motif était `src/*.test.ts`, plus étroit que ce que le compte mesure.
+     * Le compte lance `npm test`, qui exécute aussi les `.mjs` — et `identite` range ses
+     * tests à la racine, donc AUCUN fichier ne lui correspondait : la fonction rendait la
+     * chaîne vide, le filtre écartait le dépôt, et le contrôle passait sans rien regarder.
+     *
+     * Mesuré le 22 août 2026 : onze estampilles sur onze étaient périmées et le gardien
+     * était vert. Le nombre publié restait juste — la passe complète le confirmait — mais
+     * plus rien ne pouvait le prouver, et c'est précisément ce que ce contrôle existe pour
+     * faire. Le motif couvre maintenant tout fichier de test, à toute profondeur.
+     */
+    const sortie = execFileSync("git", ["log", "-1", "--format=%H", "--", "*.test.*"], {
       cwd: dossier, encoding: "utf8",
     }).trim();
     return sortie || null;
