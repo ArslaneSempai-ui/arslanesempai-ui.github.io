@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 /*
  * CE QUE CETTE PAGE N'A PAS LE DROIT DE FAIRE.
  *
@@ -25,8 +26,8 @@ import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import { OUTILS as PAGES_OUTILS } from "./pages.ts";
 
-const racine = new URL("..", import.meta.url).pathname;
-const voisins = new URL("../../", import.meta.url).pathname;
+const racine = fileURLToPath(new URL("..", import.meta.url));
+const voisins = fileURLToPath(new URL("../../", import.meta.url));
 const page = () => readFileSync(racine + "docs/index.html", "utf8");
 const chiffres = () => JSON.parse(readFileSync(racine + "chiffres.json", "utf8"));
 

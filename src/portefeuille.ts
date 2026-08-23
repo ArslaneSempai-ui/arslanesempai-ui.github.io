@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 /**
  * Le tour complet du portfolio, en une commande.
  *
@@ -25,8 +26,8 @@ import { statSync } from "node:fs";
 import { isMain } from "./cli.ts";
 import { DEPOTS } from "./compter.ts";
 
-const VOISINS_DEFAUT = new URL("../../", import.meta.url).pathname;
-const ICI_DEFAUT = new URL("..", import.meta.url).pathname;
+const VOISINS_DEFAUT = fileURLToPath(new URL("../../", import.meta.url));
+const ICI_DEFAUT = fileURLToPath(new URL("..", import.meta.url));
 
 export type Souci = { ou: string; quoi: string; detail: string };
 export type Reparation = { quoi: string; detail: string };

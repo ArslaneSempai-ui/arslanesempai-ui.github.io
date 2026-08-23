@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 /*
  * LA PAGE QUE PERSONNE NE VÉRIFIE.
  *
@@ -18,8 +19,8 @@ import { readFileSync, existsSync } from "node:fs";
 import { DEPOTS, dernierTest } from "./compter.ts";
 import { OUTILS } from "./pages.ts";
 
-const PROFIL = new URL("../../profil/README.md", import.meta.url).pathname;
-const chiffres = () => JSON.parse(readFileSync(new URL("../chiffres.json", import.meta.url).pathname, "utf8"));
+const PROFIL = fileURLToPath(new URL("../../profil/README.md", import.meta.url));
+const chiffres = () => JSON.parse(readFileSync(fileURLToPath(new URL("../chiffres.json", import.meta.url)), "utf8"));
 /*
  * On lit la page telle qu'elle sera rendue.
  *
@@ -96,7 +97,7 @@ test("l'estampille de fraîcheur couvre tous les dépôts, sinon elle ne garde r
   /* `git archive` produit un arbre sans `.git` : aucun dépôt n'a d'historique, tout serait
      nul, et le cas dirait « périmètre trop étroit » alors qu'il n'y a simplement pas d'objet.
      Un saut nommé, donc — un saut muet serait le vert vide que ce cas existe pour empêcher. */
-  if (!existsSync(new URL("../.git", import.meta.url).pathname)) {
+  if (!existsSync(fileURLToPath(new URL("../.git", import.meta.url)))) {
     return t.skip("clone sans historique — l'estampille de fraîcheur n'a pas d'objet");
   }
   const sans = DEPOTS.filter((d) => dernierTest(d) === null);
@@ -159,7 +160,7 @@ function defauts(texte: string, fichiersVoisins: (f: string) => boolean): string
   return p;
 }
 
-const VOISIN = (f: string) => existsSync(new URL("../../profil/" + f, import.meta.url).pathname);
+const VOISIN = (f: string) => existsSync(fileURLToPath(new URL("../../profil/" + f, import.meta.url)));
 
 test("le profil publié ne porte ni lien mort ni chemin de la machine", (t) => {
   if (!existsSync(PROFIL)) return t.skip("dépôt profil absent");

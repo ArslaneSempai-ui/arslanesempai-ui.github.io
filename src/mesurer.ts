@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 /*
  * LES CHIFFRES DE LA VITRINE, PRIS À LA SOURCE.
  *
@@ -32,8 +33,8 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { isMain } from "./cli.ts";
 
 /** Les dépôts voisins. Une seule ligne à changer si l'arborescence bouge. */
-const VOISINS = new URL("../../", import.meta.url).pathname;
-const FICHIER = new URL("../chiffres.json", import.meta.url).pathname;
+const VOISINS = fileURLToPath(new URL("../../", import.meta.url));
+const FICHIER = fileURLToPath(new URL("../chiffres.json", import.meta.url));
 
 export type Chiffres = Record<string, Record<string, number | string | boolean>>;
 

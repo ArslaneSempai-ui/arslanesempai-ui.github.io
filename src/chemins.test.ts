@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 /*
  * UNE CLÉ N'EST PAS UN CHEMIN, ET « rag » LE PROUVE.
  *
@@ -29,8 +30,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 
-const VOISINS = new URL("../../", import.meta.url).pathname;
-const lire = (f: string) => readFileSync(new URL(f, import.meta.url).pathname, "utf8");
+const VOISINS = fileURLToPath(new URL("../../", import.meta.url));
+const lire = (f: string) => readFileSync(fileURLToPath(new URL(f, import.meta.url)), "utf8");
 /*
  * ─── LE DÉPÔT CLONÉ SEUL ───
  *
@@ -43,7 +44,7 @@ const lire = (f: string) => readFileSync(new URL(f, import.meta.url).pathname, "
  * vide. Le signal est la liste elle-même — si `identite/depots.json` est hors de portée, il
  * n'y a pas de portfolio autour, et ces questions n'ont pas d'objet.
  */
-const SEUL = !existsSync(new URL("../../identite/depots.json", import.meta.url).pathname);
+const SEUL = !existsSync(fileURLToPath(new URL("../../identite/depots.json", import.meta.url)));
 const siSeul = (t: { skip: (m: string) => void }) =>
   SEUL && (t.skip("dépôt cloné seul — les voisins ne sont pas là, ces cas n'ont pas d'objet"), true);
 
@@ -150,7 +151,7 @@ test("aucun code ne déduit un dossier voisin d'une clé", () => {
    * voisin — c'est la seule forme mécaniquement reconnaissable de la faute.
    */
   const fautifs: string[] = [];
-  for (const f of readdirSync(new URL(".", import.meta.url).pathname)) {
+  for (const f of readdirSync(fileURLToPath(new URL(".", import.meta.url)))) {
     if (!/\.(ts|mjs)$/.test(f) || f === "chemins.test.ts") continue;
     const code = lire("./" + f).replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
     if (/\$\{VOISINS\}\$\{[a-z.]*cle\}/.test(code)) fautifs.push(f);

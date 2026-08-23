@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 /*
  * LA DÉCOUVERTE DES DÉPÔTS NE DOIT SERVIR QUE CE QUI EST INSCRIT.
  *
@@ -25,7 +26,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { decouvrirDepots } from "./compter.ts";
 
-const VRAIE_LISTE = new URL("../../identite/depots.json", import.meta.url).pathname;
+const VRAIE_LISTE = fileURLToPath(new URL("../../identite/depots.json", import.meta.url));
 
 /*
  * ─── LE DÉPÔT CLONÉ SEUL ───

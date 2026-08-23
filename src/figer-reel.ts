@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 /*
  * LA MESURE QU'UN AUTRE POSTE NE PEUT PAS REFAIRE.
  *
@@ -20,9 +21,9 @@ import { readFileSync, writeFileSync, existsSync, readdirSync, rmSync } from "no
 import { execFileSync } from "node:child_process";
 import { isMain } from "./cli.ts";
 
-const VOISINS = new URL("../../", import.meta.url).pathname;
+const VOISINS = fileURLToPath(new URL("../../", import.meta.url));
 const CORPUS = `${VOISINS}rag/corpus-reel`;
-const CHIFFRES = new URL("../chiffres.json", import.meta.url).pathname;
+const CHIFFRES = fileURLToPath(new URL("../chiffres.json", import.meta.url));
 
 /** Le nombre de pages vient des PDF eux-mêmes, pas des numéros imprimés dessus : ces
  *  documents sont des extraits, et leurs pages internes vont jusqu'à 370. */

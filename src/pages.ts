@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 /*
  * LA PAGE D'ENTRÉE.
  *
@@ -32,7 +33,7 @@ import { isMain } from "./cli.ts";
 import { lire } from "./mesurer.ts";
 import { barres, empile } from "./graphes.js";
 
-const racine = new URL("..", import.meta.url).pathname;
+const racine = fileURLToPath(new URL("..", import.meta.url));
 
 const ech = (t: unknown) => String(t ?? "").replace(/[&<>"]/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));

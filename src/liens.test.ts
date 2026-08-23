@@ -23,8 +23,9 @@ import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { OUTILS as PAGES_OUTILS } from "./pages.ts";
+import { fileURLToPath } from "node:url";
 
-const VOISINS = new URL("../../", import.meta.url).pathname;
+const VOISINS = fileURLToPath(new URL("../../", import.meta.url));
 
 /** Chaque outil, son dépôt public, et la démo que son README doit annoncer. */
 /*
@@ -60,7 +61,7 @@ const present = (d: string) => existsSync(`${VOISINS}${d}/README.md`);
  * Hors clone seul, les dix voisins sont là — mesuré. Un manquant est donc un fait à nommer,
  * jamais une raison de regarder moins.
  */
-const SEUL = !existsSync(new URL("../../identite/depots.json", import.meta.url).pathname);
+const SEUL = !existsSync(fileURLToPath(new URL("../../identite/depots.json", import.meta.url)));
 const siSeul = (t: { skip: (m: string) => void }) =>
   SEUL && (t.skip("dépôt cloné seul — les voisins ne sont pas là, ces cas n'ont pas d'objet"), true);
 

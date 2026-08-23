@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 /*
  * LA PROVENANCE DANS LA PROSE.
  *
@@ -28,8 +29,8 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { isMain } from "./cli.ts";
 
-const VOISINS = new URL("../../", import.meta.url).pathname;
-const CHIFFRES = new URL("../chiffres.json", import.meta.url).pathname;
+const VOISINS = fileURLToPath(new URL("../../", import.meta.url));
+const CHIFFRES = fileURLToPath(new URL("../chiffres.json", import.meta.url));
 
 /** Les README qui portent des marques, et où ils vivent. */
 /*
@@ -99,7 +100,7 @@ export type Ecart = { page: string; cle: string; ecrit: string; attendu: string 
  * Dans les deux cas la marque est **comptée et nommée**. Remplacer un refus par un silence
  * échangerait un mur contre un vert vide.
  */
-const LISTE = new URL("../../identite/depots.json", import.meta.url).pathname;
+const LISTE = fileURLToPath(new URL("../../identite/depots.json", import.meta.url));
 
 function horsListe(): Record<string, { pourquoi?: string; depuis?: string }> {
   try { return JSON.parse(readFileSync(LISTE, "utf8")).exclus ?? {}; } catch { return {}; }

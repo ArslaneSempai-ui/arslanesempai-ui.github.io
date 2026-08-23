@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 /*
  * L'OUTIL QUI JUGE LES AUTRES, JUGÉ.
  *
@@ -100,14 +101,14 @@ test("l'ordre documenté est celui que le code exécute", () => {
    * ordre dans la source. Ce n'est pas une preuve d'exécution, c'est mieux que rien et ça
    * tombe le jour où l'un des deux bouge sans l'autre.
    */
-  const doc = new URL("../../identite/PROPAGATION.md", import.meta.url).pathname;
+  const doc = fileURLToPath(new URL("../../identite/PROPAGATION.md", import.meta.url));
   if (!existsSync(doc)) return;
   const bloc = /```\n([^`]*?)\n```/.exec(readFileSync(doc, "utf8"))?.[1] ?? "";
   const etapes = bloc.split("→").map((x) => x.trim()).filter(Boolean)
     .map((x) => x.replace(/\s*\(.*\)\s*/, "").trim());
   assert.ok(etapes.length >= 4, `l'ordre documenté est illisible : ${JSON.stringify(bloc)}`);
 
-  const source = readFileSync(new URL("./portefeuille.ts", import.meta.url).pathname, "utf8");
+  const source = readFileSync(fileURLToPath(new URL("./portefeuille.ts", import.meta.url)), "utf8");
   /* Le nom de l'étape dans le document → ce qu'on cherche dans le code. */
   const marqueurs: Record<string, RegExp> = {
     diffuser: /diffuser\.mjs/,
@@ -149,9 +150,14 @@ function faireDepot(racine: string, nom: string, o: { testPasse?: boolean; docs?
     /* Un `pages` qui recopie la version courante de src/ vers docs/ — assez pour que
        « le paquet a changé » veuille dire quelque chose. */
     writeFileSync(d + "src/pages.mjs",
+      /* Le fichier engendré importe lui aussi `fileURLToPath` : la conversion automatique
+         a réécrit ce gabarit sans y ajouter l'import, et le paquet d'essai mourait sur une
+         `ReferenceError`. Un gabarit qui devient un autre fichier emporte ses appels mais
+         pas les imports du fichier qui le contient. */
       `import { readFileSync, writeFileSync } from "node:fs";\n`
-      + `writeFileSync(new URL("../docs/index.html", import.meta.url).pathname,\n`
-      + `  "<!doctype html><html><body>" + readFileSync(new URL("./version.txt", import.meta.url).pathname, "utf8") + "</body></html>");\n`);
+      + `import { fileURLToPath } from "node:url";\n`
+      + `writeFileSync(fileURLToPath(new URL("../docs/index.html", import.meta.url)),\n`
+      + `  "<!doctype html><html><body>" + readFileSync(fileURLToPath(new URL("./version.txt", import.meta.url)), "utf8") + "</body></html>");\n`);
     writeFileSync(d + "src/version.txt", "nouveau");
   }
   return d;

@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 /*
  * CE QUE LES README AFFIRMENT EN PROSE.
  *
@@ -20,7 +21,7 @@ import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { PAGES } from "./prose.ts";
 import { DEPOTS } from "./compter.ts";
 
-const VOISINS = new URL("../../", import.meta.url).pathname;
+const VOISINS = fileURLToPath(new URL("../../", import.meta.url));
 
 /*
  * LA LISTE VIENT DE `depots.json`, COMME TOUTES LES AUTRES.
@@ -35,7 +36,7 @@ const VOISINS = new URL("../../", import.meta.url).pathname;
  * qui n'a ni README ni comptage, donc élargir la liste ne fait qu'élargir la couverture.
  */
 
-const chiffres = () => JSON.parse(readFileSync(new URL("../chiffres.json", import.meta.url).pathname, "utf8"));
+const chiffres = () => JSON.parse(readFileSync(fileURLToPath(new URL("../chiffres.json", import.meta.url)), "utf8"));
 
 const readme = (d: string) => `${VOISINS}${d}/README.md`;
 const paquet = (d: string) => `${VOISINS}${d}/package.json`;
@@ -80,7 +81,7 @@ test("aucune page marquée n'échappe à la liste surveillée", () => {
    * Une liste écrite à la main dans un outil qui existe pour empêcher les chiffres écrits à la
    * main : le contrôle manquait exactement là où l'outil regarde.
    */
-  const racine = new URL("../../", import.meta.url).pathname;
+  const racine = fileURLToPath(new URL("../../", import.meta.url));
   /*
    * ─── UNE PAGE QUI *PARLE* D'UNE MARQUE N'EN PORTE PAS ───
    *
@@ -124,7 +125,7 @@ test("aucune page marquée n'échappe à la liste surveillée", () => {
 
 test("aucun dépôt ne prétend être testé sans l'être", (t) => {
   /* Sur un clone isolé il n'y a aucun voisin à juger — saut nommé, pas silence. */
-  if (!existsSync(new URL("../../identite/depots.json", import.meta.url).pathname)) {
+  if (!existsSync(fileURLToPath(new URL("../../identite/depots.json", import.meta.url)))) {
     return t.skip("dépôt cloné seul — aucun voisin à examiner");
   }
   /*
@@ -147,7 +148,7 @@ test("aucun dépôt ne prétend être testé sans l'être", (t) => {
     outreach: "outil en pause depuis l'alerte LinkedIn — même promesse vide, même décision en attente",
   };
 
-  const racine = new URL("../../", import.meta.url).pathname;
+  const racine = fileURLToPath(new URL("../../", import.meta.url));
   const menteurs: string[] = [];
   /*
    * Le témoin, avant le verdict.
@@ -194,7 +195,7 @@ test("le tour du portfolio a été lancé récemment", () => {
    * dix-huit secondes. Il vérifie qu'il a eu lieu, et périme au bout d'une semaine : assez
    * long pour ne pas harceler, assez court pour qu'une dérive ne s'installe pas.
    */
-  const temoin = new URL("../data/dernier-tour.txt", import.meta.url).pathname;
+  const temoin = fileURLToPath(new URL("../data/dernier-tour.txt", import.meta.url));
   const JOURS = 7;
   if (!existsSync(temoin)) {
     assert.fail("le tour du portfolio n'a jamais été lancé — `npm run portefeuille`");

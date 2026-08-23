@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 /*
  * Le serveur de relecture.
  *
@@ -11,7 +12,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { isMain } from "./cli.ts";
 
 const PORT = Number(process.env.PORT ?? 4300);
-const DOCS = new URL("../docs/", import.meta.url).pathname;
+const DOCS = fileURLToPath(new URL("../docs/", import.meta.url));
 const TYPES: Record<string, string> = { html: "text/html", css: "text/css", js: "text/javascript" };
 
 export const serveur = createServer((req, res) => {

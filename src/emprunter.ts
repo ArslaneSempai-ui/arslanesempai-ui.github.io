@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 /*
  * LES MODÈLES EMPRUNTÉS AUX OUTILS.
  *
@@ -17,8 +18,8 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, rmSync } from "node:fs";
 import { isMain } from "./cli.ts";
 
-const VOISINS = new URL("../../", import.meta.url).pathname;
-const DEPOT = new URL("../src/emprunts/", import.meta.url).pathname;
+const VOISINS = fileURLToPath(new URL("../../", import.meta.url));
+const DEPOT = fileURLToPath(new URL("../src/emprunts/", import.meta.url));
 
 /**
  * Les fichiers empruntés, et pourquoi chacun.

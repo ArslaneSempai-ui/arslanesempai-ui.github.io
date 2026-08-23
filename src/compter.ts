@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 /*
  * COMBIEN DE TESTS, ET DEPUIS QUAND.
  *
@@ -20,10 +21,10 @@ import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { isMain } from "./cli.ts";
 
-const VOISINS = new URL("../../", import.meta.url).pathname;
+const VOISINS = fileURLToPath(new URL("../../", import.meta.url));
 /* La liste des dépôts, tenue une seule fois, dans `identite`. Voir `decouvrirDepots`. */
-const LISTE = new URL("../../identite/depots.json", import.meta.url).pathname;
-const CHIFFRES = new URL("../chiffres.json", import.meta.url).pathname;
+const LISTE = fileURLToPath(new URL("../../identite/depots.json", import.meta.url));
+const CHIFFRES = fileURLToPath(new URL("../chiffres.json", import.meta.url));
 
 /**
  * Un dépôt a-t-il des tests, quelle que soit la forme qu'ils prennent.
@@ -90,8 +91,8 @@ export function decouvrirDepots(
   /* Le dépôt courant, et son dossier. Paramétrés pour que les cas d'essai tournent sur un
      faux portfolio : un contrôle qui ne peut se vérifier que sur le vrai arbre est un
      contrôle qu'on finit par ne plus vérifier. */
-  ici: string = new URL("..", import.meta.url).pathname.replace(/\/$/, "").split("/").pop()!,
-  dossierIci: string = new URL("..", import.meta.url).pathname,
+  ici: string = fileURLToPath(new URL("..", import.meta.url)).replace(/\/$/, "").split("/").pop()!,
+  dossierIci: string = fileURLToPath(new URL("..", import.meta.url)),
 ): string[] {
 
   let declare: { diffusion: string[]; exclus?: Record<string, unknown> };
@@ -176,7 +177,7 @@ export const DEPOTS = decouvrirDepots();
 
 /** Le dernier commit qui a touché un fichier de test, par dépôt. */
 export function dernierTest(depot: string): string | null {
-  const dossier = depot === "vitrine" ? new URL("..", import.meta.url).pathname : `${VOISINS}${depot}/`;
+  const dossier = depot === "vitrine" ? fileURLToPath(new URL("..", import.meta.url)) : `${VOISINS}${depot}/`;
   if (!existsSync(dossier + ".git")) return null;
   try {
     /*
@@ -204,7 +205,7 @@ export function compter(): { nombre: number; parDepot: Record<string, number>; a
   const parDepot: Record<string, number> = {};
   const absents: string[] = [];
   for (const depot of DEPOTS) {
-    const dossier = depot === "vitrine" ? new URL("..", import.meta.url).pathname : `${VOISINS}${depot}/`;
+    const dossier = depot === "vitrine" ? fileURLToPath(new URL("..", import.meta.url)) : `${VOISINS}${depot}/`;
     if (!existsSync(dossier + "package.json")) { absents.push(depot); continue; }
     let sortie = "";
     try {
