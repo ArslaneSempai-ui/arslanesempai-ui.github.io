@@ -375,6 +375,18 @@ if (isMain(import.meta)) {
      * c'est lui qui permet de dire « ce compte a vieilli » sans relancer les suites. */
     testsCommitesLe: Object.fromEntries(DEPOTS.map((d) => [d, dernierTest(d)])),
     /*
+     * L'EMPREINTE, ECRITE POUR UN HUMAIN.
+     *
+     * `testsCommitesLe` porte des condensats de quarante caracteres : un outil les compare,
+     * personne ne les lit. Un lecteur qui voit un ecart doit pouvoir savoir QUOI EN FAIRE,
+     * et c'est toute la difference avec un nombre nu — sinon on a remplace un chiffre sans
+     * provenance par un chiffre avec une provenance illisible, ce qui revient au meme pour
+     * celui qui le lit.
+     *
+     * Sept caracteres suffisent a retrouver un commit ; la ligne tient sur une page.
+     */
+    mesureSur: DEPOTS.map((d) => `${d} ${(dernierTest(d) ?? "—").slice(0, 7)}`).join(" · "),
+    /*
      * Les dépôts que ce comptage n'a PAS certifiés, et pourquoi.
      *
      * Un chiffre issu d'une sélection porte le compte de ce qu'il écarte, ou ce n'est pas

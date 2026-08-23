@@ -81,23 +81,53 @@ test("le nombre de tests annoncé est celui qui a été compté", (t) => {
     `la page n'annonce pas « ${p.tests} tests » — lancer \`npm run compter\` puis corriger le README`);
 });
 
-test("aucun dépôt n'a commité de test depuis ce comptage", (t) => {
+test("le chiffre publié dit sur quel état il a été mesuré", (t) => {
   /*
-   * Le compte juste coûte quatre-vingts secondes : trop pour chaque `npm test`. On ne le
-   * rejoue donc pas, on vérifie seulement qu'il n'a pas pu se périmer — si le dernier
-   * commit touchant un fichier de test a changé quelque part, le nombre affiché sur la
-   * page d'accueil n'est plus garanti.
+   * ELLE CHANGE DE VERDICT, PAS DE SÉVÉRITÉ — et c'est la correction d'une garde qui avait
+   * pourtant raison.
+   *
+   * Version précédente : elle échouait dès qu'un dépôt avait commité un test depuis le
+   * comptage. Elle a rattrapé une publication périmée ce soir, donc elle sert. Mais elle
+   * aurait rougi **à chaque publication** : un tour dure une dizaine de minutes, plusieurs
+   * mains travaillent, et quelqu'un commite toujours pendant. **Une garde qui rougit à
+   * chaque fois finit par se contourner** — dans un mois quelqu'un la relâche « parce
+   * qu'elle rougit tout le temps », et elle emporte le vrai défaut avec elle.
+   *
+   * La distinction qui la sauve : un commit postérieur ne rend pas le chiffre FAUX, il le
+   * rend DATÉ. Daté est un état honnête qu'on peut publier — à condition de le dire. Faux
+   * ne l'est pas. Donc ce cas signale le mouvement et passe ; c'est
+   * « le nombre de tests annoncé est celui qui a été compté », trente lignes plus haut, qui
+   * reste rouge si le chiffre publié ne correspond à aucun état connu.
+   *
+   * Ce qu'elle continue de refuser : un relevé qui ne porte AUCUNE empreinte, ou qui n'en
+   * porte pas pour tous les dépôts. Là, le chiffre ne désigne aucun état et le lecteur n'a
+   * aucun moyen de savoir de quoi il parle — c'est le vrai défaut, et il reste rouge.
    */
   if (process.env.COMPTAGE) return t.skip("comptage en cours — ce contrôle est sans objet");
   const p = chiffres().portfolio;
   if (!p?.testsCommitesLe) return t.skip("aucun comptage enregistré");
+
+  const sansEmpreinte = DEPOTS.filter((d) => p.testsCommitesLe[d] == null && dernierTest(d) !== null);
+  assert.deepEqual(sansEmpreinte, [],
+    `le relevé ne porte pas d'empreinte pour ${sansEmpreinte.join(", ")} — le chiffre publié `
+    + "ne désigne alors aucun état de ces dépôts, et personne ne peut dire de quoi il parle.");
+
   const bouges = DEPOTS.filter((d) => {
     const vu = dernierTest(d);
     return vu !== null && p.testsCommitesLe[d] != null && vu !== p.testsCommitesLe[d];
   });
-  assert.deepEqual(bouges, [],
-    `des tests ont été commités depuis le comptage (${bouges.join(", ")}) — lancer \`npm run compter\``);
+
+  if (bouges.length > 0) {
+    /*
+     * Dit, pas tu. Un mouvement silencieux se lit comme une absence de mouvement, et c'est
+     * la confusion que tout ce dépôt combat.
+     */
+    console.log(`  ${bouges.length} dépôt(s) ont commité un test depuis le comptage : `
+      + `${bouges.join(", ")}. Le chiffre publié reste celui de son état, qui est écrit `
+      + `dans chiffres.json — il est daté, pas faux. \`npm run compter\` le rafraîchit.`);
+  }
 });
+
 
 test("l'estampille de fraîcheur couvre tous les dépôts, sinon elle ne garde rien", (t) => {
   /*

@@ -89,7 +89,8 @@
       "triage": "d3fde81c10ce15a714d65c6c09d8d7b2d6d50815",
       "vitrine": "da4e6fef5349c955473f0c64fb2513bc8b78c698"
     },
-    "nonCertifies": {}
+    "nonCertifies": {},
+    "mesureSur": "arbitrage ae83f59 · banc 8bc2e53 · cycle 2f7a315 · derive db525d4 · economics 3f4b45c · funnel fffecb6 · identite ed514e5 · rag b48b461 · remediation 1d6b2aa · triage d3fde81 · vitrine da4e6fe"
   },
   "ragReel": {
     "documents": 5,
