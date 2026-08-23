@@ -61,34 +61,35 @@
     "barre": 0.84
   },
   "portfolio": {
-    "tests": 282,
+    "tests": 418,
     "parDepot": {
       "arbitrage": 39,
-      "cycle": 38,
+      "cycle": 39,
       "derive": 31,
       "funnel": 34,
       "identite": 79,
       "rag": 30,
-      "remediation": 31
+      "remediation": 31,
+      "banc": 40,
+      "economics": 72,
+      "triage": 53
     },
-    "mesureLe": "2026-08-23T20:01:11.417Z",
+    "mesureLe": "2026-08-23T20:22:30.958Z",
     "testsCommitesLe": {
-      "arbitrage": "3e9cb51d74dfe5f34f9301598eced5fbf70f7501",
-      "banc": "1744468e9aa4c104007f86749cb41412cb5e022b",
-      "cycle": "ada798bd51c02efe63d3e0f9bd381d76ca585a40",
-      "derive": "960a0472ea1dc35c8d33d84c9ab1c0b4cb845c29",
-      "economics": "2410bc5ad1eb2d34949cf14ea32661409a1ce8b6",
-      "funnel": "ed409ef5459c32ee99aead32ff9efdb4f78343b1",
-      "identite": "df4577a3ffe195238b45ab874d036cb922ad37d8",
-      "rag": "6d9f4053c5716cdb8d1dcc8ca64a50994a17ea0d",
-      "remediation": "3564b6659f43e0950fdf8c4ac735c7c80d18f7dc",
-      "triage": "ad5c5a6fb0b6fa76c52a571a092d0aba20d0bd4f",
-      "vitrine": "52562c34957dd20a2b6d41cd2e2d8f3a0dcae474"
+      "arbitrage": "ae83f591e3dc20ec1022b21157d45b2c6288b061",
+      "banc": "8d31a7942a018779d33db9db4635715deb99a169",
+      "cycle": "2f7a315909d043b2cb2ba11e56fe7570869c03b0",
+      "derive": "db525d42c31ee608469e2ef6a3a11de2cdc2872c",
+      "economics": "2213f71adb06f29e6b7dd532d3e7f199acea9907",
+      "funnel": "0547405b7119dbb6a373a5487e59752b0c753fc9",
+      "identite": "ed514e5c339ae3d3a85aff1d85272d43ac198a4a",
+      "rag": "b48b4618b586b0fda63c5ac5a289919b3b8097ba",
+      "remediation": "1d6b2aa399fed00d819a38049ba70a1d8b17862f",
+      "triage": "d3fde81c10ce15a714d65c6c09d8d7b2d6d50815",
+      "vitrine": "7291d8d0eeeb4aaaacf7b6ceade85c44d5e9f5b5"
     },
     "nonCertifies": {
-      "banc": 6,
-      "economics": 2,
-      "triage": 2,
+      "rag": 1,
       "vitrine": 1
     }
   },

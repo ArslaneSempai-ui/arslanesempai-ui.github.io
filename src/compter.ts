@@ -346,9 +346,30 @@ export function compter(): {
 if (isMain(import.meta)) {
   const { nombre, parDepot, absents, nonCertifies } = compter();
   const chiffres = JSON.parse(readFileSync(CHIFFRES, "utf8"));
+
+  /*
+   * UNE CLÉ PUBLIÉE NE DISPARAÎT PAS, MÊME QUAND SON DÉPÔT N'EST PAS CERTIFIÉ.
+   *
+   * Première version : les dépôts non certifiés étaient simplement absents de `parDepot`.
+   * Conséquence immédiate, et je l'ai découverte en la provoquant — trois README portent
+   * `<!--p:portfolio.parDepot.banc-->` et consorts, et la marque a cessé de pointer sur
+   * quoi que ce soit. `npm test` de la vitrine échouait donc AVANT sa suite, ce qui
+   * empêchait le tour suivant de compter la vitrine, ce qui empêchait de réécrire le
+   * fichier qui aurait réparé les marques. **Un blocage circulaire créé par une garde.**
+   *
+   * La valeur précédente est donc conservée pour un dépôt non certifié. Ce n'est pas la
+   * publier en douce : `nonCertifies` la nomme à côté, avec son compte de fichiers non
+   * commités. Le lecteur voit le chiffre ET le fait qu'il n'a pas été refait — ce qui est
+   * exactement la règle qu'on applique partout ailleurs, plutôt que de faire disparaître
+   * une ligne et de laisser croire que le dépôt n'existe plus.
+   */
+  const precedent: Record<string, number> = chiffres.portfolio?.parDepot ?? {};
+  const complet = { ...precedent, ...parDepot };
   chiffres.portfolio = {
+    /* Le total ne porte QUE les dépôts certifiés : additionner une valeur qu'on n'a pas
+       remesurée en ferait un chiffre que personne n'a mesuré d'un seul tenant. */
     tests: nombre,
-    parDepot,
+    parDepot: complet,
     mesureLe: new Date().toISOString(),
     /* Le dernier commit de test connu au moment de la mesure, dépôt par dépôt :
      * c'est lui qui permet de dire « ce compte a vieilli » sans relancer les suites. */
