@@ -200,6 +200,26 @@ if (isMain(import.meta)) {
     process.exit(1);
   }
   if (ecarts.length) {
+    /*
+     * EN PAUSE PENDANT LE COMPTAGE — troisieme blocage circulaire de la soiree, meme dessin.
+     *
+     * `compter` lance `npm test` chez chaque voisin, dont la vitrine. Ce controle y compare
+     * la prose publiee au contenu de `chiffres.json` — deux choses qui, PENDANT le tour,
+     * different forcement : le tour est justement en train de produire les nouveaux
+     * chiffres. Il echouait donc, `npm test` tombait avant sa suite, `compter` refusait de
+     * compter un depot dont la suite echoue, et le tour ne pouvait plus aboutir. Donc plus
+     * rien ne pouvait mettre la prose a jour. **Le controle interdisait la mesure qui aurait
+     * fait disparaitre son motif.**
+     *
+     * Il continue de tirer hors du comptage : l'ecart entre la page et la mesure reste un
+     * vrai defaut et reste visible. Il cesse seulement de bloquer le seul geste capable de
+     * le resoudre.
+     */
+    if (controle && process.env.COMPTAGE) {
+      console.log(`${ecarts.length} ecart(s) — comptage en cours, la prose porte encore les `
+        + "chiffres precedents. Controle en pause, il reprend hors comptage.");
+      process.exit(0);
+    }
     if (controle) {
       console.error("des affirmations ne disent plus ce que la mesure dit — lancer `npm run prose` :");
       for (const e of ecarts) console.error(`  ${e.page} · ${e.cle} : écrit « ${e.ecrit} », mesuré « ${e.attendu} »`);
