@@ -175,6 +175,37 @@ export function decouvrirDepots(
 
 export const DEPOTS = decouvrirDepots();
 
+/**
+ * Les fichiers non commités d'un dépôt, s'il y en a.
+ *
+ * COMPTER UN ARBRE QUI BOUGE PRODUIT UN CHIFFRE QU'AUCUN COMMIT NE CONTIENT. `compter()`
+ * lance `npm test` chez le voisin et estampille le résultat avec `dernierTest(depot)` —
+ * le dernier commit ayant touché un test. Si l'arbre porte des modifications non
+ * commitées, le nombre mesuré vient d'un code que ce commit ne contient pas : le chiffre
+ * publié est attribué à un état du dépôt qui n'existe nulle part.
+ *
+ * C'est la famille de défaut la plus chère de la journée — un chiffre dérivé de quelque
+ * chose que git ne transporte pas — et elle est invisible depuis l'arbre de travail, par
+ * construction : c'est l'arbre de travail qui est le problème.
+ *
+ * Le gardien de fraîcheur ne peut pas l'attraper non plus, et pour la même raison : il
+ * compare des empreintes de commit, donc il ne voit que ce qui a été commité. Un test
+ * modifié et non commité ne déplace aucune empreinte.
+ *
+ * On ne refuse donc pas tout le comptage : on refuse de CERTIFIER les dépôts concernés,
+ * on les nomme, et le chiffre publié porte la liste. Refuser en bloc rendrait l'outil
+ * inutilisable sur une machine où quelqu'un travaille toujours quelque part — et un outil
+ * inutilisable se contourne, ce qui est pire que de ne pas l'avoir écrit.
+ */
+export function nonCommites(depot: string): string[] {
+  const dossier = depot === "vitrine" ? fileURLToPath(new URL("..", import.meta.url)) : `${VOISINS}${depot}/`;
+  if (!existsSync(dossier + ".git")) return [];
+  try {
+    return execFileSync("git", ["status", "--porcelain"], { cwd: dossier, encoding: "utf8" })
+      .split("\n").map((l) => l.slice(3).trim()).filter(Boolean);
+  } catch { return []; }
+}
+
 /** Le dernier commit qui a touché un fichier de test, par dépôt. */
 export function dernierTest(depot: string): string | null {
   const dossier = depot === "vitrine" ? fileURLToPath(new URL("..", import.meta.url)) : `${VOISINS}${depot}/`;
@@ -201,12 +232,19 @@ export function dernierTest(depot: string): string | null {
   } catch { return null; }
 }
 
-export function compter(): { nombre: number; parDepot: Record<string, number>; absents: string[] } {
+export function compter(): {
+  nombre: number; parDepot: Record<string, number>; absents: string[];
+  nonCertifies: Record<string, number>;
+} {
   const parDepot: Record<string, number> = {};
   const absents: string[] = [];
+  /** Dépôt → nombre de fichiers non commités qui empêchent de le certifier. */
+  const nonCertifies: Record<string, number> = {};
   for (const depot of DEPOTS) {
     const dossier = depot === "vitrine" ? fileURLToPath(new URL("..", import.meta.url)) : `${VOISINS}${depot}/`;
     if (!existsSync(dossier + "package.json")) { absents.push(depot); continue; }
+    const sales = nonCommites(depot);
+    if (sales.length > 0) { nonCertifies[depot] = sales.length; continue; }
     let sortie = "";
     try {
       /*
@@ -262,11 +300,14 @@ export function compter(): { nombre: number; parDepot: Record<string, number>; a
     const lu = (mot: string) => Number(new RegExp(`^ℹ ${mot} (\\d+)$`, "m").exec(sortie)?.[1] ?? 0);
     parDepot[depot] = lu("pass") + lu("skipped");
   }
-  return { nombre: Object.values(parDepot).reduce((a, b) => a + b, 0), parDepot, absents };
+  return {
+    nombre: Object.values(parDepot).reduce((a, b) => a + b, 0),
+    parDepot, absents, nonCertifies,
+  };
 }
 
 if (isMain(import.meta)) {
-  const { nombre, parDepot, absents } = compter();
+  const { nombre, parDepot, absents, nonCertifies } = compter();
   const chiffres = JSON.parse(readFileSync(CHIFFRES, "utf8"));
   chiffres.portfolio = {
     tests: nombre,
@@ -275,8 +316,24 @@ if (isMain(import.meta)) {
     /* Le dernier commit de test connu au moment de la mesure, dépôt par dépôt :
      * c'est lui qui permet de dire « ce compte a vieilli » sans relancer les suites. */
     testsCommitesLe: Object.fromEntries(DEPOTS.map((d) => [d, dernierTest(d)])),
+    /*
+     * Les dépôts que ce comptage n'a PAS certifiés, et pourquoi.
+     *
+     * Un chiffre issu d'une sélection porte le compte de ce qu'il écarte, ou ce n'est pas
+     * un chiffre — c'est un échantillon présenté comme un recensement. Sans cette ligne,
+     * un total plus petit se lirait comme « moins de tests » au lieu de « moins de dépôts
+     * mesurés », et personne ne pourrait faire la différence.
+     */
+    nonCertifies,
   };
   writeFileSync(CHIFFRES, JSON.stringify(chiffres, null, 2) + "\n");
+  const nc = Object.entries(nonCertifies);
   console.log(`${nombre} tests${absents.length ? `, ${absents.length} dépôt(s) absent(s)` : ""} — ${
     Object.entries(parDepot).map(([d, n]) => `${d} ${n}`).join(", ")}`);
+  if (nc.length > 0) {
+    console.log(`\n  ${nc.length} dépôt(s) NON CERTIFIÉ(S) — arbre modifié, le chiffre viendrait`);
+    console.log("  d'un code qu'aucun commit ne contient :");
+    for (const [d, n] of nc) console.log(`    ${d} — ${n} fichier(s) non commité(s)`);
+    console.log("  Recomptez-les une fois leur arbre propre. Le total ci-dessus les exclut.");
+  }
 }
