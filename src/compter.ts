@@ -202,7 +202,20 @@ export function nonCommites(depot: string): string[] {
   if (!existsSync(dossier + ".git")) return [];
   try {
     return execFileSync("git", ["status", "--porcelain"], { cwd: dossier, encoding: "utf8" })
-      .split("\n").map((l) => l.slice(3).trim()).filter(Boolean);
+      .split("\n").map((l) => l.slice(3).trim()).filter(Boolean)
+      /*
+       * `chiffres.json` est la SORTIE de ce comptage, pas une source.
+       *
+       * Sans cette exemption la règle se mord la queue : le tour écrit le fichier, l'arbre
+       * de la vitrine devient modifié, et le tour SUIVANT refuse de certifier la vitrine à
+       * cause de ce que le précédent a écrit. Le code n'a pas bougé — seul le chiffre
+       * publié a été mis à jour, ce que ce fichier existe pour faire.
+       *
+       * L'exemption est nommée plutôt que silencieuse : elle porte sur un seul chemin, et
+       * si un jour la sortie change de nom, la ligne se voit. Une garde qui refuse à tort
+       * est une garde qu'on supprime — surtout quand elle refuse à cause d'elle-même.
+       */
+      .filter((f) => f !== "chiffres.json");
   } catch { return []; }
 }
 
@@ -240,6 +253,8 @@ export function compter(): {
   const absents: string[] = [];
   /** Dépôt → nombre de fichiers non commités qui empêchent de le certifier. */
   const nonCertifies: Record<string, number> = {};
+  /** Dépôt → nombre de tests en échec, rassemblés pour un seul refus à la fin. */
+  const enEchec: Record<string, number> = {};
   for (const depot of DEPOTS) {
     const dossier = depot === "vitrine" ? fileURLToPath(new URL("..", import.meta.url)) : `${VOISINS}${depot}/`;
     if (!existsSync(dossier + "package.json")) { absents.push(depot); continue; }
@@ -275,7 +290,21 @@ export function compter(): {
       sortie = brut;
       const ligneFail = /^ℹ fail (\d+)$/m.exec(brut);
       if (ligneFail) {
-        throw new Error(`${depot} : ${ligneFail[1]} test(s) en échec — compter ce dépôt n'aurait pas de sens`);
+        /*
+         * ON LES RASSEMBLE, ON NE MEURT PAS SUR LE PREMIER.
+         *
+         * Compter un dépôt dont la suite échoue n'a pas de sens — ça, c'est juste, et le
+         * refus reste. Mais lever ici arrêtait tout le tour au premier voisin fautif :
+         * on corrigeait celui-là, on relançait ONZE suites, et on découvrait le suivant.
+         * Sur un portfolio de onze dépôts dont plusieurs sont édités par d'autres, c'est
+         * un tour complet par défaut trouvé.
+         *
+         * Le refus se prononce donc une fois, à la fin, avec la liste entière — on sait
+         * d'un coup ce qu'il y a à réparer. Le dépôt n'est pas compté pour autant : il
+         * rejoint les non certifiés, avec sa raison.
+         */
+        enEchec[depot] = Number(ligneFail[1]);
+        continue;
       }
       const cause = brut.split("\n")
         .filter((l) => l.trim() && !/^(npm |>|$)/.test(l.trim()))
@@ -300,6 +329,14 @@ export function compter(): {
     const lu = (mot: string) => Number(new RegExp(`^ℹ ${mot} (\\d+)$`, "m").exec(sortie)?.[1] ?? 0);
     parDepot[depot] = lu("pass") + lu("skipped");
   }
+  const echecs = Object.entries(enEchec);
+  if (echecs.length > 0) {
+    throw new Error(
+      `${echecs.length} dépôt(s) ont une suite en échec — les compter n'aurait pas de sens :\n`
+      + echecs.map(([d, n]) => `      ${d} : ${n} test(s) en échec`).join("\n")
+      + `\n\n      Les ${Object.keys(parDepot).length} autres ont été mesurés ; rien n'a été écrit.`);
+  }
+
   return {
     nombre: Object.values(parDepot).reduce((a, b) => a + b, 0),
     parDepot, absents, nonCertifies,

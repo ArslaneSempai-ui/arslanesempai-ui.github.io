@@ -61,33 +61,35 @@
     "barre": 0.84
   },
   "portfolio": {
-    "tests": 496,
+    "tests": 282,
     "parDepot": {
-      "arbitrage": 34,
-      "banc": 38,
-      "cycle": 35,
-      "derive": 30,
-      "economics": 64,
-      "funnel": 33,
-      "identite": 77,
-      "rag": 29,
-      "remediation": 30,
-      "triage": 46,
-      "vitrine": 80
+      "arbitrage": 39,
+      "cycle": 38,
+      "derive": 31,
+      "funnel": 34,
+      "identite": 79,
+      "rag": 30,
+      "remediation": 31
     },
-    "mesureLe": "2026-08-22T02:49:14.755Z",
+    "mesureLe": "2026-08-23T20:01:11.417Z",
     "testsCommitesLe": {
-      "arbitrage": "d236b3357fa10cac00f39ee438c132447858e507",
-      "banc": "e9adba8bf53eaded4a3a717814f5414855af04aa",
-      "cycle": "b1298cc7871b35a1f840bbd111371310b31d2971",
-      "derive": "49573818ee2153207a0d191284f95db562b08b30",
-      "economics": "a39aed9b508b86e57a8f49cec485204622675076",
-      "funnel": "523968a9161ff8dafe2c2369a779af455bbf50ec",
-      "identite": "be4697de723dae37dbddcde562d603c54efd800d",
-      "rag": "f093525808dea221a19996792ffa8401376bbbc0",
-      "remediation": "936a8360746370889629f9d346f636a2a1a0358f",
-      "triage": "17829b74ec397a788ae63425a9694f20ecb34186",
-      "vitrine": "25c69cd1076f959063f56e616bfd410ef00a5c1e"
+      "arbitrage": "3e9cb51d74dfe5f34f9301598eced5fbf70f7501",
+      "banc": "1744468e9aa4c104007f86749cb41412cb5e022b",
+      "cycle": "ada798bd51c02efe63d3e0f9bd381d76ca585a40",
+      "derive": "960a0472ea1dc35c8d33d84c9ab1c0b4cb845c29",
+      "economics": "2410bc5ad1eb2d34949cf14ea32661409a1ce8b6",
+      "funnel": "ed409ef5459c32ee99aead32ff9efdb4f78343b1",
+      "identite": "df4577a3ffe195238b45ab874d036cb922ad37d8",
+      "rag": "6d9f4053c5716cdb8d1dcc8ca64a50994a17ea0d",
+      "remediation": "3564b6659f43e0950fdf8c4ac735c7c80d18f7dc",
+      "triage": "ad5c5a6fb0b6fa76c52a571a092d0aba20d0bd4f",
+      "vitrine": "52562c34957dd20a2b6d41cd2e2d8f3a0dcae474"
+    },
+    "nonCertifies": {
+      "banc": 6,
+      "economics": 2,
+      "triage": 2,
+      "vitrine": 1
     }
   },
   "ragReel": {
