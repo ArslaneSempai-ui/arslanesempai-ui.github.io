@@ -365,8 +365,17 @@ if (isMain(import.meta)) {
   };
   writeFileSync(CHIFFRES, JSON.stringify(chiffres, null, 2) + "\n");
   const nc = Object.entries(nonCertifies);
-  console.log(`${nombre} tests${absents.length ? `, ${absents.length} dépôt(s) absent(s)` : ""} — ${
-    Object.entries(parDepot).map(([d, n]) => `${d} ${n}`).join(", ")}`);
+  /*
+   * LE COMPTE DES ÉCARTÉS S'ÉCRIT MÊME QUAND IL VAUT ZÉRO.
+   *
+   * Un zéro écrit est une information : il dit que la question a été posée et que la
+   * réponse est « aucun ». Un zéro absent est indiscernable d'un contrôle qui n'a pas
+   * regardé — et c'est précisément la confusion qu'on paie ailleurs depuis ce matin.
+   * La ligne dit donc toujours sur combien de dépôts le total porte.
+   */
+  console.log(`${nombre} tests sur ${Object.keys(parDepot).length} dépôt(s) certifié(s), `
+    + `${nc.length} non certifié(s)${absents.length ? `, ${absents.length} absent(s)` : ""} — ${
+      Object.entries(parDepot).map(([d, n]) => `${d} ${n}`).join(", ")}`);
   if (nc.length > 0) {
     console.log(`\n  ${nc.length} dépôt(s) NON CERTIFIÉ(S) — arbre modifié, le chiffre viendrait`);
     console.log("  d'un code qu'aucun commit ne contient :");
