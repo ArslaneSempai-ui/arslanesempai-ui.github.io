@@ -58,6 +58,22 @@ test("chaque chiffre de la page d'accueil sort d'une mesure", (t) => {
 });
 
 test("le nombre de tests annoncé est celui qui a été compté", (t) => {
+  /*
+   * EN PAUSE PENDANT LE COMPTAGE, pour la raison exacte de son voisin trente lignes plus
+   * haut — et il a fallu tomber dedans pour la voir ici aussi.
+   *
+   * Pendant que `compter` tourne, la page publiée porte forcément l'ANCIEN nombre : le
+   * nouveau est ce que le tour est en train de produire. Ce contrôle échouait donc, la
+   * suite de la vitrine tombait, `compter` refusait de compter un dépôt dont la suite
+   * échoue, et le tour ne pouvait plus aboutir — donc plus rien ne pouvait mettre la page
+   * à jour. **Le contrôle interdisait la mesure qui aurait fait disparaître son motif.**
+   *
+   * C'est le deuxième blocage circulaire de la soirée dans cet outil, et le même dessin :
+   * une garde qui juge un écart entre deux choses dont l'une ne peut être rapprochée de
+   * l'autre que par le geste qu'elle bloque. La parade est toujours la même — la garde se
+   * met en pause pendant ce geste précis, et pas autrement.
+   */
+  if (process.env.COMPTAGE) return t.skip("comptage en cours — la page porte encore l'ancien nombre");
   if (!existsSync(PROFIL)) return t.skip("dépôt profil absent");
   const p = chiffres().portfolio;
   assert.ok(p?.tests, "aucun comptage enregistré — lancer `npm run compter`");
