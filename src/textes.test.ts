@@ -144,11 +144,26 @@ test("aucun dépôt ne prétend être testé sans l'être", (t) => {
    * exactement l'état d'où ils viennent.
    */
   const CONNUS: Record<string, string> = {
-    recon: "outil inachevé — la commande test existe, la suite n'a jamais été écrite ; à finir ou à retirer",
     outreach: "outil en pause depuis l'alerte LinkedIn — même promesse vide, même décision en attente",
   };
 
   const racine = fileURLToPath(new URL("../../", import.meta.url));
+  /*
+   * UNE DISPENSE QUI NE DESIGNE PLUS RIEN SE FAIT REMARQUER.
+   *
+   * `recon` a été dispensé ici avec sa raison, puis le dépôt a quitté la machine. La ligne
+   * est restée : elle n'exemptait plus personne, et elle attendait en silence qu'un dépôt
+   * reprenne ce nom pour le dispenser sans que quiconque l'ait décidé.
+   *
+   * C'est la faute que ce test poursuit chez les autres — **une déclaration qui ne
+   * correspond plus à rien** — et elle vivait dans sa propre liste d'exceptions. Une
+   * dispense se justifie par un dépôt précis ; le dépôt parti, la justification aussi.
+   */
+  const dispensesMortes = Object.keys(CONNUS).filter((n) => !existsSync(`${racine}${n}/`));
+  assert.deepEqual(dispensesMortes, [],
+    `CONNUS dispense un dépôt qui n'existe plus : ${dispensesMortes.join(", ")}\n`
+    + `  → retirer la ligne. Gardée, elle dispensera en silence le prochain dépôt qui `
+    + `portera ce nom, sans que personne ait pris cette décision.`);
   const menteurs: string[] = [];
   /*
    * Le témoin, avant le verdict.
@@ -173,7 +188,26 @@ test("aucun dépôt ne prétend être testé sans l'être", (t) => {
     const cherche = (x: string) => {
       try { return readdirSync(x).some((f) => /\.test\.(ts|mjs|js)$/.test(f)); } catch { return false; }
     };
-    const teste = cherche(d) || cherche(d + "src");
+    /*
+     * LES DOSSIERS VIENNENT DU SCRIPT, PAS D'UNE SUPPOSITION.
+     *
+     * Version précédente : `cherche(d) || cherche(d + "src")`. Elle affirmait que les tests
+     * d'un dépôt vivent à la racine ou dans `src`, ce qui était vrai des dix premiers et
+     * faux du onzième. `carte` déclare `node --test web/*.test.js ocr/*.test.js`, a bel et
+     * bien ses deux suites, passe à zéro — et cette garde l'accusait de mentir.
+     *
+     * **Un motif de recherche est une affirmation.** Celui-ci affirmait une convention de
+     * rangement au lieu de lire celle que le dépôt annonce lui-même : sa commande `test`
+     * nomme les dossiers, il suffit de les prendre. Et une garde qui accuse un dépôt
+     * correct se fait retirer — en emportant les vrais menteurs avec elle.
+     *
+     * On garde la racine et `src` en plus, pour les scripts qui n'écrivent aucun chemin.
+     */
+    const dossiersDuScript = [...String(pkg.scripts.test).matchAll(/(?:^|\s)([\w./-]+)\/\*/g)]
+      .map((m) => m[1]!.replace(/^\.\//, ""))
+      .filter((x) => x && !x.startsWith("-"));
+    const aChercher = [...new Set(["", "src", ...dossiersDuScript])];
+    const teste = aChercher.some((sous) => cherche(sous ? `${d}${sous}` : d));
     if (!teste && !(e.name in CONNUS)) menteurs.push(e.name);
   }
   assert.deepEqual(menteurs, [],
