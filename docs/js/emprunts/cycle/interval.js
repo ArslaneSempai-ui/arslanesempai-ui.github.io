@@ -1,3 +1,6 @@
+/* PARTAGÉ — la source de ce fichier est ~/Documents/identite ; les dépôts du portfolio
+   en portent une copie identique. Corrigez-le DANS identite, puis recopiez. Corriger une
+   copie sur place fait refuser le commit, et le refus arrive après le travail. */
 /**
  * What a percentage is actually worth.
  *
@@ -28,6 +31,25 @@
 export function wilson(successes, n, z = 1.96) {
     if (n <= 0)
         return [0, 1];
+    /*
+     * PLUS DE SUCCÈS QUE D'ESSAIS N'EST PAS UN INTERVALLE LARGE, C'EST UN DÉFAUT EN AMONT.
+     *
+     * `p > 1` rend `p(1 − p)` négatif, `Math.sqrt` d'un négatif rend NaN, et les deux bornes
+     * sortent NaN. À n ≥ ENOUGH ça publie « 150.0 % [NaN–NaN] », ce qui est bruyant donc
+     * inoffensif. **Le danger est ailleurs et il est muet** : toute comparaison avec NaN vaut
+     * `false`, donc `distinguishable` répond « non séparables », donc la règle « prends le moins
+     * cher parmi les équivalents » retient un palier cassé s'il est rapide. Un palier gagne
+     * parce qu'il est cassé.
+     *
+     * Aucun site d'appel ne l'atteint aujourd'hui — les vingt-deux ont été relus, les comptes y
+     * sont bornés par construction. **Aujourd'hui n'est pas une garantie**, et deux lignes
+     * ferment la famille entière au lieu du cas.
+     */
+    if (!Number.isFinite(successes) || successes < 0 || successes > n) {
+        throw new Error(`wilson(${successes}, ${n}): a success count outside [0, n].\n`
+            + "  An interval cannot absorb this — it would return NaN, and NaN compares silently as\n"
+            + "  \"not separable\". The defect is in the counting, upstream.");
+    }
     const p = successes / n;
     const d = 1 + (z * z) / n;
     const centre = (p + (z * z) / (2 * n)) / d;
@@ -93,6 +115,21 @@ export function writeRate(r, digits = 1) {
  * survive the question, and it is better to find that out here than in an interview.
  */
 export function distinguishable(a, b) {
+    /*
+     * « JE NE PEUX PAS COMPARER » ET « ILS SONT ÉQUIVALENTS » SONT DEUX PHRASES.
+     *
+     * Sur une borne NaN, `<` vaut `false` dans les deux sens, donc cette fonction répondait
+     * « non séparables » — et c'est la réponse qui décide, puisque l'appelant retient alors le
+     * moins cher des équivalents. Une fonction qui ne peut pas répondre doit refuser, pas
+     * choisir la réponse qui passe.
+     */
+    for (const [nom, r] of [["a", a], ["b", b]]) {
+        if (!Number.isFinite(r.low) || !Number.isFinite(r.high)) {
+            throw new Error(`distinguishable(): bound ${nom} is not a number (low=${r.low}, high=${r.high}).\n`
+                + "  Refusing rather than returning `false`: \"cannot compare\" rendered as \"equivalent\"\n"
+                + "  makes the caller take the cheapest tier on a measurement that does not exist.");
+        }
+    }
     return a.high < b.low || b.high < a.low;
 }
 /**
@@ -111,18 +148,39 @@ export function pairedVerdict(gains, regressions) {
     const discordant = gains + regressions;
     if (discordant === 0)
         return { discordant, decidable: false, note: "no case changed verdict" };
-    // Two-sided exact binomial against p = 0.5.
-    const choose = (n, k) => {
-        let r = 1;
-        for (let i = 0; i < k; i++)
-            r = (r * (n - i)) / (i + 1);
-        return r;
-    };
+    /*
+     * BINOMIALE EXACTE À DEUX QUEUES CONTRE p = 0,5 — EN ENTIERS, PAS EN FLOTTANTS.
+     *
+     * La formule était juste ; l'arithmétique ne l'était pas. `Math.pow(2, discordant)` vaut
+     * **Infinity dès 1024 paires discordantes**, et les coefficients binomiaux débordaient avec
+     * lui. Selon lequel des deux débordait le premier, `p` sortait `0` ou `NaN` — et `NaN < 0.05`
+     * vaut `false`, donc le verdict tombait sur « cet échantillon ne distingue pas les deux
+     * versions » **sans qu'aucun calcul n'ait abouti**.
+     *
+     * Mesuré : à 548 gains contre 481 régressions, p exact vaut 0,0396 — l'échantillon distingue
+     * bel et bien — et l'outil répondait « il ne distingue pas ». À 560 contre 470, p exact vaut
+     * 0,0055, même réponse. **La faute penche du côté prudent, ce qui la rend plus difficile à
+     * voir** : elle refuse une trouvaille qu'on a, elle n'en invente pas. Personne ne conteste un
+     * outil qui dit « je ne peux pas conclure ».
+     *
+     * Mille paires discordantes ne sont pas une hypothèse : une passe mesure des milliers
+     * d'extractions, et les cas où deux paliers divergent se comptent en centaines.
+     *
+     * `BigInt` porte les deux côtés exactement. La seule division flottante est la dernière, et
+     * elle porte dix-huit décimales — largement plus que ce qu'un seuil à 0,05 demande.
+     */
     const extreme = Math.min(gains, regressions);
-    let tail = 0;
-    for (let i = 0; i <= extreme; i++)
-        tail += choose(discordant, i);
-    const p = Math.min(1, 2 * tail / Math.pow(2, discordant));
+    let tail = 0n;
+    let c = 1n; /* C(discordant, i), construit sans division */
+    const n = BigInt(discordant);
+    for (let i = 0; i <= extreme; i++) {
+        if (i > 0)
+            c = (c * (n - BigInt(i) + 1n)) / BigInt(i);
+        tail += c;
+    }
+    const ECHELLE = 1000000000000000000n;
+    const brut = (2n * tail * ECHELLE) / (1n << n);
+    const p = Math.min(1, Number(brut) / 1e18);
     return {
         discordant,
         p,
