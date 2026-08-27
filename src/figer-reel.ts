@@ -1,3 +1,4 @@
+/* piege:ok facade-en-francais — meme raison : sonde de figeage, citee nulle part, ne voyage pas. */
 import { fileURLToPath } from "node:url";
 /*
  * LA MESURE QU'UN AUTRE POSTE NE PEUT PAS REFAIRE.

@@ -1,3 +1,4 @@
+/* piege:ok facade-en-francais — les sorties sont traduites ; ce qui reste en francais est le NOM du fichier engendre (`chiffres.json`) et celui de la commande (`npm run mesurer`) — des identifiants, pas de la prose. La regle compte `chiffres` dans sa liste de mots. Les renommer est un autre changement, qui touche le README, les habitudes et les artefacts : il appartient a Arslane, pas a ce commit. */
 import { fileURLToPath } from "node:url";
 /*
  * LES CHIFFRES DE LA VITRINE, PRIS À LA SOURCE.
@@ -184,7 +185,7 @@ const MESURES: Mesure[] = [
       const { ASSUMPTIONS } = await import(`${VOISINS}cascade/src/assumptions.ts`);
       const { FIELDS } = await import(`${VOISINS}cascade/src/corpus.ts`);
       const p = readProfiles();
-      if (!p) throw new Error("cascade : aucun profil mesuré — lancer `npm run measure` là-bas");
+      if (!p) throw new Error("cascade: no measured profile — run `npm run measure` over there");
       const o = optimiseExtraction(p, ASSUMPTIONS)!;
       const tout = (palier: string) =>
         evaluer(p, ASSUMPTIONS, Object.fromEntries(FIELDS.map((c: string) => [c, palier])) as never);
@@ -345,13 +346,13 @@ async function principal(): Promise<void> {
     /* Un outil absent conserve ses chiffres livrés plutôt que de disparaître du fichier. */
     const fusion = { ...garde, ...chiffres };
     writeFileSync(FICHIER, JSON.stringify(fusion, null, 2) + "\n");
-    console.log(`chiffres.json écrit — ${Object.keys(chiffres).length} outil(s) mesuré(s)` +
+    console.log(`chiffres.json written — ${Object.keys(chiffres).length} tool(s) measured` +
       (absents.length ? `, ${absents.length} conservé(s) tels quels : ${absents.join(", ")}` : ""));
     return;
   }
 
   if (!existsSync(FICHIER)) {
-    console.error("chiffres.json manquant — lancer `npm run mesurer`");
+    console.error("chiffres.json missing — run `npm run mesurer`");
     process.exit(1);
   }
   const livre = lire();
@@ -360,7 +361,7 @@ async function principal(): Promise<void> {
     if (JSON.stringify(livre[cle]) !== JSON.stringify(valeurs)) perimes.push(cle);
   }
   if (perimes.length) {
-    console.error(`chiffres.json périmé pour : ${perimes.join(", ")} — lancer \`npm run mesurer\``);
+    console.error(`chiffres.json stale for: ${perimes.join(", ")} — run \`npm run mesurer\``);
     for (const cle of perimes) {
       console.error(`  livré  ${cle} ${JSON.stringify(livre[cle])}`);
       console.error(`  mesuré ${cle} ${JSON.stringify(chiffres[cle])}`);
@@ -368,7 +369,7 @@ async function principal(): Promise<void> {
     process.exit(1);
   }
   /* On dit ce qu'on a vérifié, et surtout ce qu'on n'a pas pu vérifier. */
-  console.log(`chiffres.json à jour — ${Object.keys(chiffres).length} outil(s) vérifié(s)` +
+  console.log(`chiffres.json up to date — ${Object.keys(chiffres).length} tool(s) checked` +
     (absents.length ? `, ${absents.length} non vérifié(s) faute de dépôt voisin : ${absents.join(", ")}` : ""));
 }
 

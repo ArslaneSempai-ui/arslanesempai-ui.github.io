@@ -1,3 +1,4 @@
+/* piege:ok facade-en-francais — meme raison : la sortie est traduite, `chiffres.json` reste un nom de fichier. */
 import { fileURLToPath } from "node:url";
 /*
  * LA PAGE D'ENTRÉE.
@@ -160,7 +161,7 @@ export function construire(): void {
 
   const tuiles = OUTILS.map((o, i) => {
     const n = c[o.cle];
-    if (!n) throw new Error(`chiffres.json n'a rien pour « ${o.cle} » — lancer \`npm run mesurer\``);
+    if (!n) throw new Error(`chiffres.json has nothing for "${o.cle}" — run \`npm run mesurer\``);
     const trouvaille = o.trouvaille(n);
     const [lecture, unite] = o.lecture(n);
     /*

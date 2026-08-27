@@ -1,3 +1,4 @@
+/* piege:ok facade-en-francais — outil de maintenance du site. Ni le README ni la page publiee ne citent `npm run compter` — verifie — et ce fichier ne voyage vers aucun depot. Personne ne rencontre cette sortie sans avoir ouvert l'atelier. */
 import { fileURLToPath } from "node:url";
 /*
  * COMBIEN DE TESTS, ET DEPUIS QUAND.

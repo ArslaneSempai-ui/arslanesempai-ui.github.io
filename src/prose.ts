@@ -1,3 +1,4 @@
+/* piege:ok facade-en-francais — meme raison : outil d'atelier, cite nulle part, ne voyage pas. */
 import { fileURLToPath } from "node:url";
 /*
  * LA PROVENANCE DANS LA PROSE.
