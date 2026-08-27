@@ -23,6 +23,7 @@
 import { spawn, spawnSync, execFileSync } from "node:child_process";
 import { inscrire, rayer, ramasserOrphelins } from "./capturer.mjs";
 import { existsSync, readFileSync, rmSync, cpSync, writeFileSync, mkdirSync, readdirSync, statSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -210,6 +211,20 @@ const AUDIT = '<' + 'script>\n'
   + '    try { b.click(); } catch (e) { leves.push(String(e && e.message)); }\n'
   + '    if (leves.length > combien) soucis.push("clic qui leve : " + nomB + " — " + leves[leves.length - 1]);\n'
   + '  }\n'
+  /*
+   * LES MODULES RÉELLEMENT DEMANDÉS PAR LE NAVIGATEUR.
+   *
+   * Le navigateur resout le vrai graphe d'imports ; une analyse statique ne le fait pas. La
+   * mienne s'est trompee de quatre modules sur dix — elle suivait des chaines d'import
+   * ecrites dans des commentaires. Ici on ne deduit rien : on releve ce qui a ete demande.
+   */
+  + '  var charges = [];\n'
+  + '  var res = performance.getEntriesByType ? performance.getEntriesByType("resource") : [];\n'
+  + '  for (var q = 0; q < res.length; q++) {\n'
+  + '    var u = String(res[q].name);\n'
+  + '    if (/\\.m?js(\\?|$)/.test(u)) charges.push(u.split("/").slice(-2).join("/"));\n'
+  + '  }\n'
+  + '  document.documentElement.setAttribute("data-modules-charges", charges.join(" "));\n'
   + '  document.documentElement.setAttribute("data-boutons", String(boutons.length));\n'
   + '  document.documentElement.setAttribute("data-figures-vues", String(figures.length));\n'
   + '  document.documentElement.setAttribute("data-figures-auditees", String(auditees));\n'
@@ -245,12 +260,41 @@ export function modulesEnRetard(racineDepot) {
   const js = join(racineDepot, "docs", "js");
   if (!existsSync(js)) return [];
   const enRetard = [];
+
+  /*
+   * ─── L'EMPREINTE D'ABORD, LA DATE SEULEMENT SI ELLE MANQUE ───
+   *
+   * Les dates de modification répondent à « lequel a été écrit en dernier », qui est une
+   * question sur la machine, pas sur la page. Sur un clone neuf elles se trompent CENT POUR
+   * CENT du temps et de façon déterministe : `git clone` écrit `docs/` avant `src/`, et les
+   * neuf à dix-huit millisecondes d'écart suffisent — mesuré le 25 août 2026, six modules
+   * annoncés périmés dont les octets étaient identiques à leurs sources.
+   *
+   * `pages.ts` enregistre l'empreinte de chaque source dans `docs/.sources.json`. Quand il est
+   * là, il tranche seul et la marge d'une seconde n'a plus de rôle.
+   */
+  const manifeste = join(racineDepot, "docs", ".sources.json");
+  if (existsSync(manifeste)) {
+    let empreintes;
+    try { ({ empreintes } = JSON.parse(readFileSync(manifeste, "utf8"))); } catch { empreintes = null; }
+    if (empreintes && Object.keys(empreintes).length >= 2) {
+      for (const [rel, attendu] of Object.entries(empreintes)) {
+        const src = join(racineDepot, "src", rel.replace(/^js\//, "").replace(/\.js$/, ".ts"));
+        if (!existsSync(src)) continue;
+        const vu = createHash("sha256").update(readFileSync(src)).digest("hex");
+        if (vu !== attendu) enRetard.push(rel.startsWith("js/") ? rel.slice(3) : `index.html (src/${rel})`);
+      }
+      return enRetard;
+    }
+  }
   for (const f of readdirSync(js).filter((n) => n.endsWith(".js"))) {
     const source = join(racineDepot, "src", f.replace(/\.js$/, ".ts"));
     if (!existsSync(source)) continue;
-    /* Une seconde de marge : la construction écrit le compilé juste après avoir lu la
-       source, et deux horodatages pris à la même seconde ne doivent pas accuser. */
-    if (statSync(join(js, f)).mtimeMs + 1000 < statSync(source).mtimeMs) enRetard.push(f);
+    /* REPLI PAR DATES, faute de manifeste. La marge passe à trente secondes : une seconde
+       ne couvre pas un clone, et ce chemin ne sert plus qu'aux dépôts dont la construction
+       n'écrit pas encore d'empreintes. Un repli trop serré rend un rouge que personne ne peut
+       corriger, et un rouge qu'on ne peut pas corriger se fait désactiver. */
+    if (statSync(join(js, f)).mtimeMs + 30_000 < statSync(source).mtimeMs) enRetard.push(f);
   }
   /*
    * ET LA PAGE ELLE-MÊME, PAS SEULEMENT SES MODULES.
@@ -290,7 +334,7 @@ export function modulesEnRetard(racineDepot) {
     for (const m of src.matchAll(/(?:readFileSync|cpSync)\(\s*root \+ "([^"]+)"/g)) sources.add(m[1]);
     if (sources.size < 2) {
       throw new Error(
-        `dérivation des sources de la page cassée : ${sources.size} chemin(s) extrait(s) de `
+        `page source derivation is broken: ${sources.size} path(s) extracted from `
         + "src/pages.ts.\n\n"
         + "  Elle cherche `readFileSync(root + \"…\")` et `cpSync(root + \"…\")`. Si ce fichier a\n"
         + "  changé de façon de lire, corrigez l'extraction — ne la laissez pas rendre une liste\n"
@@ -299,7 +343,7 @@ export function modulesEnRetard(racineDepot) {
     const t = statSync(page).mtimeMs;
     for (const rel of sources) {
       const chemin = join(racineDepot, rel);
-      if (existsSync(chemin) && t + 1000 < statSync(chemin).mtimeMs) enRetard.push(`index.html (${rel})`);
+      if (existsSync(chemin) && t + 30_000 < statSync(chemin).mtimeMs) enRetard.push(`index.html (${rel})`);
     }
   }
   return enRetard;
@@ -336,7 +380,7 @@ const racine = (process.argv[2] ?? ".").replace(/\/$/, "") + "/";
 const attendu = Number(process.argv[3] ?? 1);
 const docs = racine + "docs";
 if (!existsSync(docs + "/index.html")) {
-  console.error(`${docs}/index.html absent — lancer \`npm run pages\` d'abord`);
+  console.error(`${docs}/index.html is missing — run \`npm run pages\` first`);
   process.exit(1);
 }
 
@@ -345,10 +389,10 @@ if (!existsSync(docs + "/index.html")) {
 const enRetard = modulesEnRetard(racine);
 if (enRetard.length) {
   console.error(
-    `${enRetard.length} module(s) publié(s) plus vieux que leur source : ${enRetard.join(", ")}.\n\n`
-    + "  La page construite n'est pas celle du code d'aujourd'hui. La vérifier reviendrait à\n"
-    + "  approuver la construction précédente, et à le dire avec les mots de celle-ci.\n\n"
-    + "  Lancez `npm run pages`, qui reconstruit puis vérifie.");
+    `${enRetard.length} published module(s) older than their source: ${enRetard.join(", ")}.\n\n`
+    + "  The built page is not the one from today's code. Verifying it would mean approving\n"
+    + "  the previous build, and saying so in this one's words.\n\n"
+    + "  Run `npm run pages`, which rebuilds and then verifies.");
   process.exit(1);
 }
 
@@ -392,7 +436,7 @@ writeFileSync(temp + "jeton.txt", JETON);
 /* On ramasse les orphelins d'exécutions tuées avant d'ouvrir le nôtre. */
 const orphelins = ramasserOrphelins();
 if (orphelins.fermes.length) {
-  console.error(`${orphelins.fermes.length} serveur(s) orphelin(s) fermé(s) — `
+  console.error(`${orphelins.fermes.length} orphan server(s) closed — `
     + orphelins.fermes.map((e) => `${e.outil}:${e.port}`).join(", "));
 }
 
@@ -422,7 +466,7 @@ for (let essai = 0; essai < 20 && !serveur; essai++) {
   } else candidat.kill();
 }
 if (!serveur) {
-  console.error("aucun port libre trouvé en vingt essais — une autre vérification tourne-t-elle ?");
+  console.error("no free port found in twenty attempts — is another verification running?");
   process.exit(1);
 }
 try {
@@ -474,13 +518,51 @@ try {
   const auditees = Number(dom.match(/data-figures-auditees="(\d+)"/)?.[1] ?? NaN);
   const soucis = [...new Set(console_)];
   const audit = dom.match(/data-audit="([^"]*)"/)?.[1];
-  if (audit === undefined) soucis.push("l'audit de forme n'a pas rendu de verdict");
+  if (audit === undefined) soucis.push("the shape audit returned no verdict");
   else if (audit !== "ok") soucis.push(...[...new Set(audit.split(" | "))]);
-  if (figures < attendu) soucis.push(`${figures} figure(s) rendues pour ${attendu} attendues`);
+  if (figures < attendu) soucis.push(`${figures} figure(s) rendered against ${attendu} expected`);
   if (Number.isFinite(auditees) && auditees < figures) {
-    soucis.push(`${figures} figure(s) rendues mais ${auditees} inspectée(s) : `
-      + `${figures - auditees} figure(s) sans SVG sous .graphe échappent au contrôle de forme`);
+    soucis.push(`${figures} figure(s) rendered but ${auditees} inspected: `
+      + `${figures - auditees} figure(s) with no SVG under .graphe escape the shape check`);
   }
+  /*
+   * ─── PUBLIER CE QUE LA PAGE NE CHARGE PAS ───
+   *
+   * Mesuré dans `cascade` le 25 août 2026 : 102 Ko sur 162 publiés n'étaient jamais demandés
+   * par le navigateur. Quatre modules compilés parce que le `tsconfig` du web les balaie, et
+   * copiés parce que la construction copie ce que le compilateur a produit.
+   *
+   * Ce n'est pas seulement du poids mort. L'un d'eux portait `http://localhost:11434`, trois
+   * routes d'API et un chemin `node_modules` — servis publiquement, lisibles par un simple
+   * `curl`. On ne vend pas à une banque une page dont la revue de sécurité trouve du code qui
+   * appelle la boucle locale du visiteur : ce n'est pas exploitable, et c'est exactement le
+   * genre de chose qui termine une conversation avant qu'on ait montré un chiffre.
+   *
+   * LA LISTE EST MESURÉE, PAS DÉDUITE. Mon analyse statique des imports s'était trompée de
+   * quatre modules sur dix : elle suivait des chaînes écrites dans des commentaires. Le
+   * navigateur, lui, résout le vrai graphe — alors on lui demande.
+   */
+  const declares = (() => {
+    const d = join(racine, "docs", "js");
+    return existsSync(d) ? readdirSync(d).filter((n) => n.endsWith(".js")) : [];
+  })();
+  const attribut = dom.match(/data-modules-charges="([^"]*)"/)?.[1];
+  if (declares.length > 0) {
+    if (attribut === undefined) {
+      soucis.push("le relevé des modules chargés est absent : on ne peut pas dire ce que la page publie pour rien");
+    } else {
+      const charges = new Set(attribut.split(" ").filter(Boolean).map((u) => u.split("/").pop()));
+      const jamais = declares.filter((n) => !charges.has(n));
+      if (charges.size === 0) {
+        soucis.push("aucun module relevé alors que la page en publie " + declares.length
+          + " : le relevé n'a pas fonctionné, et son zéro ne vaut rien");
+      } else if (jamais.length > 0) {
+        soucis.push(`${jamais.length} module(s) publié(s) que la page ne charge jamais : ${jamais.join(", ")}`
+          + " — poids mort servi publiquement, et lisible par un curl");
+      }
+    }
+  }
+
   /* Une section vide est le symptôme visible d'un rendu interrompu. */
   for (const [, id, contenu] of dom.matchAll(/id="([a-zA-Z]+)"[^>]*>([\s\S]{0,4})<\/div>/g)) {
     if (contenu.trim() === "" && ["verdict", "leviers", "reglages"].includes(id)) {
@@ -500,11 +582,11 @@ try {
    * ne ferme pas les processus déjà lancés : c'est une leçon à part entière.
    */
   if (soucis.length) {
-    console.error("l'écran construit ne s'affiche pas correctement :");
+    console.error("the built screen does not render correctly:");
     for (const s of soucis) console.error(`  ${s}`);
     process.exitCode = 1;
   } else {
-    console.log(`écran vérifié — ${figures} figure(s) rendues, ${auditees} inspectée(s)`);
+    console.log(`screen verified — ${figures} figure(s) rendered, ${auditees} inspected`);
   }
 } finally {
   serveur.kill();

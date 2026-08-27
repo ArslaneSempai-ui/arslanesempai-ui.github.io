@@ -570,10 +570,100 @@ test("aucun module compilé pour le navigateur n'importe un module Node", (t) =>
   assert.ok(vus.size > 0,
     `aucun fichier suivi depuis ${conf} : la liste d'entrées est vide ou illisible, et un vert `
     + `rendu ici ne dirait rien`);
-  assert.deepEqual([...new Set(fautifs)], [],
-    `${[...new Set(fautifs)].join(", ")} : importé dans la construction web et employant un `
-    + `module Node. Le navigateur ne le résout pas, le module ne se charge pas, et la page `
-    + `publiée est vide — pas amoindrie, vide. ${vus.size} fichier(s) suivis.`);
+
+  /*
+   * ─── CE QUI EST COMPILÉ N'EST PAS CE QUI EST SERVI, ET LA PROPRIÉTÉ PORTE SUR LE SERVI ───
+   *
+   * `tsconfig.web.json` nomme les entrées ; `pages.ts` publie ensuite la FERMETURE réellement
+   * atteinte depuis `index.html` et SUPPRIME le reste. Dans cascade, trois modules employant
+   * des modules Node sont compilés puis retirés — la page ne les charge jamais et fonctionne.
+   * La garde, qui partait du tsconfig, les accusait quand même : elle décrivait le compilateur
+   * et croyait décrire la page. Un rouge qu'aucune correction ne peut lever se fait désactiver.
+   *
+   * Le verdict DUR porte donc sur `docs/js/`, c'est-à-dire sur ce qui part chez le lecteur.
+   * Le balayage large reste, en diagnostic : un module compilé aujourd'hui et retiré peut être
+   * atteint demain par un import de plus, et l'avoir signalé d'avance vaut mieux que le
+   * découvrir sur la page.
+   */
+  const publies = ICI + "../docs/js";
+  const larges = [...new Set(fautifs)];
+  if (!existsSync(publies)) {
+    assert.deepEqual(larges, [],
+      `${larges.join(", ")} : importé dans la construction web et employant un module Node, et `
+      + `ce dépôt n'a pas de docs/js pour trancher plus finement. Le navigateur ne résout pas `
+      + `node:, le module ne se charge pas, et la page est vide — pas amoindrie, vide. `
+      + `${vus.size} fichier(s) suivis.`);
+    return;
+  }
+  const servis = new Set(readdirSync(publies).filter((n) => n.endsWith(".js"))
+    .map((n) => n.replace(/\.js$/, ".ts")));
+  assert.ok(servis.size > 0,
+    `docs/js existe et ne porte aucun module : la page ne sert rien, ou la convention a changé.`);
+  const fautifsServis = larges.filter((f) => servis.has(f.split("/").pop()));
+  assert.deepEqual(fautifsServis, [],
+    `${fautifsServis.join(", ")} : PUBLIÉ dans docs/js et employant un module Node. Le `
+    + `navigateur ne le résout pas, le module ne se charge pas, et la page est vide — pas `
+    + `amoindrie, vide. ${vus.size} fichier(s) suivis, ${servis.size} publié(s).`);
+
+  const retires = larges.filter((f) => !servis.has(f.split("/").pop()));
+  if (retires.length) {
+    t.diagnostic(`${retires.join(", ")} : emploie un module Node, compilé pour le web mais `
+      + `RETIRÉ avant publication — sans effet aujourd'hui. Un import de plus depuis la page `
+      + `les y ramènerait, et la page serait vide.`);
+  }
+});
+
+test("une donnée qui traverse data-lecture ressort telle qu'elle est entrée", () => {
+  /*
+   * ─── LE MODÈLE DU TRAJET, VALIDÉ CONTRE UN VRAI NAVIGATEUR AVANT D'ÊTRE FIGÉ ICI ───
+   *
+   * Ce cas simule ce que fait le navigateur : il décode l'attribut au parsing, puis `innerHTML`
+   * décode une seconde fois en interprétant le balisage. Une simulation ne prouve rien par
+   * elle-même — celle-ci a été confrontée à Chrome le 25 août 2026, sur le trajet complet, et
+   * les trois formes y donnent exactement ce que ce cas affirme :
+   *
+   *              « Smith & Co »     « a<b »   « <img src=x onerror=…> »
+   *   aucun      Smith & Co         « a »     ÉLÉMENT CRÉÉ — la faille
+   *   UNE        Smith & Co         a<b       texte inerte
+   *   deux       Smith &amp; Co     a&lt;b    texte inerte
+   *
+   * D'où le cas : une passe est la seule à la fois SÛRE et FIDÈLE. Deux passes ferment bien la
+   * faille et affichent « Smith &amp; Co » à un client dont un champ porte une esperluette.
+   */
+  const src = readFileSync(new URL("./graphes.js", import.meta.url), "utf8");
+
+  const m = src.match(/const echLecture = \(t\) => ([^;]+);/);
+  assert.ok(m, "`echLecture` a disparu ou changé de forme : ce cas ne garde plus rien.");
+  const corps = m[1].trim();
+  assert.equal(corps, "ech(t)",
+    `echLecture applique « ${corps} ». UNE passe et une seule : l'enveloppe de l'attribut en `
+    + "ajoute déjà une, et le trajet n'en défait que deux. Deux passes ici corrompent toute "
+    + "esperluette et tout chevron d'une valeur client ; zéro rouvre la faille.");
+
+  /* Le trajet, joué sur les valeurs qui décident. `ech` est relu du fichier plutôt que
+     réécrit ici : un cas qui redéfinit ce qu'il contrôle ne contrôle que lui-même. */
+  const ech = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const decode = (t) => t.replace(/&quot;/g, '"').replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+  const trajet = (v, passes) => {
+    let dedans = v;
+    for (let i = 0; i < passes; i++) dedans = ech(dedans);
+    const attribut = ech("<u>" + dedans + "</u>");
+    const lu = decode(attribut);                 /* le navigateur décode l'attribut */
+    return decode(lu.replace(/<\/?u>/g, ""));    /* puis innerHTML décode le contenu */
+  };
+
+  for (const v of ["Smith & Co", "a<b", 'il a dit "non"', "Dupont"]) {
+    assert.equal(trajet(v, 1), v, `« ${v} » ne ressort pas identique avec UNE passe`);
+    /* CONTRE-ÉPREUVES, dans les deux sens — sans elles, un trajet qui rendrait toujours son
+       entrée passerait ce cas en ne modélisant rien. */
+    if (/[&<>"]/.test(v)) {
+      assert.notEqual(trajet(v, 2), v, `« ${v} » ressort intact avec DEUX passes : le modèle du `
+        + "trajet ne reproduit pas la sur-échappement, donc il ne prouve rien.");
+      assert.notEqual(trajet(v, 0), ech(v), `« ${v} » : le modèle ne distingue pas zéro passe.`);
+    }
+  }
 });
 
 test("un jeton court n'est pas trouvé à l'intérieur d'un nom composé", () => {
@@ -594,4 +684,121 @@ test("un jeton court n'est pas trouvé à l'intérieur d'un nom composé", () =>
   assert.equal(borne("prise").test('class="prise"'), true, "le jeton seul reste trouvé");
   /* Et le pendant : la borne ne doit pas devenir si stricte qu'elle ne trouve plus rien. */
   assert.equal(borne("tete").test(".pliable > .tete { }"), true, "un sélecteur CSS reste lisible");
+});
+
+test("chaque data-lecture passe par le double échappement", () => {
+  /*
+   * CODEQL SIGNALE `boite.innerHTML = t` DANS `graphes.js`, ET C'EST UN FAUX POSITIF —
+   * AUJOURD'HUI.
+   *
+   * `data-lecture` porte du balisage VOULU (`<u>`, `<br>`), donc `innerHTML` est délibéré, et
+   * les données passent par `ech(echLecture(...))`. Vérifié deux fois : dans un vrai
+   * navigateur, les charges `<img src=x onerror=…>` et `<script>` ressortent inertes tandis
+   * que `<u>` et `<br>` survivent — le témoin qui rend la mesure valable ; et par énumération,
+   * les onze sites de construction passent tous par `ech`.
+   *
+   * Mais « vrai par énumération » est vrai à un instant. Le douzième site écrit demain sans
+   * `ech` ferait une XSS réelle, dans un fichier que douze dépôts portent, et le rejet déposé
+   * sur l'alerte CodeQL dirait toujours « faux positif ». Ce cas rend la propriété vraie par
+   * construction : il DÉRIVE les sites du fichier au lieu d'en réciter la liste.
+   */
+  const src = readFileSync(new URL("./graphes.js", import.meta.url), "utf8");
+  /*
+   * L'EXPRESSION SE LIT EN COMPTANT LES ACCOLADES, PAS AVEC `[^}]*`.
+   *
+   * Ces expressions sont des gabarits imbriqués : `ech(`<u>${echLecture(x)}`)`. Un motif qui
+   * s'arrête au premier `}` rend `ech(`<u>${echLecture(x` — tronqué avant l'accolade qui
+   * compte. Le contrôle extérieur y survit par chance (`ech(` est dans le morceau gardé) ;
+   * tout contrôle du contenu INTÉRIEUR, lui, ne voit rien et rend un vert vide.
+   *
+   * Mesuré le 25 août 2026 : la garde du second échappement, écrite avec `[^}]*`, restait
+   * verte alors qu'un `echLecture` avait été retiré — c'est-à-dire sur le défaut d'origine.
+   * Troisième fois dans ce dépôt qu'un extracteur naïf se désynchronise sur une imbrication.
+   */
+  const extraire = (texte) => {
+    const out = [];
+    const marque = 'data-lecture="${';
+    for (let i = texte.indexOf(marque); i !== -1; i = texte.indexOf(marque, i + 1)) {
+      let d = 1, j = i + marque.length;
+      while (j < texte.length && d > 0) {
+        if (texte[j] === "{") d++;
+        else if (texte[j] === "}") d--;
+        j++;
+      }
+      if (d === 0) out.push({ index: i, 1: texte.slice(i + marque.length, j - 1) });
+    }
+    return out;
+  };
+  const sites = extraire(src);
+  assert.ok(sites.length >= 8,
+    `${sites.length} site(s) data-lecture trouvé(s) — le motif ne lit plus le fichier, `
+    + "et un cas qui n'examine rien passerait toujours.");
+
+  /* Un site est sûr si l'expression appelle `ech(`, ou si elle nomme une variable dont
+     l'affectation, plus haut, appelle `ech(`. Les deux formes existent dans le fichier. */
+  const lignes = src.split("\n");
+  const nus = [];
+  for (const s of sites) {
+    const expr = s[1].trim();
+    if (/\bech\(/.test(expr)) continue;
+    const nom = expr.match(/^[A-Za-z_$][\w$]*$/)?.[0];
+    const pose = nom && lignes.some((l) => new RegExp(`\\b(const|let)\\s+${nom}\\s*=`).test(l) && /\bech\(/.test(l));
+    if (!pose) nus.push(`ligne ${src.slice(0, s.index).split("\n").length} — ${expr.slice(0, 40)}`);
+  }
+  assert.deepEqual(nus, [],
+    `site(s) data-lecture sans échappement :\n${nus.map((x) => "  - " + x).join("\n")}\n`
+    + "  → envelopper dans `ech(...)` avec `echLecture(...)` pour les données, sinon `innerHTML` "
+    + "rend du balisage fourni par la donnée.");
+
+  /*
+   * ET LE SECOND ÉCHAPPEMENT, QUI EST CELUI QUE LE TITRE PROMET.
+   *
+   * Le contrôle ci-dessus n'exige que le `ech(` EXTÉRIEUR, celui qui protège l'attribut. Il
+   * laisse passer `data-lecture="${ech(`<u>${b.nom}`)}"` — données échappées UNE fois — qui
+   * est le défaut d'origine mot pour mot. Trouvé le 25 août 2026 en mutant le fichier :
+   * remplacer `echLecture(` par `(` sur un seul site laissait la suite au vert.
+   *
+   * Un contrôle dont le nom promet plus que ce qu'il regarde est pire qu'un contrôle absent :
+   * il occupe la place de celui qui aurait pu exister. Ici la promesse était dans le titre du
+   * cas ET dans le texte de rejet déposé sur l'alerte CodeQL.
+   *
+   * La donnée traverse `ech` TROIS fois — deux par `echLecture`, une par l'enveloppe — parce
+   * que le navigateur relit l'attribut et réinsère son contenu.
+   */
+  const simples = [];
+  for (const s of sites) {
+    const expr = s[1];
+    /* Les interpolations INTÉRIEURES : celles du gabarit que l'enveloppe `ech(` entoure. */
+    /* Les interpolations intérieures, elles aussi comptées : `${fmtX(x(p))}` porte des
+       parenthèses mais pas d'accolades, `${a ? `${b}` : c}` en porte. */
+    const inters = [];
+    for (let i = expr.indexOf("${"); i !== -1; i = expr.indexOf("${", i + 1)) {
+      let d = 1, j = i + 2;
+      while (j < expr.length && d > 0) { if (expr[j] === "{") d++; else if (expr[j] === "}") d--; j++; }
+      if (d === 0) inters.push([null, expr.slice(i + 2, j - 1)]);
+    }
+    for (const inter of inters) {
+      const e = inter[1].trim();
+      if (!e || /^["'`]/.test(e)) continue;              /* un littéral n'a rien à échapper */
+      if (/\bechLecture\(/.test(e)) continue;
+      simples.push(`ligne ${src.slice(0, s.index).split("\n").length} — ${e.slice(0, 40)}`);
+    }
+  }
+  assert.deepEqual(simples, [],
+    `donnée(s) échappée(s) UNE SEULE FOIS dans un data-lecture :\n`
+    + `${simples.map((x) => "  - " + x).join("\n")}\n`
+    + "  → `echLecture(...)`, pas `ech(...)` : l'attribut est relu puis réinséré, donc une\n"
+    + "    seule passe laisse la charge vivante. C'est le défaut d'origine.");
+
+  /* TÉMOINS DU SECOND MOTIF, dans les deux sens. */
+  const faux = extraire('a data-lecture="${ech(`<u>${b.nom}`)}" b');
+  assert.equal(faux.length, 1, "le motif ne reconnaît plus un site à échappement simple");
+  assert.ok(/\bech\(/.test(faux[0][1]) && !/\bechLecture\(/.test(faux[0][1]),
+    "le témoin doit être accepté par le premier contrôle ET refusé par le second — "
+    + "sinon il ne démontre pas l'écart entre les deux.");
+
+  /* TÉMOINS DU MOTIF, sans quoi `nus` vide dirait seulement qu'il ne trouve rien. */
+  const nuDansUnFaux = [...`x data-lecture="\${brut}" y`.matchAll(/data-lecture="\$\{([^}]*)\}/g)];
+  assert.equal(nuDansUnFaux.length, 1, "le motif ne reconnaît plus un site data-lecture.");
+  assert.ok(!/\bech\(/.test(nuDansUnFaux[0][1]), "le témoin négatif doit être vu comme non échappé.");
 });
