@@ -61,36 +61,36 @@
     "barre": 0.84
   },
   "portfolio": {
-    "tests": 549,
+    "tests": 799,
     "parDepot": {
-      "arbitrage": 39,
-      "cycle": 39,
-      "derive": 31,
-      "funnel": 38,
-      "identite": 79,
-      "rag": 34,
-      "remediation": 31,
-      "banc": 45,
-      "economics": 76,
-      "triage": 53,
-      "vitrine": 84
+      "arbitrage": 62,
+      "cycle": 66,
+      "derive": 54,
+      "funnel": 62,
+      "identite": 96,
+      "rag": 54,
+      "remediation": 54,
+      "banc": 71,
+      "economics": 98,
+      "triage": 78,
+      "vitrine": 104
     },
-    "mesureLe": "2026-08-23T21:29:42.057Z",
+    "mesureLe": "2026-08-27T14:36:36.753Z",
     "testsCommitesLe": {
-      "arbitrage": "ae83f591e3dc20ec1022b21157d45b2c6288b061",
-      "banc": "8bc2e53bcfcc8d7d4e38c7b430a17a0bcbded6d1",
-      "cycle": "2f7a315909d043b2cb2ba11e56fe7570869c03b0",
-      "derive": "db525d42c31ee608469e2ef6a3a11de2cdc2872c",
-      "economics": "3f4b45ca21d47cf57cfa21dda369988373143bde",
-      "funnel": "fffecb6703252b5456f9cf6d618b50b1575e9673",
-      "identite": "ed514e5c339ae3d3a85aff1d85272d43ac198a4a",
-      "rag": "b48b4618b586b0fda63c5ac5a289919b3b8097ba",
-      "remediation": "1d6b2aa399fed00d819a38049ba70a1d8b17862f",
-      "triage": "d3fde81c10ce15a714d65c6c09d8d7b2d6d50815",
-      "vitrine": "da4e6fef5349c955473f0c64fb2513bc8b78c698"
+      "arbitrage": "7473426b67dfba483b9d8b658909db489900c4a4",
+      "banc": "f39e93f925a991fdd0380bf5d8e0c3ce6e5f7eaf",
+      "cycle": "fce7a61b3b24a0c9276216d4f5b7d4d649671ebd",
+      "derive": "360955df0fc9910cd22e710f9035a4e11d4c5bd1",
+      "economics": "4bf4ef67ecece2ca32f038cd44560a20e6b2968b",
+      "funnel": "d2dd11c3d4c4644e69795a6bce1c7040709f9d8b",
+      "identite": "f171a39b14828200839fa0c9b18187b885ae4693",
+      "rag": "24d410f53fe3e3ab868f3d6e06fde380e14dd575",
+      "remediation": "1c495e577e93fa72c83fb27d74c416414d06f184",
+      "triage": "6d6c4f97146a3e17a37ad02b48176d7c89c36c12",
+      "vitrine": "fa3b116bb27cbfcc38e3d91fb60c4f72bc95e62e"
     },
-    "nonCertifies": {},
-    "mesureSur": "arbitrage ae83f59 · banc 8bc2e53 · cycle 2f7a315 · derive db525d4 · economics 3f4b45c · funnel fffecb6 · identite ed514e5 · rag b48b461 · remediation 1d6b2aa · triage d3fde81 · vitrine da4e6fe"
+    "mesureSur": "arbitrage 7473426 · banc f39e93f · cycle fce7a61 · derive 360955d · economics 4bf4ef6 · funnel d2dd11c · identite f171a39 · rag 24d410f · remediation 1c495e5 · triage 6d6c4f9 · vitrine fa3b116",
+    "nonCertifies": {}
   },
   "ragReel": {
     "documents": 5,
