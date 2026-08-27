@@ -118,15 +118,28 @@ test("le chiffre publié dit sur quel état il a été mesuré", (t) => {
     return vu !== null && p.testsCommitesLe[d] != null && vu !== p.testsCommitesLe[d];
   });
 
-  if (bouges.length > 0) {
-    /*
-     * Dit, pas tu. Un mouvement silencieux se lit comme une absence de mouvement, et c'est
-     * la confusion que tout ce dépôt combat.
-     */
-    console.log(`  ${bouges.length} dépôt(s) ont commité un test depuis le comptage : `
-      + `${bouges.join(", ")}. Le chiffre publié reste celui de son état, qui est écrit `
-      + `dans chiffres.json — il est daté, pas faux. \`npm run compter\` le rafraîchit.`);
-  }
+  /*
+   * DIT ET TU, PARCE QUE « DIT » N'A PAS SUFFI.
+   *
+   * Ce contrôle disait juste et ne tombait jamais : `console.log`, six cas verts, code 0. Son
+   * motif se défendait — le chiffre est « daté, pas faux », `chiffres.json` enregistre bien
+   * l'état qu'il décrit. Mesuré le 27 août 2026 : onze dépôts déplacés depuis le comptage, et
+   * NEUF marques publiées fausses de deux à cinq cas, sur les pages que lit un acheteur.
+   *
+   * Un avertissement qui ne fait jamais échouer n'est pas compté : personne ne sait qu'il faut
+   * rafraîchir, et l'écart grandit jusqu'à ce qu'un lecteur le trouve à notre place. C'est le
+   * même défaut que le crochet de pré-commit corrigé le même soir, un cran plus bas.
+   *
+   * L'ISSUE COÛTE UNE COMMANDE, ET ELLE NE PEUT PAS SE BLOQUER ELLE-MÊME : `compter` lance les
+   * suites voisines avec `COMPTAGE=1`, drapeau sur lequel ce cas s'abstient trente lignes plus
+   * haut. Sans cette pause, rendre ceci ferme rendrait le rafraîchissement impossible — la
+   * couture circulaire qu'on a payée trois fois ce soir.
+   */
+  assert.deepEqual(bouges, [],
+    `${bouges.length} dépôt(s) ont commité un test depuis le comptage : ${bouges.join(", ")}.\n`
+    + "  Le chiffre publié décrit un état que ces dépôts ont quitté. Il est daté, pas faux —\n"
+    + "  et c'est exactement ce qui le laisse vieillir sans que personne agisse.\n"
+    + "  → npm run compter && npm run prose   rafraîchit le relevé et les marques.");
 });
 
 
