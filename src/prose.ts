@@ -38,6 +38,9 @@ const CHIFFRES = fileURLToPath(new URL("../chiffres.json", import.meta.url));
  * écrite qui l'accompagne — celle-là n'est pas un README, d'où le chemin complet : la
  * provenance ne dépend pas du nom du fichier.
  */
+/* piege:ok couverture-recitee — cette liste EST confrontée au disque, par le cas
+   « aucune page marquée n'échappe à la liste surveillée » (textes.test.ts) : tout README
+   marqué hors de PAGES rend la suite rouge. La confrontation vit à côté, pas ici. */
 export const PAGES = [
   "economics/README.md", "triage/README.md", "funnel/README.md", "cycle/README.md",
   "banc/README.md", "rag/README.md", "rag-vitrine/README.md",

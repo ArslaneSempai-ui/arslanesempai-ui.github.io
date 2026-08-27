@@ -10,7 +10,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { diagnostiquer, separationPour, type Entrees } from "./diagnostic.ts";
+import { diagnostiquer, lireJournal, separationPour, type Entrees } from "./diagnostic.ts";
 import { ASSUMED } from "./emprunts/economics/calibrate.ts";
 import { generatePopulation } from "./emprunts/economics/alerts.ts";
 
@@ -194,4 +194,25 @@ test("la population d'alertes est engendrée depuis une graine, pas au hasard", 
   assert.equal(a.alerts.length, b.alerts.length);
   assert.equal(a.truePositivesTotal, b.truePositivesTotal);
   assert.deepEqual(a.alerts.slice(0, 50), b.alerts.slice(0, 50), "deux tirages de même graine diffèrent");
+});
+
+test("une cellule de minutes vide vaut « pas de mesure », une cellule illisible écarte la ligne en le disant", () => {
+  /*
+   * `Number("")` vaut 0 : une cellule vide entrait comme « zéro minute travaillée »,
+   * indiscernable d'un vrai zéro — et une cellule corrompue donnait NaN, replié à 0 en
+   * silence alors que le mécanisme d'écart existe trois lignes plus haut. Septième dépôt de
+   * la même famille (27/08/2026). Les deux directions, parce qu'un témoin qui n'éprouve que
+   * le refus laisserait un lecteur qui refuse TOUT passer pour juste.
+   */
+  const texte = "dossier,activite,quand,minutes\n"
+    + "A,ouverture,2026-01-01T10:00:00Z,\n"        // vide → 0 assumé, ligne RETENUE
+    + "B,ouverture,2026-01-01T10:00:00Z,abc\n"     // illisible → ÉCARTÉE, nommée
+    + "C,ouverture,2026-01-01T10:00:00Z,45\n";     // nombre → lu tel quel
+  const j = lireJournal(texte);
+  assert.equal(j.evenements.length + j.ignorees.length >= 3 ? j.ignorees.length : -1, 1,
+    `une seule ligne devait être écartée, ignorees=${JSON.stringify(j.ignorees)}`);
+  assert.match(j.ignorees[0]!.raison, /minutes .abc. not understood/,
+    "la ligne écartée ne nomme pas la cellule illisible : le lecteur ne saurait pas quoi corriger.");
+  const minutes = j.evenements.map((e) => e.touchMinutes ?? 0).sort((x, y) => x - y);
+  assert.deepEqual(minutes.slice(-1), [45], "le nombre lisible n'est pas lu tel quel.");
 });

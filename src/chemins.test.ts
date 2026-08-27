@@ -87,7 +87,23 @@ test("le relevé porte sur des correspondances — sinon il ne prouve rien", () 
 test("tout dossier déclaré existe vraiment", (t) => {
   if (siSeul(t)) return;
   const absents: string[] = [];
-  for (const f of ["./pages.ts", "./mesurer.ts"]) {
+  /*
+   * LA LISTE DES FICHIERS SE DÉRIVE DU DISQUE, comme partout ailleurs : elle était écrite à
+   * la main (`["./pages.ts", "./mesurer.ts"]`), et un troisième fichier portant une table
+   * `cle/dossier` demain n'aurait été couvert par rien — son absence aurait passé pour un
+   * choix. On balaie donc tout `src/*.ts` : `correspondances()` rend simplement vide sur un
+   * fichier sans table, et le contrôle d'en dessous vérifie que le balayage a bien VU les
+   * deux porteurs connus — un zéro de parcours ne doit pas ressembler à une couverture.
+   */
+  const porteurs = readdirSync(fileURLToPath(new URL(".", import.meta.url)))
+    .filter((f) => f.endsWith(".ts") && !f.endsWith(".test.ts")).map((f) => `./${f}`);
+  const vus = porteurs.filter((f) => Object.keys(correspondances(f)).length > 0);
+  for (const attendu of ["./pages.ts", "./mesurer.ts"]) {
+    assert.ok(vus.includes(attendu),
+      `${attendu} ne porte plus de table cle/dossier lisible : le motif d'extraction est périmé, `
+      + `et ce contrôle ne confronte plus rien.`);
+  }
+  for (const f of vus) {
     for (const [cle, dossier] of Object.entries(correspondances(f))) {
       if (!existsSync(`${VOISINS}${dossier}`)) absents.push(`${f} : ${cle} → ${dossier}`);
     }

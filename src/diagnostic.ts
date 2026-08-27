@@ -390,8 +390,23 @@ export function lireJournal(texte: string, retour?: string): Journal {
     if (!dossier) { ignorees.push({ ligne: n + 1, raison: "no case identifier" }); continue; }
     if (!activite) { ignorees.push({ ligne: n + 1, raison: "no activity" }); continue; }
     if (!Number.isFinite(quand)) { ignorees.push({ ligne: n + 1, raison: `timestamp “${t}” not understood` }); continue; }
-    const m = cMinutes >= 0 ? Number(cel[cMinutes]) : 0;
-    brut.push({ dossier, activite, quand, minutes: Number.isFinite(m) ? m : 0 });
+    /*
+     * LA CELLULE VIDE AVANT LA CONVERSION — et le déchet se REFUSE, il ne devient pas zéro.
+     *
+     * `Number("")` vaut 0 : une cellule de minutes vide entrait comme « zéro minute
+     * travaillée », indiscernable d'un vrai zéro écrit. Pire : une cellule CORROMPUE
+     * (`"abc"`) donnait NaN, que le repli posait aussi à 0 — le mécanisme d'écart existe
+     * trois lignes plus haut, et cette valeur-là n'y arrivait jamais. Septième dépôt de la
+     * même famille, mesurée le 27/08/2026.
+     *
+     * La sémantique : colonne absente OU cellule vide = « pas de mesure de travail » (0,
+     * assumé — c'est la convention déclarée de la colonne optionnelle) ; cellule remplie
+     * mais illisible = ligne ÉCARTÉE en le disant, comme un horodatage incompris.
+     */
+    const brutMinutes = cMinutes >= 0 ? (cel[cMinutes] ?? "").trim() : "";
+    const m = brutMinutes === "" ? 0 : Number(brutMinutes);
+    if (!Number.isFinite(m)) { ignorees.push({ ligne: n + 1, raison: `minutes “${brutMinutes}” not understood` }); continue; }
+    brut.push({ dossier, activite, quand, minutes: m });
   }
   if (!brut.length) return { evenements: [], activites: [], ignorees, minutesFournies: false };
 
