@@ -86,6 +86,15 @@
 }
 
 .rien { color: var(--encre-tres-pale); font-size: 14.5px; padding: 14px 0; margin: 0; }
+/* L'état vide en boîte pointillée — le même idiome que les dépôts de fichier : un vide qui
+   dit quoi faire est une invitation, un vide nu est un trou (regard du 27/08/2026). */
+.rien-boite { border: 1px dashed var(--filet-gras); padding: 13px 16px; margin-top: 8px;
+  color: var(--encre-pale); font-size: 14px; max-width: 62ch; }
+.rien-boite a { color: var(--encre); text-decoration: underline; text-underline-offset: 3px; }
+/* La signature sous le lede : le lecteur sait chez qui il est AVANT de défiler — la même
+   phrase que le pied de page, promue, aucun fait nouveau. */
+.byline { margin-top: 14px; font-size: 13.5px; color: var(--encre-pale); }
+.byline b { color: var(--encre); font-weight: 600; }
 .refus { border-left: 3px solid var(--defavorable); padding: 4px 0 4px 14px; margin: 16px 0; font-size: 14.5px; }
 
 /* Le relevé des outils. */
@@ -130,6 +139,8 @@
           number each one actually turns on. <b>Put your own volumes in below</b>: the
           arithmetic runs in your browser, and nothing is sent anywhere.
         </p>
+      <p class="byline"><b>Arslane Chaouche Ramdane</b> — business operations and AI
+        transformation, open to US-remote roles.</p>
     </div>
   </div>
 
@@ -208,7 +219,7 @@
     </fieldset>
 
     <fieldset class="groupe">
-      <legend>The funnel</legend>
+      <legend id="funnel">The funnel</legend>
       <p class="aide">
         Your raw volumes, step by step. Everything that comes out is computed
           on those alone — including the confidence interval that says whether your weakest
@@ -346,7 +357,7 @@ const MOT = {
   niveau: "Level", reste: "What remains assumed:", refus: "What your figures do not allow:",
   deja: "What already leaves the account", gagner: "What a project would go after",
   rienDeja: "Nothing to recover on what you already pay, given what is filled in.",
-  rienGagner: "Fill in your funnel volumes to price this part.",
+  rienGagner: 'Nothing priced yet — this block reads the four volumes under <a href="#funnel">The funnel</a> above. Fill them in and the figure appears here.',
   pasSomme: "The two blocks do not add up: the first is money leaving every year without producing anything, the second a revenue conditional on work still to be done.",
   lus: "case(s) read.", remis: "Scores brought back from a 0–100 scale.", ecartees: "line(s) skipped —",
 };
@@ -365,7 +376,7 @@ function dessiner() {
 
   const bloc = (titre, liste, vide) =>
     `<div class="titre-fig" style="margin-top:26px">${titre}</div>`
-    + (liste.length ? liste.map(ligne).join("") : `<p class="rien">${vide}</p>`);
+    + (liste.length ? liste.map(ligne).join("") : `<div class="rien-boite">${vide}</div>`);
 
   $("#verdict").innerHTML = crans + refus
     + bloc(M.deja, r.dejaPaye, M.rienDeja)
