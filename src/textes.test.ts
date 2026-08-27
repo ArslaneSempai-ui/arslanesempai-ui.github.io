@@ -103,6 +103,20 @@ test("aucune page marquée n'échappe à la liste surveillée", () => {
     .map((c) => c.replace(/^\.\//, ""))
     .filter((c) => !c.includes("node_modules"))
     /*
+     * ─── UN ARBRE DE TRAVAIL N'EST PAS UNE PAGE DU PORTFOLIO ───
+     *
+     * Le balayage du 27/08 ouvre un worktree `.balayage-<depot>` à côté de chaque dépôt. Leur
+     * README porte évidemment les mêmes marques que l'original — c'est le MÊME fichier, une
+     * seconde fois — et ce contrôle les a accusés de n'être surveillés par personne. La suite
+     * de la vitrine devenait donc rouge pendant qu'un balayage tourne, c'est-à-dire exactement
+     * quand elle doit servir.
+     *
+     * Le critère n'est pas « ce chemin est temporaire » mais « ce fichier est une COPIE de
+     * travail » : les dossiers cachés ne sont pas des dépôts du portfolio, `depots.json` en est
+     * la liste, et aucune page publiée ne vit sous un dossier commençant par un point.
+     */
+    .filter((c) => !c.split("/").some((seg) => seg.startsWith(".")))
+    /*
      * Et une marque MONTRÉE n'est pas une marque POSÉE.
      *
      * Le verdict du pilote illustre le mécanisme par `<!--p:clé~format-->valeur<!--/p-->` — une
