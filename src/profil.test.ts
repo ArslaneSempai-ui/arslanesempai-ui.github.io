@@ -15,7 +15,8 @@ import { fileURLToPath } from "node:url";
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { DEPOTS, dernierTest } from "./compter.ts";
 import { OUTILS } from "./pages.ts";
 
@@ -146,8 +147,51 @@ test("l'estampille de fraîcheur couvre tous les dépôts, sinon elle ne garde r
   if (!existsSync(fileURLToPath(new URL("../.git", import.meta.url)))) {
     return t.skip("clone sans historique — l'estampille de fraîcheur n'a pas d'objet");
   }
+  /*
+   * DEUX QUESTIONS DIFFÉRENTES, ET UNE SEULE EST JUGEABLE PARTOUT.
+   *
+   * « Combien de dépôts sont sur le disque » est une question d'ENVIRONNEMENT : sur un coureur
+   * d'intégration continue il n'y a jamais de voisin, et ce cas échouait donc à chaque envoi —
+   * un rouge chronique qui accuse la machine, pas le code. Il a fallu retirer la chaîne de ce
+   * dépôt pour cette seule raison.
+   *
+   * « Le motif de recherche trouve-t-il les commits de test des dépôts présents » est la
+   * question que ce cas existe pour poser, et elle se juge sur ce qu'on a : un dépôt ou onze.
+   * C'est elle qui a attrapé le rétrécissement du motif — `identite` range ses cas à la racine
+   * en `.mjs`, le motif ne voyait que `src/*.test.ts`.
+   *
+   * On s'abstient donc NOMMÉMENT sur la première, et on garde la seconde. Le nom compte : la
+   * porte anti-ignorés surveille les libellés, donc une abstention se voit dans le relevé là
+   * où un saut muet disparaîtrait.
+   */
+  /*
+   * ET L'ABSTENTION SE GARDE ELLE-MÊME, parce qu'on m'a annoncé une porte anti-ignorés que
+   * je n'ai pas trouvée dans ce dépôt : ni crochet, ni chaîne ne surveille les libellés de
+   * saut ici. Une abstention posée sur une protection qu'on suppose est un trou silencieux.
+   *
+   * On regarde donc le disque DIRECTEMENT, sans passer par la découverte : si des dépôts
+   * voisins sont là et que la découverte n'en rend qu'un, ce n'est pas l'environnement — c'est
+   * la découverte qui s'est rétrécie, et ça doit rougir.
+   */
+  const voisinsSurLeDisque = (() => {
+    try {
+      const parent = fileURLToPath(new URL("../..", import.meta.url));
+      return readdirSync(parent, { withFileTypes: true })
+        .filter((e) => e.isDirectory() && !e.name.startsWith(".")
+          && existsSync(join(parent, e.name, ".git"))).length;
+    } catch { return 0; }
+  })();
+  if (DEPOTS.length < 2) {
+    assert.ok(voisinsSurLeDisque < 2,
+      `la découverte ne rend que ${DEPOTS.length} dépôt alors que ${voisinsSurLeDisque} dépôts `
+      + "git sont sur le disque à côté. Ce n'est pas une machine isolée, c'est la découverte "
+      + "qui s'est rétrécie — et s'abstenir ici masquerait exactement le défaut que ce cas "
+      + "existe pour attraper.");
+    return t.skip(`${DEPOTS.length} dépôt découvert et ${voisinsSurLeDisque} voisin(s) git sur `
+      + "le disque — les voisins ne sont pas sur cette machine, donc la couverture de "
+      + "l'estampille ne peut pas être jugée ici. Elle l'est en local.");
+  }
   const sans = DEPOTS.filter((d) => dernierTest(d) === null);
-  assert.ok(DEPOTS.length >= 11, `seulement ${DEPOTS.length} dépôt(s) découvert(s) : la liste est vide ou tronquée`);
   assert.deepEqual(sans, [],
     `${sans.join(", ")} : aucun commit de test trouvé — le contrôle de fraîcheur les écarte `
     + `en silence, et un contrôle qui n'examine personne est vert par construction.`);
