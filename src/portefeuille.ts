@@ -323,16 +323,21 @@ export async function tour(options: {
     }
   }
 
-  /* 4. La vitrine en dernier, parce qu'elle contrôle tout ce qui précède. */
-  const v = lancer(ici, "npm", ["test"]);
-  dire(`  vitrine           ${v.ok ? `${/^ℹ pass (\d+)$/m.exec(v.sortie)?.[1] ?? "?"} tests` : "ÉCHEC"}`);
-  if (!v.ok) soucis.push({ ou: "vitrine", quoi: "npm test", detail: cause(v.sortie) });
-
-  if (reparations.length) {
-    dire(`\n${reparations.length} réparation(s) — ce qui était cassé et ne l'est plus :\n`);
-    for (const r of reparations) dire(`  ↻ ${r.quoi}\n      ${r.detail}`);
-  }
-  /* La trace que le tour a eu lieu — c'est elle que la suite de la vitrine surveille. */
+  /*
+   * LE TAMPON S'ÉCRIT ICI — après le tour des onze dépôts et des chiffres, AVANT la suite
+   * de la vitrine. Sa place d'avant (après le pas 4, conditionnée à zéro souci) créait une
+   * COUTURE CIRCULAIRE, mesurée le 27/08/2026 : la suite de la vitrine contient le test de
+   * fraîcheur qui LIT ce tampon ; un tampon vieux rendait la suite rouge, la suite rouge
+   * était un souci, et le souci empêchait d'écrire le tampon. Le portfolio entier pouvait
+   * être vert, le tour tourner tous les jours, et la vitrine rester rouge pour toujours.
+   *
+   * Le tampon atteste que LE TOUR A TOURNÉ — c'est exactement ce que le test de fraîcheur
+   * surveille (« un contrôle qu'on doit penser à lancer est une note déguisée »). La santé
+   * des dépôts a ses propres gardes, dans leurs propres suites, et le tour la rapporte
+   * bruyamment ; elle reste une condition : un tour qui a trouvé des soucis AILLEURS que
+   * dans la suite de la vitrine ne tamponne pas — on ne date pas comme « fait » un tour
+   * qui laisse le portfolio cassé.
+   */
   if (!soucis.length) {
     /*
      * Le témoin appartient au portfolio parcouru, pas au module qui parcourt.
@@ -344,6 +349,16 @@ export async function tour(options: {
      */
     mkdirSync(ici + "data/", { recursive: true });
     writeFileSync(ici + "data/dernier-tour.txt", new Date().toISOString() + "\n");
+  }
+
+  /* 4. La vitrine en dernier, parce qu'elle contrôle tout ce qui précède. */
+  const v = lancer(ici, "npm", ["test"]);
+  dire(`  vitrine           ${v.ok ? `${/^ℹ pass (\d+)$/m.exec(v.sortie)?.[1] ?? "?"} tests` : "ÉCHEC"}`);
+  if (!v.ok) soucis.push({ ou: "vitrine", quoi: "npm test", detail: cause(v.sortie) });
+
+  if (reparations.length) {
+    dire(`\n${reparations.length} réparation(s) — ce qui était cassé et ne l'est plus :\n`);
+    for (const r of reparations) dire(`  ↻ ${r.quoi}\n      ${r.detail}`);
   }
   if (!soucis.length) {
     dire(`\nTout concorde${reparations.length ? " — après réparation" : ""}.\n`);

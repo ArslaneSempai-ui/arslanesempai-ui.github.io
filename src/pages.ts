@@ -33,7 +33,13 @@ import { isMain } from "./cli.ts";
 import { lire } from "./mesurer.ts";
 import { barres, empile } from "./graphes.js";
 
-const racine = fileURLToPath(new URL("..", import.meta.url));
+/* `root`, pas `racine` : le vérificateur d'écran partagé DÉRIVE la liste des sources de la
+   page en extrayant `readFileSync(root + "…")` de ce fichier — le nom même de la variable
+   fait partie du contrat. Sous l'ancien nom, l'extraction rendait 1 chemin et la garde
+   refusait toute construction (à raison : une liste courte passerait au vert en ne
+   regardant presque rien). Le motif est étroit et c'est remonté vers identite ; en
+   attendant, ce dépôt parle la convention que ses onze voisins parlent déjà. */
+const root = fileURLToPath(new URL("..", import.meta.url));
 
 const ech = (t: unknown) => String(t ?? "").replace(/[&<>"]/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
@@ -149,7 +155,7 @@ export const OUTILS: Outil[] = [
 
 export function construire(): void {
   const c = lire();
-  const docs = racine + "docs";
+  const docs = root + "docs";
   mkdirSync(docs, { recursive: true });
 
   const tuiles = OUTILS.map((o, i) => {
@@ -183,7 +189,7 @@ export function construire(): void {
    * septième outil est arrivé. Un nombre écrit à la main dans une page vieillit. */
   const MOTS_NOMBRE = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
                        "nine", "ten", "eleven", "twelve"];
-  const html = readFileSync(racine + "src/gabarit.html", "utf8")
+  const html = readFileSync(root + "src/gabarit.html", "utf8")
     .replaceAll("<!--NOMBRE-TITRE-->", (MOTS_NOMBRE[OUTILS.length] ?? String(OUTILS.length)).replace(/^./, (m) => m.toUpperCase()))
     .replace("<!--NOMBRE-OUTILS-->", "The " + (MOTS_NOMBRE[OUTILS.length] ?? String(OUTILS.length)))
     /*
@@ -200,7 +206,7 @@ export function construire(): void {
     .replace("</main>", `</main>
 <script type="application/json" id="mesures">${mesures}</script>`);
   writeFileSync(docs + "/index.html", html);
-  cpSync(racine + "src/registre.css", docs + "/registre.css");
+  cpSync(root + "src/registre.css", docs + "/registre.css");
   writeFileSync(docs + "/.nojekyll", "");
   console.log(`docs/index.html construit — ${OUTILS.length} outils`);
 }
