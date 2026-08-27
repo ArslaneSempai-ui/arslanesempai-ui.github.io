@@ -1,6 +1,6 @@
 # The entry point
 
-One page holding six tools together: [arslanesempai-ui.github.io](https://arslanesempai-ui.github.io/).
+One page holding ten tools together: [arslanesempai-ui.github.io](https://arslanesempai-ui.github.io/).
 
 Each tool takes a decision an operations team makes every quarter and computes the number
 that decision actually turns on. This page states one finding per tool, draws the figure
@@ -8,7 +8,7 @@ that carries it, and links to the running demo and the source.
 
 ## The one rule
 
-**No figure on this page is typed.** `chiffres.json` is produced by running the six models
+**No figure on this page is typed.** `chiffres.json` is produced by running the ten models
 in the neighbouring repositories; the page is built from that file. Three guards keep it
 honest:
 
