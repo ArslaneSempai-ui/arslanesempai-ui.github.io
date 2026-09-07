@@ -18,7 +18,7 @@ honest:
 | `src/vitrine.test.ts` | a number here that is absent from the tool's own README |
 | the same test | a link to the private engine, a missing tile, a half-finished translation |
 
-A repository that is not present on the machine is reported as **not verified** — never as
+A repository that is not present on the machine is reported as **not verified**, never as
 agreeing. Saying "up to date" about something you did not read is the failure this file
 exists to prevent.
 
