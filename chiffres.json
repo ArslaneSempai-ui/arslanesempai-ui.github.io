@@ -61,7 +61,7 @@
     "barre": 0.84
   },
   "portfolio": {
-    "tests": 903,
+    "tests": 726,
     "parDepot": {
       "arbitrage": 72,
       "cycle": 76,
@@ -75,22 +75,26 @@
       "triage": 87,
       "vitrine": 113
     },
-    "mesureLe": "2026-09-07T10:46:53.167Z",
+    "mesureLe": "2026-09-07T11:13:12.052Z",
     "testsCommitesLe": {
-      "arbitrage": "32cbca97594c6afd5e36a928ef0c41e8eb1a8a4d",
-      "banc": "e153ac26d4e83a880a3e4b05cb7edd7689e2eb44",
-      "cycle": "aa320f2fd9ef606527c838c742c465bdae09dbda",
-      "derive": "2fda0813ca70c3536e6a8c69ac610c002d2c6728",
-      "economics": "d4b57dd0746b87c47f18c24084be26c36610ce52",
-      "funnel": "682a1d44eba6ec0784ccdfd8dd89fca0e3e0840f",
+      "arbitrage": "825042d9379a6a30693ad9759b29a5678a72c500",
+      "banc": "c0c22fa7d2d43badc8425003f334b225ef5c044c",
+      "cycle": "7b39fab8622f8c6ae84130c03bd9c089d666204b",
+      "derive": "5eeb88f11759cb9ca65ba8ef0749f98a2788be9c",
+      "economics": "df7c95d8565948a69e9f8c5e63fffef289cd2270",
+      "funnel": "c92026230cb6675dad4b1c80c061cb0f002327d4",
       "identite": "7ef2f076f9096612c78c304d32c961273497a6a5",
-      "rag": "f50b30b73f023bbcebd46aa9fa3a50c57b9ecca7",
-      "remediation": "d5ea930830be7c4b6ab5ba5e92f5284a4e311dd7",
-      "triage": "d6ee85eee0909407902ff1753a22ceac0cba7449",
-      "vitrine": "6676b71c5e8aac3306db41f304c2b0d148ff66d3"
+      "rag": "8ff6bf6db75c761e1755ce51470d040502e405d9",
+      "remediation": "41ba94d85ccf825c40f39624a6a5fccc5d0e5b42",
+      "triage": "49662f77334f5e33f8f6dcdea8299fd7f851d9b1",
+      "vitrine": "fc6073e43cebc27da285a7930c9062a60d45110e"
     },
-    "mesureSur": "arbitrage 32cbca9 · banc e153ac2 · cycle aa320f2 · derive 2fda081 · economics d4b57dd · funnel 682a1d4 · identite 7ef2f07 · rag f50b30b · remediation d5ea930 · triage d6ee85e · vitrine 6676b71",
-    "nonCertifies": {}
+    "mesureSur": "arbitrage 825042d · banc c0c22fa · cycle 7b39fab · derive 5eeb88f · economics df7c95d · funnel c920262 · identite 7ef2f07 · rag 8ff6bf6 · remediation 41ba94d · triage 49662f7 · vitrine fc6073e",
+    "nonCertifies": {
+      "derive": 1,
+      "vitrine": 1
+    },
+    "outils": 10
   },
   "ragReel": {
     "documents": 5,

@@ -344,6 +344,21 @@ export function compter(): {
   };
 }
 
+/** Les lignes d'outil du tableau que titre « ### The … » dans le README du profil. */
+function outilsDuProfil(): number {
+  const chemin = fileURLToPath(new URL("../../profil/README.md", import.meta.url));
+  if (!existsSync(chemin)) return 0;
+  const lignes = readFileSync(chemin, "utf8").split("\n");
+  const debut = lignes.findIndex((l) => /^### The /.test(l));
+  if (debut < 0) return 0;
+  let n = 0;
+  for (const l of lignes.slice(debut + 1)) {
+    if (/^#{1,3} /.test(l)) break;
+    if (/^\| \*\*\[/.test(l)) n += 1;
+  }
+  return n;
+}
+
 if (isMain(import.meta)) {
   const { nombre, parDepot, absents, nonCertifies } = compter();
   const chiffres = JSON.parse(readFileSync(CHIFFRES, "utf8"));
@@ -396,6 +411,16 @@ if (isMain(import.meta)) {
      * mesurés », et personne ne pourrait faire la différence.
      */
     nonCertifies,
+    /*
+     * LE COMPTE DES OUTILS, LU SUR LE TABLEAU QU'IL TITRE.
+     *
+     * Le titre du profil disait « The six » au-dessus d'un tableau qui en listait dix : il
+     * avait été écrit quand il y en avait six, et la liste a grandi sans lui (trouvé le
+     * 13/09/2026, sur la page la plus vue du portfolio, dont tout l'argument est que ses
+     * chiffres sont tenus). Le compte se mesure donc là où il ment le plus vite : sur les
+     * lignes du tableau lui-même, pas sur une liste de dépôts qui n'est pas la même chose.
+     */
+    outils: outilsDuProfil(),
   };
   writeFileSync(CHIFFRES, JSON.stringify(chiffres, null, 2) + "\n");
   const nc = Object.entries(nonCertifies);
