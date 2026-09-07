@@ -1,6 +1,6 @@
-# Pilote React : on ne migre pas
+# Pilote React : on ne migre pas
 
-Mesuré le 22 août 2026 sur `vitrine`. Trois candidats : Next en export statique, Astro à îlots, React comme gabarit au build.
+Mesuré le 22 août 2026 sur `vitrine`. Trois candidats : Next en export statique, Astro à îlots, React comme gabarit au build.
 
 Verdict et mesures complètes ci-dessous, telles que rendues par le juge du pilote.
 

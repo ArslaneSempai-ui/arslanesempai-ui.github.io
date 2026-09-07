@@ -7,12 +7,12 @@ d'un fichier ne dit jamais pourquoi il est absent.
 ## Ce qui a été mesuré
 
 La suite a été lancée dans un arbre de travail isolé, hors de `~/Documents`, sans les dépôts
-voisins sur le disque — c'est-à-dire dans les conditions exactes d'un runner. Résultat :
+voisins sur le disque — c'est-à-dire dans les conditions exactes d'un runner. Résultat :
 
     78 cas · 60 passés · 5 fichiers en ÉCHEC · 13 abstentions
 
 Les cinq échecs ne sont pas des cas mais des **fichiers entiers** — `certification`,
-`compter`, `portefeuille`, `profil`, `textes` — qui lèvent au chargement sur la même cause :
+`compter`, `portefeuille`, `profil`, `textes` — qui lèvent au chargement sur la même cause :
 `la liste des dépôts est illisible`. Ils lisent `../../identite/depots.json`, un dépôt privé
 de développement qui ne vit sur aucun runner.
 
@@ -32,7 +32,7 @@ que son voyant laisse croire est pire que pas de contrôle.
 
 Au **crochet de pré-commit**, sur une machine qui porte le portfolio entier — c'est-à-dire
 la seule où ces questions se posent. C'est la même décision que pour le contrôle de couche
-partagée, et pour la même raison : *le domicile d'un contrôle est l'endroit où il peut
+partagée, et pour la même raison : *le domicile d'un contrôle est l'endroit où il peut
 répondre, pas celui où il serait le plus visible.*
 
 ## Ce qui rouvrirait la question
