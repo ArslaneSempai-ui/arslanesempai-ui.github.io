@@ -61,13 +61,13 @@
     "barre": 0.84
   },
   "portfolio": {
-    "tests": 903,
+    "tests": 907,
     "parDepot": {
       "arbitrage": 72,
       "cycle": 76,
       "derive": 64,
       "funnel": 72,
-      "identite": 102,
+      "identite": 106,
       "rag": 67,
       "remediation": 64,
       "banc": 79,
@@ -75,21 +75,21 @@
       "triage": 87,
       "vitrine": 113
     },
-    "mesureLe": "2026-09-07T11:17:07.048Z",
+    "mesureLe": "2026-09-07T13:49:35.754Z",
     "testsCommitesLe": {
-      "arbitrage": "825042d9379a6a30693ad9759b29a5678a72c500",
-      "banc": "c0c22fa7d2d43badc8425003f334b225ef5c044c",
-      "cycle": "7b39fab8622f8c6ae84130c03bd9c089d666204b",
-      "derive": "5eeb88f11759cb9ca65ba8ef0749f98a2788be9c",
-      "economics": "df7c95d8565948a69e9f8c5e63fffef289cd2270",
-      "funnel": "c92026230cb6675dad4b1c80c061cb0f002327d4",
-      "identite": "7ef2f076f9096612c78c304d32c961273497a6a5",
-      "rag": "8ff6bf6db75c761e1755ce51470d040502e405d9",
-      "remediation": "41ba94d85ccf825c40f39624a6a5fccc5d0e5b42",
-      "triage": "49662f77334f5e33f8f6dcdea8299fd7f851d9b1",
-      "vitrine": "fc6073e43cebc27da285a7930c9062a60d45110e"
+      "arbitrage": "52502fbac22d514662a6ce19068cb9c6c07255fe",
+      "banc": "ad56a1db43c1e332bb7d8e935f7aab0cf11d7922",
+      "cycle": "3ef19be01a7ac3e1224e93b002ac051ab9ed914f",
+      "derive": "6cc5e08a46ef4a6ecc49f66305bb5a5c76845a39",
+      "economics": "a4ee896cb2648b7126d3990aa5585fafa5ad5887",
+      "funnel": "92813285ce26e787d8d55cd49c5b44cbeddc3928",
+      "identite": "a8d31e4a602c5eb1ca4d450729a6f34dccf6b4f7",
+      "rag": "717dbb4a3f485f515581ed26128bc11c08e5d33a",
+      "remediation": "7d5af71c2f5018aa52e73d98dbf2fd523abb9ea0",
+      "triage": "c3595ace45429a4b5f20ae4563e723276e0a33ef",
+      "vitrine": "bb93d57671243ab6ff5beb8ab3109cb272559714"
     },
-    "mesureSur": "arbitrage 825042d · banc c0c22fa · cycle 7b39fab · derive 5eeb88f · economics df7c95d · funnel c920262 · identite 7ef2f07 · rag 8ff6bf6 · remediation 41ba94d · triage 49662f7 · vitrine fc6073e",
+    "mesureSur": "arbitrage 52502fb · banc ad56a1d · cycle 3ef19be · derive 6cc5e08 · economics a4ee896 · funnel 9281328 · identite a8d31e4 · rag 717dbb4 · remediation 7d5af71 · triage c3595ac · vitrine bb93d57",
     "nonCertifies": {},
     "outils": 10
   },
