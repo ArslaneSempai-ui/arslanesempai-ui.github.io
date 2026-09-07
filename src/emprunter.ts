@@ -117,9 +117,9 @@ if (isMain(import.meta)) {
 
   if (ecarts.length) {
     console.error(controle
-      ? "des modèles empruntés ont divergé — lancer `npm run emprunter`"
+      ? "des modèles empruntés ont divergé. Lancer `npm run emprunter`"
       : "emprunt incomplet :");
-    for (const e of ecarts) console.error(`  ${e.chemin} — ${e.raison}`);
+    for (const e of ecarts) console.error(`  ${e.chemin} : ${e.raison}`);
     process.exit(1);
   }
   console.log(controle

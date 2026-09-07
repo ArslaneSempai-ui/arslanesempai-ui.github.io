@@ -135,11 +135,11 @@
     <div>
       <h1><!--NOMBRE-TITRE--> numbers nobody computes</h1>
       <p class="lede">
-        <!--NOMBRE-TITRE--> decisions an operations team settles every quarter — and the
+        <!--NOMBRE-TITRE--> decisions an operations team settles every quarter, and the
           number each one actually turns on. <b>Put your own volumes in below</b>: the
           arithmetic runs in your browser, and nothing is sent anywhere.
         </p>
-      <p class="byline"><b>Arslane Chaouche Ramdane</b> — business operations and AI
+      <p class="byline"><b>Arslane Chaouche Ramdane</b>, business operations and AI
         transformation, open to US-remote roles.</p>
     </div>
   </div>
@@ -149,8 +149,8 @@
     <fieldset class="groupe">
       <legend>Detection</legend>
       <p class="aide">
-        The first two fields are enough for a demonstration. The next two —
-          your alerts for the year, and the share that turned out to be founded — refit the
+        The first two fields are enough for a demonstration. The next two
+          (your alerts for the year, and the share that turned out to be founded) refit the
           model to your system instead of this one's.
         </p>
       <div class="champs">
@@ -159,9 +159,9 @@
         <div class="champ"><label for="seuilActuel">Current threshold</label>
           <input id="seuilActuel" type="text" inputmode="decimal" placeholder="0.65" /></div>
         <div class="champ"><label for="alertesParAn">Alerts reviewed / yr</label>
-          <input id="alertesParAn" type="text" inputmode="numeric" placeholder="—" /></div>
+          <input id="alertesParAn" type="text" inputmode="numeric" placeholder="n/a" /></div>
         <div class="champ"><label for="tauxReel">Share founded (%)</label>
-          <input id="tauxReel" type="text" inputmode="decimal" placeholder="—" /></div>
+          <input id="tauxReel" type="text" inputmode="decimal" placeholder="n/a" /></div>
         <div class="champ"><label for="analystesEnPoste">Analysts in post</label>
           <input id="analystesEnPoste" type="text" inputmode="numeric" placeholder="8" /></div>
         <div class="champ"><label for="coutChargeAnalyste">Loaded cost / analyst ($)</label>
@@ -170,7 +170,7 @@
       <div class="depot" id="depot">
         <span class="dit">
           <b>Have an export of scored cases?</b> Two columns are enough: the
-            score, and whether the case turned out to be founded. Nothing is uploaded — the
+            score, and whether the case turned out to be founded. Nothing is uploaded: the
             file is read here, in this page.
           
           <span id="depotEtat"></span></span>
@@ -181,19 +181,19 @@
     <fieldset class="groupe">
       <legend>Process time</legend>
       <p class="aide">
-        Your volume and your hourly cost are enough. An event log — case,
-          activity, timestamp — replaces this repository's process with your own.
+        Your volume and your hourly cost are enough. An event log (case,
+          activity, timestamp) replaces this repository's process with your own.
         </p>
       <div class="champs">
         <div class="champ"><label for="dossiersParAn">Cases handled / yr</label>
-          <input id="dossiersParAn" type="text" inputmode="numeric" placeholder="—" /></div>
+          <input id="dossiersParAn" type="text" inputmode="numeric" placeholder="n/a" /></div>
         <div class="champ"><label for="coutHoraireCharge">Loaded hourly cost ($)</label>
           <input id="coutHoraireCharge" type="text" inputmode="numeric" placeholder="48" /></div>
       </div>
       <div class="depot" id="depotJournal">
         <span class="dit">
           <b>An event log?</b> Three columns: case, activity, timestamp. A
-            fourth — minutes actually worked — separates work from waiting.
+            fourth (minutes actually worked) separates work from waiting.
           
           <span id="journalEtat"></span>
         </span>
@@ -212,7 +212,7 @@
         </p>
       <div class="champs">
         <div class="champ"><label for="entreesEnRelationParAn">Onboardings / yr</label>
-          <input id="entreesEnRelationParAn" type="text" inputmode="numeric" placeholder="—" /></div>
+          <input id="entreesEnRelationParAn" type="text" inputmode="numeric" placeholder="n/a" /></div>
         <div class="champ"><label for="minutesRevueParDossier">Minutes of review / file</label>
           <input id="minutesRevueParDossier" type="text" inputmode="numeric" placeholder="25" /></div>
       </div>
@@ -222,15 +222,15 @@
       <legend id="funnel">The funnel</legend>
       <p class="aide">
         Your raw volumes, step by step. Everything that comes out is computed
-          on those alone — including the confidence interval that says whether your weakest
+          on those alone, including the confidence interval that says whether your weakest
           step can really be named.
         </p>
       <div class="champs">
-        <div class="champ"><label for="f0">Visits</label><input id="f0" type="text" inputmode="numeric" placeholder="—" /></div>
-        <div class="champ"><label for="f1">Signups</label><input id="f1" type="text" inputmode="numeric" placeholder="—" /></div>
-        <div class="champ"><label for="f2">Activations</label><input id="f2" type="text" inputmode="numeric" placeholder="—" /></div>
-        <div class="champ"><label for="f3">Subscriptions</label><input id="f3" type="text" inputmode="numeric" placeholder="—" /></div>
-        <div class="champ"><label for="f4">Retained at 12 months</label><input id="f4" type="text" inputmode="numeric" placeholder="—" /></div>
+        <div class="champ"><label for="f0">Visits</label><input id="f0" type="text" inputmode="numeric" placeholder="n/a" /></div>
+        <div class="champ"><label for="f1">Signups</label><input id="f1" type="text" inputmode="numeric" placeholder="n/a" /></div>
+        <div class="champ"><label for="f2">Activations</label><input id="f2" type="text" inputmode="numeric" placeholder="n/a" /></div>
+        <div class="champ"><label for="f3">Subscriptions</label><input id="f3" type="text" inputmode="numeric" placeholder="n/a" /></div>
+        <div class="champ"><label for="f4">Retained at 12 months</label><input id="f4" type="text" inputmode="numeric" placeholder="n/a" /></div>
         <div class="champ"><label for="revenuParClient">Annual revenue / customer ($)</label><input id="revenuParClient" type="text" inputmode="numeric" placeholder="1,200" /></div>
       </div>
     </fieldset>
@@ -246,25 +246,25 @@
 
   <h2>Two apps, built end to end</h2>
   <div class="feuillet"><div class="corps">
-    <div class="quoi">The tools above are analysis. These are products — designed, built, and
+    <div class="quoi">The tools above are analysis. These are products: designed, built, and
       taken to the point where the remaining work is Apple's review queue rather than mine.</div>
     <div class="ligne">
-      <span class="intitule"><b>Atlas</b> — a strength-training companion. Flutter, English and
+      <span class="intitule"><b>Atlas</b>, a strength-training companion. Flutter, English and
         French, everything on the device.</span>
       <span class="valeur">at 1.0</span>
     </div>
     <div class="ligne">
-      <span class="intitule"><b>Hisho</b> — an on-device habit tracker organised around needs
+      <span class="intitule"><b>Hisho</b>, an on-device habit tracker organised around needs
         rather than streaks. No server, no account.</span>
       <span class="valeur">in build</span>
     </div>
-    <p class="renvoi">Neither is on the App Store yet, and neither is open source — so neither
+    <p class="renvoi">Neither is on the App Store yet, and neither is open source, so neither
       carries a link here. They are named because ten measurement tools do not say whether the
       person can ship a product.</p>
   </div></div>
 
   <p class="renvoi" id="signature">
-    Arslane Chaouche Ramdane — business operations and AI transformation,
+    Arslane Chaouche Ramdane, business operations and AI transformation,
       open to US-remote roles. Written in TypeScript with no runtime dependencies: clone any
       repository, run <code>npm test</code>, and every figure regenerates. The demonstration
       data is synthetic and seeded; the regulation cited is real (31 CFR Chapter X).
@@ -349,17 +349,17 @@ const ligne = (c, i) => `<a class="constat" href="${esc(c.lien)}">
 </a>`;
 
 const DIT = {
-  1: "assumed — this repository's shape, scaled to your volume",
-  2: "fitted — refit on a point you observed",
-  3: "yours — computed on your own cases",
+  1: "assumed: this repository's shape, scaled to your volume",
+  2: "fitted: refit on a point you observed",
+  3: "yours: computed on your own cases",
 };
 const MOT = {
   niveau: "Level", reste: "What remains assumed:", refus: "What your figures do not allow:",
   deja: "What already leaves the account", gagner: "What a project would go after",
   rienDeja: "Nothing to recover on what you already pay, given what is filled in.",
-  rienGagner: 'Nothing priced yet — this block reads the four volumes under <a href="#funnel">The funnel</a> above. Fill them in and the figure appears here.',
+  rienGagner: 'Nothing priced yet: this block reads the four volumes under <a href="#funnel">The funnel</a> above. Fill them in and the figure appears here.',
   pasSomme: "The two blocks do not add up: the first is money leaving every year without producing anything, the second a revenue conditional on work still to be done.",
-  lus: "case(s) read.", remis: "Scores brought back from a 0–100 scale.", ecartees: "line(s) skipped —",
+  lus: "case(s) read.", remis: "Scores brought back from a 0–100 scale.", ecartees: "line(s) skipped:",
 };
 
 function dessiner() {

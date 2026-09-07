@@ -150,7 +150,7 @@ export function relire(mode: "check" | "write"): Relecture {
     const ouvertures = (avant.match(/<!--p:/g) ?? []).length;
     const reconnues = (avant.match(MARQUE) ?? []).length;
     if (ouvertures !== reconnues) {
-      inconnues.push(`${page} : ${ouvertures} marque(s) ouverte(s) pour ${reconnues} reconnue(s) — un fragment s'affichera`);
+      inconnues.push(`${page} : ${ouvertures} marque(s) ouverte(s) pour ${reconnues} reconnue(s). Un fragment s'affichera`);
     }
 
     const apres = avant.replace(MARQUE, (tout, cle, format, ecrit) => {
@@ -164,9 +164,9 @@ export function relire(mode: "check" | "write"): Relecture {
          */
         const nom = cle.split(".").find((seg: string) => seg in exclus);
         if (nom && existsSync(`${VOISINS}${nom}`)) {
-          pendantes.push(`${page} : ${cle} — « ${nom} » hors liste depuis le ${exclus[nom]!.depuis ?? "?"}`);
+          pendantes.push(`${page} : ${cle}, « ${nom} » hors liste depuis le ${exclus[nom]!.depuis ?? "?"}`);
         } else if (nom) {
-          inconnues.push(`${page} : ${cle} — « ${nom} » est hors liste ET absent du disque`);
+          inconnues.push(`${page} : ${cle}, « ${nom} » est hors liste ET absent du disque`);
         } else {
           inconnues.push(`${page} : ${cle}`);
         }
@@ -220,12 +220,12 @@ if (isMain(import.meta)) {
      * le resoudre.
      */
     if (controle && process.env.COMPTAGE) {
-      console.log(`${ecarts.length} ecart(s) — comptage en cours, la prose porte encore les `
+      console.log(`${ecarts.length} ecart(s) : comptage en cours, la prose porte encore les `
         + "chiffres precedents. Controle en pause, il reprend hors comptage.");
       process.exit(0);
     }
     if (controle) {
-      console.error("des affirmations ne disent plus ce que la mesure dit — lancer `npm run prose` :");
+      console.error("des affirmations ne disent plus ce que la mesure dit. Lancer `npm run prose` :");
       for (const e of ecarts) console.error(`  ${e.page} · ${e.cle} : écrit « ${e.ecrit} », mesuré « ${e.attendu} »`);
       process.exit(1);
     }

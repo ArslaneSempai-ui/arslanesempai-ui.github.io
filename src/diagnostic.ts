@@ -308,7 +308,7 @@ function repriseCoutee(e: Entrees): Constat | null {
         + (delai ? ` Removing the loop would take the average case from ${avant} to ${apres} days.` : ""),
     reserve: propre
       ? null
-      : "the share of cases that come back is measured on this repository's event log, not yours — only the volume and the hourly cost are yours",
+      : "the share of cases that come back is measured on this repository's event log, not yours; only the volume and the hourly cost are yours",
     lien: `${BASE}/process-cycle-time/`,
   };
 }
@@ -339,7 +339,7 @@ function revueEvitable(e: Entrees): Constat | null {
     unite: "a year, in reviews a rule could decide",
     provenance: "supposé",
     phrase: `On a comparable case set, ${(part * 100).toFixed(0)} % of files were decided without a human and without a single uncontrolled onboarding. At your volume, that is ${Math.round(dossiers * part).toLocaleString("en-GB")} files a year an analyst never has to open.`,
-    reserve: `the automatable share is measured on this repository's ${sur} synthetic cases, not on yours — your own mix of sectors and countries would move it`,
+    reserve: `the automatable share is measured on this repository's ${sur} synthetic cases, not on yours; your own mix of sectors and countries would move it`,
     lien: `${BASE}/kyc-triage-agent/`,
   };
 }
@@ -420,7 +420,7 @@ export function lireJournal(texte: string, retour?: string): Journal {
     activity: (retour && b.activite === retour ? "information requested" : b.activite) as Activity,
     at: b.quand - debut,
     touchMinutes: b.minutes,
-    actor: "—",
+    actor: "n/a",
   }));
   return { evenements, activites, ignorees, minutesFournies: cMinutes >= 0 };
 }
@@ -437,7 +437,7 @@ export function diagnostiquer(e: Entrees): Diagnostic {
     c.reserve = niveau === 3 ? null
       : niveau === 2
         ? "the noise distribution comes from your numbers; the signal side depends on the share of reportable operations, which nobody can observe"
-        : "the shape of the population is this repository's, scaled to your volume — a demonstration of method, not a measurement of your institution";
+        : "the shape of the population is this repository's, scaled to your volume: a demonstration of method, not a measurement of your institution";
   }
 
   const parMontant = (a: Constat, b: Constat) => b.montant - a.montant;

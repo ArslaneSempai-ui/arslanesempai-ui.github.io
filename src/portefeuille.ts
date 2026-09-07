@@ -179,7 +179,7 @@ export async function tour(options: {
   const soucis: Souci[] = [];
   const reparations: { quoi: string; detail: string }[] = [];
 
-  dire(`\nTOUR DU PORTFOLIO — ${depots.length} dépôts${reparer ? "" : " (contrôle seul)"}\n`);
+  dire(`\nTOUR DU PORTFOLIO : ${depots.length} dépôts${reparer ? "" : " (contrôle seul)"}\n`);
 
   /*
    * 1. La couche partagée d'abord — puis les emprunts, dans cet ordre.
@@ -207,7 +207,7 @@ export async function tour(options: {
     if (nDiverges && reparer) {
       const fait = lancer(identite, "node", ["diffuser.mjs"]);
       reparations.push({ quoi: `${nDiverges} fichier(s) de la couche partagée`, detail: cause(vu.sortie) });
-      dire(`  couche partagée   ${nDiverges} divergence(s) — RÉPARÉE${fait.ok ? "" : " (échec)"}`);
+      dire(`  couche partagée   ${nDiverges} divergence(s) : RÉPARÉE${fait.ok ? "" : " (échec)"}`);
       if (!fait.ok) soucis.push({ ou: "identite", quoi: "diffusion en échec", detail: cause(fait.sortie) });
     } else if (nDiverges) {
       dire(`  couche partagée   ${nDiverges} divergence(s)`);
@@ -357,13 +357,13 @@ export async function tour(options: {
   if (!v.ok) soucis.push({ ou: "vitrine", quoi: "npm test", detail: cause(v.sortie) });
 
   if (reparations.length) {
-    dire(`\n${reparations.length} réparation(s) — ce qui était cassé et ne l'est plus :\n`);
+    dire(`\n${reparations.length} réparation(s), ce qui était cassé et ne l'est plus :\n`);
     for (const r of reparations) dire(`  ↻ ${r.quoi}\n      ${r.detail}`);
   }
   if (!soucis.length) {
-    dire(`\nTout concorde${reparations.length ? " — après réparation" : ""}.\n`);
+    dire(`\nTout concorde${reparations.length ? ", après réparation" : ""}.\n`);
   } else {
-    dire(`\n${soucis.length} problème(s) — tous, pas seulement le premier :\n`);
+    dire(`\n${soucis.length} problème(s) ; tous, pas seulement le premier :\n`);
     for (const s of soucis) dire(`  ✗ ${s.ou} · ${s.quoi}\n      ${s.detail}`);
     dire("");
     /*

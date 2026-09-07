@@ -311,7 +311,7 @@ export function compter(): {
         .filter((l) => l.trim() && !/^(npm |>|$)/.test(l.trim()))
         .slice(-3).join("\n      ");
       throw new Error(
-        `${depot} : \`npm test\` a échoué avant d'exécuter la suite — ce n'est pas un test cassé.\n`
+        `${depot} : \`npm test\` a échoué avant d'exécuter la suite. Ce n'est pas un test cassé.\n`
         + `      ${cause}`);
     }
     /*
@@ -333,7 +333,7 @@ export function compter(): {
   const echecs = Object.entries(enEchec);
   if (echecs.length > 0) {
     throw new Error(
-      `${echecs.length} dépôt(s) ont une suite en échec — les compter n'aurait pas de sens :\n`
+      `${echecs.length} dépôt(s) ont une suite en échec ; les compter n'aurait pas de sens :\n`
       + echecs.map(([d, n]) => `      ${d} : ${n} test(s) en échec`).join("\n")
       + `\n\n      Les ${Object.keys(parDepot).length} autres ont été mesurés ; rien n'a été écrit.`);
   }
@@ -386,7 +386,7 @@ if (isMain(import.meta)) {
      *
      * Sept caracteres suffisent a retrouver un commit ; la ligne tient sur une page.
      */
-    mesureSur: DEPOTS.map((d) => `${d} ${(dernierTest(d) ?? "—").slice(0, 7)}`).join(" · "),
+    mesureSur: DEPOTS.map((d) => `${d} ${(dernierTest(d) ?? "n/a").slice(0, 7)}`).join(" · "),
     /*
      * Les dépôts que ce comptage n'a PAS certifiés, et pourquoi.
      *
@@ -408,12 +408,12 @@ if (isMain(import.meta)) {
    * La ligne dit donc toujours sur combien de dépôts le total porte.
    */
   console.log(`${nombre} tests sur ${Object.keys(parDepot).length} dépôt(s) certifié(s), `
-    + `${nc.length} non certifié(s)${absents.length ? `, ${absents.length} absent(s)` : ""} — ${
+    + `${nc.length} non certifié(s)${absents.length ? `, ${absents.length} absent(s)` : ""} : ${
       Object.entries(parDepot).map(([d, n]) => `${d} ${n}`).join(", ")}`);
   if (nc.length > 0) {
-    console.log(`\n  ${nc.length} dépôt(s) NON CERTIFIÉ(S) — arbre modifié, le chiffre viendrait`);
+    console.log(`\n  ${nc.length} dépôt(s) NON CERTIFIÉ(S) : arbre modifié, le chiffre viendrait`);
     console.log("  d'un code qu'aucun commit ne contient :");
-    for (const [d, n] of nc) console.log(`    ${d} — ${n} fichier(s) non commité(s)`);
+    for (const [d, n] of nc) console.log(`    ${d} : ${n} fichier(s) non commité(s)`);
     console.log("  Recomptez-les une fois leur arbre propre. Le total ci-dessus les exclut.");
   }
 }

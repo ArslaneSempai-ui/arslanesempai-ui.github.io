@@ -65,7 +65,7 @@ export async function figerReel() {
 
 if (isMain(import.meta)) {
   if (!existsSync(CORPUS)) {
-    console.error("corpus-reel absent de cette machine — rien à mesurer, la valeur enregistrée est conservée");
+    console.error("corpus-reel absent de cette machine : rien à mesurer, la valeur enregistrée est conservée");
     process.exit(1);
   }
   const chiffres = JSON.parse(readFileSync(CHIFFRES, "utf8"));

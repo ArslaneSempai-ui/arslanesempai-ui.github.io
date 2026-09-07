@@ -117,6 +117,14 @@ test("aucune page marquée n'échappe à la liste surveillée", () => {
      */
     .filter((c) => !c.split("/").some((seg) => seg.startsWith(".")))
     /*
+     * Même critère, un cran plus loin : un dossier que git ne tient pas pour un dépôt ne
+     * publie rien. `equipe-cascade` est le dossier de travail de l'équipe ; ses relectures
+     * CITENT des lignes de README, marques comprises, et ce contrôle les accusait de n'être
+     * surveillées par personne (mesuré le 13/09 sur relecture-sorties-vitrine.md). Une copie
+     * de travail n'est pas une page, et l'absence de `.git` le dit sans liste à tenir.
+     */
+    .filter((c) => existsSync(`${racine}${c.split("/")[0]}/.git`))
+    /*
      * Et une marque MONTRÉE n'est pas une marque POSÉE.
      *
      * Le verdict du pilote illustre le mécanisme par `<!--p:clé~format-->valeur<!--/p-->` — une

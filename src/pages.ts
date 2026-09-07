@@ -91,28 +91,28 @@ export const OUTILS: Outil[] = [
     cle: "triage", dossier: "triage", nom: "Onboarding triage",
     depot: "kyc-triage-agent",
     demo: `${BASE_DEMO}/kyc-triage-agent/`, source: `${BASE_SRC}/kyc-triage-agent`,
-    trouvaille: (c) => `<b>${pc(c.partAutomatisee)}</b> of files decided without a human, and <b>${c.manquements}</b> uncontrolled onboardings — the agent stops where it is not sure.`,
+    trouvaille: (c) => `<b>${pc(c.partAutomatisee)}</b> of files decided without a human, and <b>${c.manquements}</b> uncontrolled onboardings: the agent stops where it is not sure.`,
     lecture: (c) => [`${c.manquements}`, "breach in " + nb(c.dossiers)],
   },
   {
     cle: "funnel", dossier: "funnel", nom: "Where the funnel leaks, and what that is worth",
     depot: "funnel-economics",
     demo: `${BASE_DEMO}/funnel-economics/`, source: `${BASE_SRC}/funnel-economics`,
-    trouvaille: (c) => `The biggest leak is not the best place to spend: <b>${c.meilleurRendement}×</b> against <b>${c.pireRendement}×</b> per dollar — a factor of ${c.facteur}.`,
+    trouvaille: (c) => `The biggest leak is not the best place to spend: <b>${c.meilleurRendement}×</b> against <b>${c.pireRendement}×</b> per dollar, a factor of ${c.facteur}.`,
     lecture: (c) => [`${c.facteur}<em>×</em>`, "between best and worst lever"],
   },
   {
     cle: "arbitrage", dossier: "arbitrage", nom: "Growth versus controls, priced instead of argued",
     depot: "growth-versus-controls",
     demo: `${BASE_DEMO}/growth-versus-controls/`, source: `${BASE_SRC}/growth-versus-controls`,
-    trouvaille: (c) => `The A/B test settles the lift — <b>${c.ecartConversion} %</b> [${c.ecartBas} – ${c.ecartHaut}] — and not the decision. The sign flips at an undetected-risk share of <b>${c.bascule} %</b>, inside the range both sides defend.`,
+    trouvaille: (c) => `The A/B test settles the lift (<b>${c.ecartConversion} %</b> [${c.ecartBas} – ${c.ecartHaut}]) and not the decision. The sign flips at an undetected-risk share of <b>${c.bascule} %</b>, inside the range both sides defend.`,
     lecture: (c) => [`${c.bascule}<em> %</em>`, "where the verdict flips"],
   },
   {
     cle: "cascade", dossier: "cascade", nom: "Where should the next dollar go?",
     depot: "cascade-routing",
     demo: `${BASE_DEMO}/cascade-routing/`, source: `${BASE_SRC}/cascade-routing`,
-    trouvaille: (c) => `Sending every field to the large model reaches ${c.justesseGrandModele} % for ${dollars(c.coutGrandModele)}. Routing field by field reaches <b>${c.justesseOptimale} %</b> for <b>${dollars(c.coutOptimal)}</b> — better and ${c.facteur}× cheaper, because ${c.champsGratuits} of the ${c.champs} fields are carried by regexes.`,
+    trouvaille: (c) => `Sending every field to the large model reaches ${c.justesseGrandModele} % for ${dollars(c.coutGrandModele)}. Routing field by field reaches <b>${c.justesseOptimale} %</b> for <b>${dollars(c.coutOptimal)}</b>: better and ${c.facteur}× cheaper, because ${c.champsGratuits} of the ${c.champs} fields are carried by regexes.`,
     lecture: (c) => [`${c.facteur}<em>×</em>`, "cheaper, and more accurate"],
   },
   {
@@ -126,7 +126,7 @@ export const OUTILS: Outil[] = [
     cle: "derive", dossier: "derive", nom: "The drift threshold sits above the signal",
     depot: "drift-monitor",
     demo: `${BASE_DEMO}/drift-monitor/`, source: `${BASE_SRC}/drift-monitor`,
-    trouvaille: (c) => `Every note says to alarm at <b>${c.seuilDeLaNote}</b>. A ${c.deplacement}σ shift moves the index to <b>${c.signal}</b> — the alarm is above the signal it exists to see. Below <b>${c.fenetreSeparante}</b> observations a check, no threshold separates noise from that shift at all.`,
+    trouvaille: (c) => `Every note says to alarm at <b>${c.seuilDeLaNote}</b>. A ${c.deplacement}σ shift moves the index to <b>${c.signal}</b>: the alarm is above the signal it exists to see. Below <b>${c.fenetreSeparante}</b> observations a check, no threshold separates noise from that shift at all.`,
     lecture: (c) => [`${c.signal}`, `signal, against a ${c.seuilDeLaNote} alarm`],
   },
   {
@@ -149,7 +149,7 @@ export const OUTILS: Outil[] = [
     cle: "rag", dossier: "rag-vitrine", nom: "Document search",
     depot: "compliance-document-search",
     demo: `${BASE_DEMO}/compliance-document-search/`, source: `${BASE_SRC}/compliance-document-search`,
-    trouvaille: (c) => `On ${c.questions} questions: <b>${c.justes} right</b>, ${c.ratees} wrong, and <b>${c.silencesJustifies} times it said nothing</b> — every time no answer existed in the corpus.`,
+    trouvaille: (c) => `On ${c.questions} questions: <b>${c.justes} right</b>, ${c.ratees} wrong, and <b>${c.silencesJustifies} times it said nothing</b>, every time no answer existed in the corpus.`,
     lecture: (c) => [`${c.silencesJustifies}`, "justified silences"],
   },
 ];
@@ -161,7 +161,7 @@ export function construire(): void {
 
   const tuiles = OUTILS.map((o, i) => {
     const n = c[o.cle];
-    if (!n) throw new Error(`chiffres.json has nothing for "${o.cle}" — run \`npm run mesurer\``);
+    if (!n) throw new Error(`chiffres.json has nothing for "${o.cle}". Run \`npm run mesurer\``);
     const trouvaille = o.trouvaille(n);
     const [lecture, unite] = o.lecture(n);
     /*
@@ -209,7 +209,7 @@ export function construire(): void {
   writeFileSync(docs + "/index.html", html);
   cpSync(root + "src/registre.css", docs + "/registre.css");
   writeFileSync(docs + "/.nojekyll", "");
-  console.log(`docs/index.html construit — ${OUTILS.length} outils`);
+  console.log(`docs/index.html construit : ${OUTILS.length} outils`);
 }
 
 if (isMain(import.meta)) construire();

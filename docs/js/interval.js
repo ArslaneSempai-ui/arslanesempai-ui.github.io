@@ -47,14 +47,23 @@ export function wilson(successes, n, z = 1.96) {
      */
     if (!Number.isFinite(successes) || successes < 0 || successes > n) {
         throw new Error(`wilson(${successes}, ${n}): a success count outside [0, n].\n`
-            + "  An interval cannot absorb this — it would return NaN, and NaN compares silently as\n"
+            + "  An interval cannot absorb this: it would return NaN, and NaN compares silently as\n"
             + "  \"not separable\". The defect is in the counting, upstream.");
     }
     const p = successes / n;
     const d = 1 + (z * z) / n;
     const centre = (p + (z * z) / (2 * n)) / d;
     const spread = (z * Math.sqrt((p * (1 - p)) / n + (z * z) / (4 * n * n))) / d;
-    return [Math.max(0, centre - spread), Math.min(1, centre + spread)];
+    /*
+     * L'INTERVALLE CONTIENT SON ESTIMATION, ET C'EST UNE GARANTIE FLOTTANTE, PAS UN THÉORÈME
+     * REDIT. Mathématiquement, l'intervalle de Wilson contient toujours p̂ — mais wilson(60, 60)
+     * rendait une borne haute de 0,9999999999999999 : la division perd le 1 exact, et un
+     * lecteur qui vérifie « taux ≤ borne haute » sur un relevé scellé aurait RAISON de le
+     * refuser. Trouvé par un témoin de cascade-screening qui parcourait toutes les cellules de
+     * son relevé public ; le même flottant dormait ici. Les bornes sont donc élargies jusqu'à
+     * p̂ quand la virgule les a fait passer de l'autre côté — jamais rétrécies.
+     */
+    return [Math.max(0, Math.min(centre - spread, p)), Math.min(1, Math.max(centre + spread, p))];
 }
 /** Half the width of the interval, in percentage points. The number to quote. */
 export function precision(successes, n) {
@@ -118,7 +127,7 @@ export function rate(successes, n, z = CONFIANCE.z) {
  */
 export function cellulesDeTaux(r, digits = 1) {
     if (!r.reportable)
-        return { taux: "— too few to quote", intervalle: `n < ${ENOUGH}` };
+        return { taux: "n/a: too few to quote", intervalle: `n < ${ENOUGH}` };
     return {
         taux: `${(r.rate * 100).toFixed(digits)} %`,
         intervalle: `[${(r.low * 100).toFixed(0)}–${(r.high * 100).toFixed(0)}]`,
@@ -126,7 +135,7 @@ export function cellulesDeTaux(r, digits = 1) {
 }
 export function writeRate(r, digits = 1) {
     if (!r.reportable)
-        return `— (n=${r.n}, too few to quote)`;
+        return `n/a (n=${r.n}, too few to quote)`;
     return `${(r.rate * 100).toFixed(digits)} % [${(r.low * 100).toFixed(0)}–${(r.high * 100).toFixed(0)}], n=${r.n}`;
 }
 /**
@@ -209,7 +218,7 @@ export function pairedVerdict(gains, regressions) {
         /** Can this set tell the two versions apart at all? */
         decidable: p < 0.05,
         note: p < 0.05
-            ? "the set distinguishes these versions"
-            : "the set cannot distinguish these versions by rate — judge the broken cases instead",
+            ? "The set distinguishes these versions"
+            : "The set cannot distinguish these versions by rate, so judge the broken cases instead",
     };
 }

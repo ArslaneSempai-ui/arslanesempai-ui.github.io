@@ -185,7 +185,7 @@ const MESURES: Mesure[] = [
       const { ASSUMPTIONS } = await import(`${VOISINS}cascade/src/assumptions.ts`);
       const { FIELDS } = await import(`${VOISINS}cascade/src/corpus.ts`);
       const p = readProfiles();
-      if (!p) throw new Error("cascade: no measured profile — run `npm run measure` over there");
+      if (!p) throw new Error("cascade: no measured profile. Run `npm run measure` over there");
       const o = optimiseExtraction(p, ASSUMPTIONS)!;
       const tout = (palier: string) =>
         evaluer(p, ASSUMPTIONS, Object.fromEntries(FIELDS.map((c: string) => [c, palier])) as never);
@@ -325,7 +325,7 @@ export async function mesurer(): Promise<{ chiffres: Chiffres; absents: string[]
       chiffres[m.cle] = await m.prendre();
     } catch (e) {
       absents.push(m.cle);
-      console.error(`  ${m.cle} : mesure impossible — ${(e as Error).message}`);
+      console.error(`  ${m.cle} : mesure impossible ; ${(e as Error).message}`);
     }
   }
   return { chiffres, absents };
@@ -346,13 +346,13 @@ async function principal(): Promise<void> {
     /* Un outil absent conserve ses chiffres livrés plutôt que de disparaître du fichier. */
     const fusion = { ...garde, ...chiffres };
     writeFileSync(FICHIER, JSON.stringify(fusion, null, 2) + "\n");
-    console.log(`chiffres.json written — ${Object.keys(chiffres).length} tool(s) measured` +
+    console.log(`chiffres.json written: ${Object.keys(chiffres).length} tool(s) measured` +
       (absents.length ? `, ${absents.length} conservé(s) tels quels : ${absents.join(", ")}` : ""));
     return;
   }
 
   if (!existsSync(FICHIER)) {
-    console.error("chiffres.json missing — run `npm run mesurer`");
+    console.error("chiffres.json missing. Run `npm run mesurer`");
     process.exit(1);
   }
   const livre = lire();
@@ -361,7 +361,7 @@ async function principal(): Promise<void> {
     if (JSON.stringify(livre[cle]) !== JSON.stringify(valeurs)) perimes.push(cle);
   }
   if (perimes.length) {
-    console.error(`chiffres.json stale for: ${perimes.join(", ")} — run \`npm run mesurer\``);
+    console.error(`chiffres.json stale for: ${perimes.join(", ")}. Run \`npm run mesurer\``);
     for (const cle of perimes) {
       console.error(`  livré  ${cle} ${JSON.stringify(livre[cle])}`);
       console.error(`  mesuré ${cle} ${JSON.stringify(chiffres[cle])}`);
@@ -369,7 +369,7 @@ async function principal(): Promise<void> {
     process.exit(1);
   }
   /* On dit ce qu'on a vérifié, et surtout ce qu'on n'a pas pu vérifier. */
-  console.log(`chiffres.json up to date — ${Object.keys(chiffres).length} tool(s) checked` +
+  console.log(`chiffres.json up to date: ${Object.keys(chiffres).length} tool(s) checked` +
     (absents.length ? `, ${absents.length} non vérifié(s) faute de dépôt voisin : ${absents.join(", ")}` : ""));
 }
 
