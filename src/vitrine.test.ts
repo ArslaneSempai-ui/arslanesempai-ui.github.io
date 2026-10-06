@@ -57,7 +57,7 @@ test("chaque outil a sa tuile, avec ses deux liens", () => {
   const liens = [
     ["alert-triage-economics", 2], ["kyc-triage-agent", 2], ["funnel-economics", 2],
     ["process-cycle-time", 2], ["regression-bench", 2], ["compliance-document-search", 2],
-    ["growth-versus-controls", 2], ["cascade-routing", 2],
+    ["growth-versus-controls", 2], ["crusetra-routing", 2],
     ["remediation-backlog", 2], ["drift-monitor", 2],
   ] as const;
   for (const [depot, combien] of liens) {

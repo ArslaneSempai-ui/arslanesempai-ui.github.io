@@ -110,8 +110,8 @@ export const OUTILS: Outil[] = [
   },
   {
     cle: "cascade", dossier: "cascade", nom: "Where should the next dollar go?",
-    depot: "cascade-routing",
-    demo: `${BASE_DEMO}/cascade-routing/`, source: `${BASE_SRC}/cascade-routing`,
+    depot: "crusetra-routing",
+    demo: `${BASE_DEMO}/crusetra-routing/`, source: `${BASE_SRC}/crusetra-routing`,
     trouvaille: (c) => `Sending every field to the large model reaches ${c.justesseGrandModele} % for ${dollars(c.coutGrandModele)}. Routing field by field reaches <b>${c.justesseOptimale} %</b> for <b>${dollars(c.coutOptimal)}</b>: better and ${c.facteur}× cheaper, because ${c.champsGratuits} of the ${c.champs} fields are carried by regexes.`,
     lecture: (c) => [`${c.facteur}<em>×</em>`, "cheaper, and more accurate"],
   },
